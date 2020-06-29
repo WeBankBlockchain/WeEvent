@@ -1,5 +1,11 @@
 package com.webank.weevent.file.inner;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.ErrorCode;
 import com.webank.weevent.client.JsonHelper;
@@ -13,14 +19,9 @@ import com.webank.weevent.file.dto.FileChunksMetaStatus;
 import com.webank.weevent.file.dto.FileEvent;
 import com.webank.weevent.file.dto.FileTransportStats;
 import com.webank.weevent.file.service.FileChunksMeta;
+
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.channel.dto.ChannelResponse;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 /**
  * File transport service base on AMOP.
@@ -133,6 +134,13 @@ public class FileTransportService {
 
 
         return fileTransportStats;
+    }
+
+    public boolean getFileExistence(String fileName, String topic, String groupId) throws BrokerException {
+
+        FileChunksMeta fileChunksMeta = new FileChunksMeta("", fileName, 0, "", topic, groupId, false);
+
+        return channel.isFileExist(fileChunksMeta);
     }
 
     public FileChunksMeta openChannel(FileChunksMeta fileChunksMeta) throws BrokerException {
@@ -278,5 +286,12 @@ public class FileTransportService {
 
     public void writeChunkData(FileEvent fileEvent) throws BrokerException {
         this.diskFiles.writeChunkData(fileEvent.getFileId(), fileEvent.getChunkIndex(), fileEvent.getChunkData());
+    }
+
+    public boolean checkFileExist(FileChunksMeta fileChunksMeta) throws BrokerException {
+        log.info("check if the file exists, fileName: {}", fileChunksMeta.getFileName());
+
+        // check if the file exists
+        return this.diskFiles.checkFileExist(fileChunksMeta);
     }
 }

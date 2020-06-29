@@ -1,17 +1,18 @@
 package com.webank.weevent.file;
 
+import java.io.File;
+import java.util.List;
+
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.core.fisco.util.WeEventUtils;
 import com.webank.weevent.file.inner.DiskFiles;
 import com.webank.weevent.file.service.FileChunksMeta;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-
-import java.io.File;
-import java.util.List;
 
 /**
  * DiskFiles Tester.

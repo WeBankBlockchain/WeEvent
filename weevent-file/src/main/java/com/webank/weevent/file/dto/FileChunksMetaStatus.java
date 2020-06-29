@@ -2,8 +2,8 @@ package com.webank.weevent.file.dto;
 
 
 import com.webank.weevent.client.BrokerException;
-import com.webank.weevent.file.service.FileChunksMeta;
 import com.webank.weevent.client.JsonHelper;
+import com.webank.weevent.file.service.FileChunksMeta;
 
 import lombok.Getter;
 import lombok.Setter;
