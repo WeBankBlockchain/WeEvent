@@ -172,5 +172,5 @@ public interface IWeEventFileClient {
      */
     void genPemFile(String filePath) throws BrokerException;
 
-    boolean getFileExistence(String fileName, String topic, String groupId) throws BrokerException;
+    boolean isFileExist(String fileName, String topic, String groupId) throws BrokerException;
 }

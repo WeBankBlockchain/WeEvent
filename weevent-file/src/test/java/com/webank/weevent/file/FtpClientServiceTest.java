@@ -1,6 +1,8 @@
 package com.webank.weevent.file;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.file.ftpclient.FtpClientService;
@@ -30,7 +32,7 @@ public class FtpClientServiceTest {
             ftpClientService.connect(this.ftpHost, this.ftpPort, this.ftpUser, this.ftpPassWord);
 
             // list dir
-            String[] dir = ftpClientService.getFileList("./");
+            List<String> dir = ftpClientService.getFileList("./");
             for (String fileName : dir) {
                 System.out.println(fileName);
             }
@@ -94,10 +96,12 @@ public class FtpClientServiceTest {
     @Test
     public void testGetFileList() throws BrokerException {
         FtpClientService ftpClientService = mock(FtpClientService.class);
-        String[] fileList = {"test1.txt", "test2.txt"};
+        List<String> fileList = new ArrayList<>();
+        fileList.add("test1.txt");
+        fileList.add("test2.txt");
         when(ftpClientService.getFileList("./")).thenReturn(fileList);
-        String[] ret = ftpClientService.getFileList("./");
-        Assert.assertArrayEquals(ret, fileList);
+        List<String> ret = ftpClientService.getFileList("./");
+        Assert.assertEquals(ret, fileList);
     }
 
 }

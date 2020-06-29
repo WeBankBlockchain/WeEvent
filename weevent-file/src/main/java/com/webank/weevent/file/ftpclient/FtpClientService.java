@@ -63,25 +63,22 @@ public class FtpClientService {
      * @return list of file and directory in fileDir
      * @throws BrokerException BrokerException
      */
-    public String[] getFileList(String fileDir) throws BrokerException {
-        String[] files = null;
+    public List<String> getFileList(String fileDir) throws BrokerException {
         try {
             ftpClient.enterLocalPassiveMode();
-
             FTPFile[] ftpFiles = ftpClient.listFiles(fileDir);
-
+            List<String> files = new ArrayList<>();
             if (ftpFiles != null) {
-                files = new String[ftpFiles.length];
-                for (int i = 0; i < ftpFiles.length; i++) {
-                    files[i] = ftpFiles[i].getName();
+                for (FTPFile ftpFile : ftpFiles) {
+                    files.add(ftpFile.getName());
                 }
             }
             this.ftpClient.disconnect();
+            return files;
         } catch (IOException e) {
             log.error("list file error");
             throw new BrokerException(ErrorCode.FTP_LIST_FILE_FAILED);
         }
-        return files;
     }
 
 
@@ -277,11 +274,7 @@ public class FtpClientService {
      * download a directory
      *
      * @param remoteDirPath download directory
-<<<<<<< HEAD
-     * @param localPath     local path
-=======
      * @param localPath local path
->>>>>>> 7eebc84691ad9a51001cf9d169aa171be74eba3c
      * @throws BrokerException BrokerException
      */
     public void downLoadDirectory(String remoteDirPath, String localPath) throws BrokerException {
@@ -318,7 +311,7 @@ public class FtpClientService {
      *
      * @param remoteDirPath ftp server file path
      * @param filePathList  param
-     * @param first         first invoke flag
+     * @param first first invoke flag
      * @return all file list
      * @throws BrokerException
      */

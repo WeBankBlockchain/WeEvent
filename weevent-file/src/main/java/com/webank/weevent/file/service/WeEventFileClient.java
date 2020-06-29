@@ -375,7 +375,7 @@ public class WeEventFileClient implements IWeEventFileClient {
         }
     }
 
-    public boolean getFileExistence(String fileName, String topic, String groupId) throws BrokerException {
+    public boolean isFileExist(String fileName, String topic, String groupId) throws BrokerException {
         return this.fileTransportService.getFileExistence(fileName, topic, groupId);
     }
 
@@ -436,17 +436,19 @@ public class WeEventFileClient implements IWeEventFileClient {
 
                     // check file exist
                     if (StringUtils.isBlank(this.ftpInfo.getFtpReceivePath())) {
-                        String[] files = ftpClientService.getFileList("./");
+                        List<String> files = ftpClientService.getFileList("./");
                         for (String file : files) {
                             if (file.equals(fileName)) {
                                 ret = true;
+                                break;
                             }
                         }
                     } else {
-                        String[] files = ftpClientService.getFileList(this.ftpInfo.getFtpReceivePath());
+                        List<String> files = ftpClientService.getFileList(this.ftpInfo.getFtpReceivePath());
                         for (String file : files) {
                             if (file.equals(fileName)) {
                                 ret = true;
+                                break;
                             }
                         }
                     }

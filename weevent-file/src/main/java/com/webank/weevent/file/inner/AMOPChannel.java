@@ -244,15 +244,14 @@ public class AMOPChannel extends ChannelPushCallback {
         throw toBrokerException(rsp);
     }
 
-    public boolean getFileExistence(FileChunksMeta fileChunksMeta) throws BrokerException {
+    public boolean isFileExist(FileChunksMeta fileChunksMeta) throws BrokerException {
         log.info("send AMOP message to Check file existence");
         FileEvent fileEvent = new FileEvent(FileEvent.EventType.FileChannelExist, fileChunksMeta.getFileId());
         fileEvent.setFileChunksMeta(fileChunksMeta);
         ChannelResponse rsp = this.sendEvent(fileChunksMeta.getTopic(), fileEvent);
         if (rsp.getErrorCode() == ErrorCode.SUCCESS.getCode()) {
             log.info("Check file existence success");
-            String resString = JsonHelper.json2Object(rsp.getContentByteArray(), String.class);
-            return resString.equals(BOOLEAN_TRUE);
+            return JsonHelper.json2Object(rsp.getContentByteArray(), Boolean.class);
         }
 
         log.error("Check file existence failed");
@@ -378,7 +377,7 @@ public class AMOPChannel extends ChannelPushCallback {
                     boolean fileExistFtp = eventListener.checkFile(fileChunksMeta.getFileName());
                     log.info("check if the file exists success, fileName: {}, ftp file existence: {}", fileChunksMeta.getFileName(), fileExistFtp);
 
-                    channelResponse = AMOPChannel.toChannelResponse(ErrorCode.SUCCESS, fileExistLocal || fileExistFtp ? BOOLEAN_TRUE.getBytes() : BOOLEAN_FALSE.getBytes());
+                    channelResponse = AMOPChannel.toChannelResponse(ErrorCode.SUCCESS, JsonHelper.object2Json(fileExistLocal || fileExistFtp).getBytes());
                 } catch (BrokerException e) {
                     log.error("check if the file exists failed", e);
                     channelResponse = AMOPChannel.toChannelResponse(e);

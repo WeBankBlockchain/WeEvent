@@ -30,6 +30,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class DiskFiles {
+    private static final String PATH_SEPARATOR = "/";
     public final String MetaFileSuffix = ".json";
     private final String path;
     private Map<String, FileChunksMeta> fileIdChunksMeta = new ConcurrentHashMap<>();
@@ -258,23 +259,8 @@ public class DiskFiles {
 
     public boolean checkFileExist(FileChunksMeta fileChunksMeta) throws BrokerException {
         // ensure path exist and disk space
-        String filePath = this.path + "/" + fileChunksMeta.getTopic();
-        File path = new File(filePath);
-        path.mkdirs();
-        if (!path.exists()) {
-            log.error("not exist local file path, {}", filePath);
-            throw new BrokerException(ErrorCode.FILE_NOT_EXIST_PATH);
-        } else {
-            // check if file exists
-            File[] fileList = path.listFiles();
-            if (fileList != null) {
-                for (File file : fileList) {
-                    if (file.getName().equals(fileChunksMeta.getFileName())) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
+        String filePath = this.path + PATH_SEPARATOR + fileChunksMeta.getTopic() + PATH_SEPARATOR + fileChunksMeta.getFileName();
+        File file = new File(filePath);
+        return file.exists();
     }
 }

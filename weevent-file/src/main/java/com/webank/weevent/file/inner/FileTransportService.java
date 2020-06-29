@@ -140,7 +140,7 @@ public class FileTransportService {
 
         FileChunksMeta fileChunksMeta = new FileChunksMeta("", fileName, 0, "", topic, groupId, false);
 
-        return channel.getFileExistence(fileChunksMeta);
+        return channel.isFileExist(fileChunksMeta);
     }
 
     public FileChunksMeta openChannel(FileChunksMeta fileChunksMeta) throws BrokerException {
