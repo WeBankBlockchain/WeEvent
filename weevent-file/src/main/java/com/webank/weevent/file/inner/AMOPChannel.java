@@ -1,6 +1,6 @@
 package com.webank.weevent.file.inner;
 
-import java.io.InputStream;
+import java.io.BufferedInputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -119,7 +119,7 @@ public class AMOPChannel extends ChannelPushCallback {
     }
 
     // Receiver call subscribe verify topic
-    public void subTopic(String topic, String groupId, InputStream privatePem, IWeEventFileClient.EventListener eventListener) throws BrokerException {
+    public void subTopic(String topic, String groupId, BufferedInputStream privatePem, IWeEventFileClient.EventListener eventListener) throws BrokerException {
         if (this.senderTopics.contains(topic) || senderVerifyTopics.containsKey(topic)) {
             log.error("this is already sender side for topic: {}", topic);
             throw new BrokerException(ErrorCode.FILE_SENDER_RECEIVER_CONFLICT);
