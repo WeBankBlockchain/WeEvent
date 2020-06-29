@@ -29,48 +29,39 @@ public class InitialDb implements AutoCloseable {
     private static Properties properties;
 
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         try (InitialDb initialDb = new InitialDb()) {
             properties = initialDb.getProperties();
             initialDb.createDataBase();
-        } catch (Exception e) {
-            log.error("create database fail", e);
-            throw new Exception("create database fail", e);
+        } catch (ClassNotFoundException | IOException | SQLException e) {
+            log.error("create database failed", e);
         }
-
     }
 
-
-    private void createDataBase() throws Exception {
-        try {
-            String goalUrl = properties.getProperty("spring.datasource.url");
-            this.user = properties.getProperty("spring.datasource.username");
-            this.password = properties.getProperty("spring.datasource.password");
-            String driverName = properties.getProperty("spring.datasource.driver-class-name");
-            boolean flag = driverName.contains("mariadb");
-            if (flag) {
-                databaseType = "mysql";
-            }
-            // first use dbself database
-            int first = goalUrl.lastIndexOf("/");
-            int end = goalUrl.lastIndexOf("?");
-            this.dbName = flag ? goalUrl.substring(first + 1, end) : goalUrl.substring(first + 1);
-            // get mysql default url like jdbc:mysql://127.0.0.1:3306
-            String defaultUrl = flag ? goalUrl.substring(0, first) : goalUrl;
-
-            Class.forName(driverName);
-
-            List<String> tableSqlList = readSql();
-
-            runScript(defaultUrl, flag, tableSqlList);
-        } catch (Exception e) {
-            log.error("create database error,{}", e.getMessage());
-            throw e;
+    private void createDataBase() throws ClassNotFoundException, IOException, SQLException {
+        String goalUrl = properties.getProperty("spring.datasource.url");
+        this.user = properties.getProperty("spring.datasource.username");
+        this.password = properties.getProperty("spring.datasource.password");
+        String driverName = properties.getProperty("spring.datasource.driver-class-name");
+        boolean flag = driverName.contains("mariadb");
+        if (flag) {
+            databaseType = "mysql";
         }
+        // first use dbself database
+        int first = goalUrl.lastIndexOf("/");
+        int end = goalUrl.lastIndexOf("?");
+        this.dbName = flag ? goalUrl.substring(first + 1, end) : goalUrl.substring(first + 1);
+        // get mysql default url like jdbc:mysql://127.0.0.1:3306
+        String defaultUrl = flag ? goalUrl.substring(0, first) : goalUrl;
 
+        Class.forName(driverName);
+
+        List<String> tableSqlList = readSql();
+
+        runScript(defaultUrl, flag, tableSqlList);
     }
 
-    private Properties getProperties() throws Exception {
+    private Properties getProperties() throws IOException {
         Properties properties = new Properties();
         URL url = InitialDb.class.getClassLoader().getResource("application-prod.properties");
         Assert.notNull(url, "url is empty");
@@ -99,7 +90,7 @@ public class InitialDb implements AutoCloseable {
         return sqlList;
     }
 
-    private void runScript(String defaultUrl, Boolean flag, List<String> tableSqlList) throws Exception {
+    private void runScript(String defaultUrl, Boolean flag, List<String> tableSqlList) throws SQLException {
         try (Connection conn = DriverManager.getConnection(defaultUrl, this.user, this.password);
              Statement stat = conn.createStatement()) {
             if (flag) {
@@ -119,7 +110,7 @@ public class InitialDb implements AutoCloseable {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         log.info("resource is close");
     }
 }
