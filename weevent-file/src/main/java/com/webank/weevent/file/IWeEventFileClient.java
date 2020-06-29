@@ -64,26 +64,6 @@ public interface IWeEventFileClient {
     FileChunksMeta publishFile(String topic, String localFile, boolean overwrite) throws BrokerException, IOException;
 
     /**
-     * Interface for event notify callback
-     */
-    interface EventListener {
-        /**
-         * Called while new event arrived.
-         *
-         * @param topic topic name
-         * @param fileName file name
-         */
-        void onEvent(String topic, String fileName);
-
-        /**
-         * Called while raise exception.
-         *
-         * @param e the e
-         */
-        void onException(Throwable e);
-    }
-
-    /**
      * open transport for receiver.
      *
      * @param topic topic name
@@ -112,6 +92,7 @@ public interface IWeEventFileClient {
      * @throws BrokerException BrokerException
      */
     void openTransport4Receiver(String topic, FileListener fileListener, String privatePem) throws IOException, BrokerException;
+
 
     /**
      * Interface for file notify callback
@@ -190,4 +171,6 @@ public interface IWeEventFileClient {
      * @throws BrokerException BrokerException
      */
     void genPemFile(String filePath) throws BrokerException;
+
+    boolean isFileExist(String fileName, String topic, String groupId) throws BrokerException;
 }
