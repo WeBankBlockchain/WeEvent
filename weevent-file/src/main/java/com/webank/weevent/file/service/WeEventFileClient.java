@@ -225,10 +225,6 @@ public class WeEventFileClient implements IWeEventFileClient {
         // privatePem is private  key
         BufferedInputStream bufferedInputStream = new BufferedInputStream(privatePem);
         try {
-            if (privatePem == null) {
-                log.error("private key pem inputstream is null.");
-                throw new BrokerException(ErrorCode.PARAM_ISNULL);
-            }
             bufferedInputStream.mark(bufferedInputStream.available() + 1);
             String publicKey = IOUtils.toString(bufferedInputStream, StandardCharsets.UTF_8);
             if (!publicKey.contains(PRIVATE_KEY_DESC)) {
@@ -379,6 +375,10 @@ public class WeEventFileClient implements IWeEventFileClient {
         }
     }
 
+    public boolean isFileExist(String fileName, String topic, String groupId) throws BrokerException {
+        return this.fileTransportService.getFileExistence(fileName, topic, groupId);
+    }
+
     private static void validateLocalFile(String filePath) throws BrokerException {
         if (StringUtils.isBlank(filePath)) {
             throw new BrokerException(ErrorCode.LOCAL_FILE_IS_EMPTY);
@@ -388,8 +388,36 @@ public class WeEventFileClient implements IWeEventFileClient {
         }
     }
 
-    static class FileEventListener implements EventListener {
-        private String receivePath;
+    /**
+     * Interface for event notify callback
+     */
+    public interface EventListener {
+        /**
+         * check if file exists at ftp server.
+         *
+         * @param fileName file name
+         * @return true if file exist.
+         */
+        boolean checkFile(String fileName);
+
+        /**
+         * Called while new event arrived.
+         *
+         * @param topic topic name
+         * @param fileName file name
+         */
+        void onEvent(String topic, String fileName);
+
+        /**
+         * Called while raise exception.
+         *
+         * @param e the e
+         */
+        void onException(Throwable e);
+    }
+
+    static class FileEventListener implements EventListener{
+        private final String receivePath;
         private final FtpInfo ftpInfo;
         private final FileListener fileListener;
 
@@ -399,6 +427,38 @@ public class WeEventFileClient implements IWeEventFileClient {
             this.fileListener = fileListener;
         }
 
+        public boolean checkFile(String fileName) {
+            boolean ret = false;
+            if (this.ftpInfo != null) {
+                try {
+                    FtpClientService ftpClientService = new FtpClientService();
+                    ftpClientService.connect(this.ftpInfo.getHost(), this.ftpInfo.getPort(), this.ftpInfo.getUserName(), this.ftpInfo.getPassWord());
+
+                    // check file exist
+                    if (StringUtils.isBlank(this.ftpInfo.getFtpReceivePath())) {
+                        List<String> files = ftpClientService.getFileList("./");
+                        for (String file : files) {
+                            if (file.equals(fileName)) {
+                                ret = true;
+                                break;
+                            }
+                        }
+                    } else {
+                        List<String> files = ftpClientService.getFileList(this.ftpInfo.getFtpReceivePath());
+                        for (String file : files) {
+                            if (file.equals(fileName)) {
+                                ret = true;
+                                break;
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            return ret;
+        }
+
         @Override
         public void onEvent(String topic, String fileName) {
             // upload file to ftp
@@ -406,6 +466,7 @@ public class WeEventFileClient implements IWeEventFileClient {
                 try {
                     FtpClientService ftpClientService = new FtpClientService();
                     ftpClientService.connect(this.ftpInfo.getHost(), this.ftpInfo.getPort(), this.ftpInfo.getUserName(), this.ftpInfo.getPassWord());
+                    // upload file
                     if (StringUtils.isBlank(this.ftpInfo.getFtpReceivePath())) {
                         log.info("upload file to ftp server, file：{}", fileName);
                         ftpClientService.upLoadFile(this.receivePath + PATH_SEPARATOR + topic + PATH_SEPARATOR + fileName);
@@ -414,7 +475,6 @@ public class WeEventFileClient implements IWeEventFileClient {
                         log.info("upload file to ftp server, to path: {}, file：{}", this.ftpInfo.getFtpReceivePath(), fileName);
                         ftpClientService.upLoadFile(this.ftpInfo.getFtpReceivePath(), this.receivePath + PATH_SEPARATOR + topic + PATH_SEPARATOR + fileName);
                     }
-
                 } catch (BrokerException e) {
                     e.printStackTrace();
                 }
@@ -422,7 +482,6 @@ public class WeEventFileClient implements IWeEventFileClient {
             fileListener.onFile(topic, fileName);
         }
 
-        @Override
         public void onException(Throwable e) {
             this.fileListener.onException(e);
         }
