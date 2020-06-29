@@ -192,7 +192,7 @@ public class WeEventFileClient implements IWeEventFileClient {
     }
 
     @Override
-    public FileChunksMeta publishFile(String topic, String filePath, boolean overwrite) throws BrokerException, IOException, InterruptedException {
+    public FileChunksMeta publishFile(String topic, String filePath, boolean overwrite) throws BrokerException, IOException {
 
         if (this.ftpInfo == null) {
             // publish local file
@@ -340,14 +340,6 @@ public class WeEventFileClient implements IWeEventFileClient {
         return this.fileTransportService.sendSign(fileChunksMeta);
     }
 
-    /**
-     * verify a file transport event.
-     *
-     * @param eventId eventId return by sign
-     * @param groupId group id
-     * @return file and block information
-     * @throws BrokerException broker exception
-     */
     public FileChunksMetaPlus verify(String eventId, String groupId) throws BrokerException {
         return this.fileTransportService.verify(eventId, groupId);
 

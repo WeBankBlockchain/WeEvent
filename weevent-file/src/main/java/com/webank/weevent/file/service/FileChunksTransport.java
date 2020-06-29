@@ -105,11 +105,11 @@ public class FileChunksTransport {
         FileChunksMeta newFileChunksMeta;
         try {
             newFileChunksMeta = new FileChunksMeta(WeEventUtils.generateUuid(),
-                URLDecoder.decode(fileChunksMeta.getFileName(), StandardCharsets.UTF_8.toString()),
-                fileChunksMeta.getFileSize(),
-                fileChunksMeta.getFileMd5(),
-                fileChunksMeta.getTopic(),
-                fileChunksMeta.getGroupId(), fileChunksMeta.isOverwrite());
+                    URLDecoder.decode(fileChunksMeta.getFileName(), StandardCharsets.UTF_8.toString()),
+                    fileChunksMeta.getFileSize(),
+                    fileChunksMeta.getFileMd5(),
+                    fileChunksMeta.getTopic(),
+                    fileChunksMeta.getGroupId(), fileChunksMeta.isOverwrite());
         } catch (UnsupportedEncodingException e) {
             log.error("decode fileName error", e);
             throw new BrokerException(ErrorCode.DECODE_FILE_NAME_ERROR);

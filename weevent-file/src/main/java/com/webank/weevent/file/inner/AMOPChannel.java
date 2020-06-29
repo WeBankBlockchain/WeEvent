@@ -70,8 +70,7 @@ public class AMOPChannel extends ChannelPushCallback {
         this.threadPool = this.initThreadPool(5, 10, 10);
 
         // new service
-        Service service = Web3SDKConnector.initService(Long.valueOf(groupId), this.fileTransportService.getFiscoConfig());
-        this.service = service;
+        this.service = Web3SDKConnector.initService(Long.valueOf(groupId), this.fileTransportService.getFiscoConfig());
         this.service.setPushCallback(this);
         try {
             this.service.run();

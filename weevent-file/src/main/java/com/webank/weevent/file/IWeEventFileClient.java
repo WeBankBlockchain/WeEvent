@@ -34,7 +34,7 @@ public interface IWeEventFileClient {
      * open transport for authentication sender.
      *
      * @param topic topic name
-     * @param publicPem public pem inputstream
+     * @param publicPem public pem InputStream
      * @throws BrokerException broker exception
      */
     void openTransport4Sender(String topic, InputStream publicPem) throws BrokerException;
@@ -45,7 +45,7 @@ public interface IWeEventFileClient {
      * @param topic topic name
      * @param publicPem public pem path string
      * @throws BrokerException broker exception
-     * @throws IOException IOException
+     * @throws BrokerException BrokerException
      */
     void openTransport4Sender(String topic, String publicPem) throws BrokerException, IOException;
 
@@ -59,9 +59,9 @@ public interface IWeEventFileClient {
      * @return send result, SendResult.SUCCESS if success, and return SendResult.eventId
      * @throws BrokerException broker exception
      * @throws IOException IOException
-     * @throws InterruptedException InterruptedException
+     * @throws BrokerException BrokerException
      */
-    FileChunksMeta publishFile(String topic, String localFile, boolean overwrite) throws BrokerException, IOException, InterruptedException;
+    FileChunksMeta publishFile(String topic, String localFile, boolean overwrite) throws BrokerException, IOException;
 
     /**
      * open transport for receiver.
@@ -77,7 +77,7 @@ public interface IWeEventFileClient {
      *
      * @param topic topic name
      * @param fileListener notify interface
-     * @param privatePem private key pem inputstream
+     * @param privatePem private key pem InputStream
      * @throws BrokerException broker exception
      */
     void openTransport4Receiver(String topic, FileListener fileListener, InputStream privatePem) throws BrokerException;
@@ -89,20 +89,20 @@ public interface IWeEventFileClient {
      * @param fileListener notify interface
      * @param privatePem private key pem path string
      * @throws IOException IOException
-     * @throws BrokerException InterruptedException
+     * @throws BrokerException BrokerException
      */
     void openTransport4Receiver(String topic, FileListener fileListener, String privatePem) throws IOException, BrokerException;
 
 
     /**
-     * Interface for file notify callback.
+     * Interface for file notify callback
      */
     interface FileListener {
         /**
          * Called while new file arrived.
          *
          * @param topicName topic name
-         * @param fileName  file name
+         * @param fileName file name
          */
         void onFile(String topicName, String fileName);
 
@@ -125,7 +125,7 @@ public interface IWeEventFileClient {
      * query transport status.
      *
      * @param topic topic name
-     * @return filetransportstatus
+     * @return FileTransportStats
      */
     FileTransportStats status(String topic);
 
@@ -133,7 +133,7 @@ public interface IWeEventFileClient {
      * list received files.
      *
      * @param topic topic name
-     * @return filechunksmeta list
+     * @return FileChunksMeta list
      * @throws BrokerException broker exception
      */
     List<FileChunksMeta> listFiles(String topic) throws BrokerException;
@@ -159,6 +159,7 @@ public interface IWeEventFileClient {
 
     /**
      * get DiskFiles.
+     *
      * @return DiskFiles
      */
     DiskFiles getDiskFiles();
