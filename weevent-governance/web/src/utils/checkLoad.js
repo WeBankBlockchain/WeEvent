@@ -1,13 +1,13 @@
 import { checkCurrentData, checkCurrentTime } from './formatTime.js'
 export const checkLoad = (value, remakeItem, array, selectField) => {
-  let newPayload = JSON.parse(value)
-  let funArray = JSON.parse(array)
+  const newPayload = JSON.parse(value)
+  const funArray = JSON.parse(array)
   for (let i = 0; i < selectField.length; i++) {
-    let e = selectField[i]
+    const e = selectField[i]
     if (e !== 'eventId') {
       if (newPayload[e] !== undefined) {
-        let newType = typeof (newPayload[e])
-        let oldType = typeof (remakeItem[e])
+        const newType = typeof (newPayload[e])
+        const oldType = typeof (remakeItem[e])
         if (newType !== oldType) {
           return false
         }
@@ -17,11 +17,11 @@ export const checkLoad = (value, remakeItem, array, selectField) => {
     }
   }
   for (let i = 0; i < funArray.length; i++) {
-    let item = funArray[i]
+    const item = funArray[i]
     if (item[2] === 'substring' || item[2] === 'concat' || item[2] === 'now' || item[2] === 'currentDate' || item[2] === 'currentTime') {
       if (item[2] === 'substring' || item[2] === 'concat') {
-        let key = item[3].split(',')
-        let e = key[0]
+        const key = item[3].split(',')
+        const e = key[0]
         if (newPayload[e] !== undefined) {
           let newType = typeof (newPayload[e])
           let oldType = typeof (remakeItem[e])
@@ -35,7 +35,7 @@ export const checkLoad = (value, remakeItem, array, selectField) => {
       if (item[2] === 'concat') {
         let key = item[3].split(',')
         for (let i = 0; i < key.length; i++) {
-          let e = item[i]
+          const e = item[i]
           if (newPayload[e] !== undefined) {
             let newType = typeof (newPayload[e])
             let oldType = typeof (remakeItem[e])
@@ -48,19 +48,19 @@ export const checkLoad = (value, remakeItem, array, selectField) => {
         }
       }
       if (item[2] === 'now') {
-        let e = item[3]
+        const e = item[3]
         if (newPayload[e] !== undefined) {
           let newType = typeof (newPayload[e])
           let oldType = typeof (remakeItem[e])
           if (newType !== oldType) {
             return false
           } else {
-            let reg = /^(\d{4})(-|\/)(\d{2})\2(\d{2}) (\d{2}):(\d{2}):(\d{2})$/
-            let t = newPayload[e]
+            const reg = /^(\d{4})(-|\/)(\d{2})\2(\d{2}) (\d{2}):(\d{2}):(\d{2})$/
+            const t = newPayload[e]
             if (t.match(reg) == null) {
               return false
             } else {
-              let time = t.split(' ')
+              const time = t.split(' ')
               if (!checkCurrentData(time[0]) || !checkCurrentTime(time[1])) {
                 return false
               }
@@ -78,7 +78,7 @@ export const checkLoad = (value, remakeItem, array, selectField) => {
           if (newType !== oldType) {
             return false
           } else {
-            let reg = /^(\d{4})(-|\/)(\d{2})\2(\d{2})$/
+            const reg = /^(\d{4})(-|\/)(\d{2})\2(\d{2})$/
             let t = newPayload[e]
             if (t.match(reg) == null) {
               return false
@@ -100,7 +100,7 @@ export const checkLoad = (value, remakeItem, array, selectField) => {
           if (newType !== oldType) {
             return false
           } else {
-            let reg = /^(\d{2}):(\d{2}):(\d{2})$/
+            const reg = /^(\d{2}):(\d{2}):(\d{2})$/
             let t = newPayload[e]
             if (t.match(reg) == null) {
               return false

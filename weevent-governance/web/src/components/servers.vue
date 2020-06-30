@@ -86,7 +86,7 @@ export default {
       if (value === '') {
         callback(new Error(this.$t('serverSet.noServerName')))
       } else {
-        let regex = /^[0-9A-Za-z]{1,20}$/
+        const regex = /^[0-9A-Za-z]{1,20}$/
         if (regex.exec(value)) {
           callback()
         } else {
@@ -101,10 +101,10 @@ export default {
         if (this.isEdit) {
           callback()
         } else {
-          let url = '?brokerUrl=' + value
+          const url = '?brokerUrl=' + value
           API.getVersion(url).then(res => {
             if (res.data.code === 0) {
-              let data = res.data.data
+              const data = res.data.data
               let str = this.$t('header.version') + ': '
               for (var key in data) {
                 str += data[key] + '&nbsp&nbsp'
@@ -173,7 +173,7 @@ export default {
   },
   methods: {
     confirm () {
-      let vm = this
+      const vm = this
       vm.$refs.form.validate((valid) => {
         if (valid) {
           if (vm.isEdit) {
@@ -187,7 +187,7 @@ export default {
       })
     },
     addServer () {
-      let data = {
+      const data = {
         name: this.form.name,
         brokerUrl: this.form.brokerUrl
       }
@@ -312,7 +312,7 @@ export default {
       var vm = this
       vm.$confirm(vm.$t('common.isDelete')).then(_ => {
         let data = {
-          'id': e.id
+          id: e.id
         }
         API.deleteServer(data).then(res => {
           if (res.data.status === 200) {
@@ -323,7 +323,7 @@ export default {
             vm.getServer()
             if (e.id === parseInt(localStorage.getItem('brokerId'))) {
               if (vm.server.length > 0) {
-                let newId = vm.server[0].id
+                const newId = vm.server[0].id
                 localStorage.setItem('brokerId', newId)
               } else {
                 localStorage.removeItem('brokerId')
@@ -341,8 +341,8 @@ export default {
       })
     },
     readRule (e) {
-      let list = e.ruleIdList.join(',')
-      this.$router.push({ path: './ruleStatic', query: { 'list': list } })
+      const list = e.ruleIdList.join(',')
+      this.$router.push({path: './ruleStatic', query: {'list': list}})
     },
     back () {
       this.$router.go(-1)
