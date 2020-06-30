@@ -32,6 +32,7 @@ public enum ErrorCode {
     FILE_NOT_EXIST(1020010, "file not exist"),
     FILE_DOWNLOAD_ERROR(102011, "file download failed"),
     GENERATE_PEM_FAILED(102012, "generate pem key failed"),
+    CHECK_FILE_IS_UPLOADED_ERROR(102013, "check file is uploaded error"),
 
     PARSE_CHUNK_REQUEST_ERROR(102020, "parse chunk request error"),
     ;

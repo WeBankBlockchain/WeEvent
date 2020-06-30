@@ -10,7 +10,7 @@ import com.webank.weevent.client.JsonHelper;
 import com.webank.weevent.governance.JUnitTestBase;
 import com.webank.weevent.governance.common.ErrorCode;
 import com.webank.weevent.governance.common.GovernanceResult;
-import com.webank.weevent.governance.entity.FileTransportEntity;
+import com.webank.weevent.governance.entity.FileTransportChannelEntity;
 import com.webank.weevent.governance.utils.JwtUtils;
 import com.webank.weevent.governance.utils.Utils;
 
@@ -128,7 +128,7 @@ public class FileControllerTest extends JUnitTestBase {
         Assert.assertNotNull(result);
         GovernanceResult governanceResult = JsonHelper.json2Object(result, GovernanceResult.class);
         Assert.assertEquals(200, (int) governanceResult.getStatus());
-        List<FileTransportEntity> transportList = (List<FileTransportEntity>) governanceResult.getData();
+        List<FileTransportChannelEntity> transportList = (List<FileTransportChannelEntity>) governanceResult.getData();
         Assert.assertNotNull(transportList);
         Assert.assertTrue(transportList.size() > 0);
     }

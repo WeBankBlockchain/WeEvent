@@ -91,7 +91,7 @@ export default {
       if (value === '') {
         callback(new Error(this.$t('timerSchedule.enterPP')))
       } else {
-        let url = '?corn=' + value
+        const url = '?corn=' + value
         API.cornCheck(url).then(res => {
           if (res.data.data) {
             callback()
@@ -119,10 +119,10 @@ export default {
       type: 1,
       title: this.$t('timerSchedule.addScheduler'),
       form: {
-        'schedulerName': '',
-        'ruleDatabaseId': '',
-        'periodParams': '',
-        'parsingSql': ''
+        schedulerName: '',
+        ruleDatabaseId: '',
+        periodParams: '',
+        parsingSql: ''
       },
       rules: {
         schedulerName: [
@@ -155,7 +155,7 @@ export default {
   },
   methods: {
     timerList () {
-      let data = {
+      const data = {
         brokerId: localStorage.getItem('brokerId'),
         pageSize: 10,
         pageNumber: this.pageNum
@@ -176,9 +176,9 @@ export default {
       })
     },
     addURL () {
-      let vm = this
+      const vm = this
       vm.$refs.form.validate((valid) => {
-        let data = {
+        const data = {
           schedulerName: this.form.schedulerName,
           ruleDatabaseId: this.form.ruleDatabaseId,
           periodParams: this.form.periodParams,
@@ -239,14 +239,14 @@ export default {
       this.type = 2
     },
     deleteItem (e) {
-      let vm = this
+      const vm = this
       vm.$confirm(vm.$t('common.isDelete'), vm.$t('rule.deleteAddress'), {
         confirmButtonText: vm.$t('common.ok'),
         cancelButtonText: vm.$t('common.cancel'),
         type: 'warning'
       }).then(() => {
         let data = {
-          'id': e.id,
+          id: e.id,
           brokerId: localStorage.getItem('brokerId')
         }
         API.deleteTimer(data).then(res => {

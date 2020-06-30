@@ -175,7 +175,7 @@ export default {
   watch: {
     showlog (nVal) {
       if (!nVal) {
-        let data = {
+        const data = {
           datasourceName: '',
           databaseType: '2',
           databaseIp: '',
@@ -212,9 +212,9 @@ export default {
       })
     },
     addURL () {
-      let vm = this
+      const vm = this
       vm.$refs.form.validate((valid) => {
-        let data = {
+        const data = {
           datasourceName: vm.form.datasourceName,
           databaseType: vm.form.databaseType,
           username: vm.form.username,
@@ -282,7 +282,7 @@ export default {
       this.type = 2
     },
     deleteItem (e) {
-      let vm = this
+      const vm = this
       vm.$confirm(vm.$t('common.isDelete'), vm.$t('rule.deleteAddress'), {
         confirmButtonText: vm.$t('common.ok'),
         cancelButtonText: vm.$t('common.cancel'),
@@ -316,15 +316,15 @@ export default {
       let vm = this
       vm.$refs.form.validate((valid) => {
         let data = {
-          'datasourceName': vm.form.datasourceName,
-          'databaseType': vm.form.databaseType,
-          'username': vm.form.username,
-          'password': vm.form.password,
-          'databaseIp': vm.form.databaseIp,
-          'databasePort': vm.form.databasePort,
-          'databaseName': vm.form.databaseName,
-          'optionalParameter': vm.form.optionalParameter,
-          'checkType': 1
+          datasourceName: vm.form.datasourceName,
+          databaseType: vm.form.databaseType,
+          username: vm.form.username,
+          password: vm.form.password,
+          databaseIp: vm.form.databaseIp,
+          databasePort: vm.form.databasePort,
+          databaseName: vm.form.databaseName,
+          optionalParameter: vm.form.optionalParameter,
+          checkType: 1
         }
         if (valid) {
           API.checkJDBC(data).then(res => {

@@ -199,21 +199,21 @@ export default {
           callback(new Error(this.$t('rule.enterTableName')))
         } else {
           const list = this.dbList
-          let id = this.sqlOption.ruleDataBaseId
+          const id = this.sqlOption.ruleDataBaseId
           list.forEach(e => {
             if (e.id === id) {
-              let data = {
-                'datasourceName': e.datasourceName,
-                'databaseType': e.databaseType,
-                'username': e.username,
-                'password': e.password,
-                'databaseIp': e.databaseIp,
-                'databasePort': e.databasePort,
-                'databaseName': e.databaseName,
-                'optionalParameter': e.optionalParameter,
-                'checkType': 2,
-                'id': e.id,
-                'tableName': value
+              const data = {
+                datasourceName: e.datasourceName,
+                databaseType: e.databaseType,
+                username: e.username,
+                password: e.password,
+                databaseIp: e.databaseIp,
+                databasePort: e.databasePort,
+                databaseName: e.databaseName,
+                optionalParameter: e.optionalParameter,
+                checkType: 2,
+                id: e.id,
+                tableName: value
               }
               API.checkJDBC(data).then(res => {
                 if (res.data.status === 200) {
@@ -235,28 +235,28 @@ export default {
       createSQL: false,
       crrentTable: true,
       ruleItem: {
-        'id': '',
-        'brokerId': '',
-        'ruleName': '',
-        'payloadType': '1',
-        'payloadMap': '',
-        'selectField': '',
-        'fromDestination': '',
-        'toDestination': '',
-        'conditionField': '',
-        'conditionType': '',
-        'ruleDataBaseId': '',
-        'errorDestination': '',
-        'conditionFieldJson': [],
-        'functionArray': '',
-        'ruleDescription': '',
-        'tableName': ''
+        id: '',
+        brokerId: '',
+        ruleName: '',
+        payloadType: '1',
+        payloadMap: '',
+        selectField: '',
+        fromDestination: '',
+        toDestination: '',
+        conditionField: '',
+        conditionType: '',
+        ruleDataBaseId: '',
+        errorDestination: '',
+        conditionFieldJson: [],
+        functionArray: '',
+        ruleDescription: '',
+        tableName: ''
       },
       rule: {
-        'ruleName': '',
-        'payloadType': '1',
-        'payloadMap': '',
-        'ruleDescription': ''
+        ruleName: '',
+        payloadType: '1',
+        payloadMap: '',
+        ruleDescription: ''
       },
       rules: {
         ruleName: [
@@ -267,16 +267,16 @@ export default {
         ]
       },
       sqlOption: {
-        'selectField': [],
-        'fromDestination': '',
-        'toDestination': '',
-        'conditionFieldJson': [],
-        'conditionType': '',
-        'ruleDataBaseId': '',
-        'errorDestination': '',
-        'functionArray': '',
-        'conditionField': '',
-        'tableName': ''
+        selectField: [],
+        fromDestination: '',
+        toDestination: '',
+        conditionFieldJson: [],
+        conditionType: '',
+        ruleDataBaseId: '',
+        errorDestination: '',
+        functionArray: '',
+        conditionField: '',
+        tableName: ''
       },
       sqlCheck: {
         fromDestination: [
@@ -316,7 +316,7 @@ export default {
       functionArray: []
     }
   },
-  components: {tree, ruleDes},
+  components: { tree, ruleDes },
   computed: {
     brokerId () {
       return this.$store.state.brokerId
@@ -331,9 +331,9 @@ export default {
   watch: {
     createRule (nVal) {
       if (!nVal) {
-        let vm = this
+        const vm = this
         vm.$nextTick(fun => {
-          for (let key in vm.rule) {
+          for (const key in vm.rule) {
             if (key === 'payloadMap') {
               vm.rule.payloadMap = ''
               vm.rule.payloadMap = JSON.stringify(vm.ruleItem.payloadMap)
@@ -351,20 +351,20 @@ export default {
       if (!nVal) {
         let vm = this
         vm.crrentTable = true
-        let nodes = document.getElementsByClassName('tree_content')
+        const nodes = document.getElementsByClassName('tree_content')
         if (nodes) {
           for (let i = 0; i < nodes.length; i++) {
-            let war = nodes[i].childNodes[nodes[i].childNodes.length - 1]
+            const war = nodes[i].childNodes[nodes[i].childNodes.length - 1]
             war.style.display = 'none'
           }
         }
         vm.$nextTick(fun => {
-          for (let key in vm.sqlOption) {
+          for (const key in vm.sqlOption) {
             if (key === 'selectField') {
               if (vm.ruleItem.selectField) {
                 vm.sqlOption.selectField = [].concat(vm.ruleItem.selectField.split(','))
-                let listColumnName = []
-                for (let key in vm.columnName) {
+                const listColumnName = []
+                for (const key in vm.columnName) {
                   listColumnName.push(key)
                 }
                 if (vm.sqlOption.selectField.length === listColumnName.length + 1) {
@@ -409,7 +409,7 @@ export default {
   methods: {
     checkSQLData (x, y, z) {
       let vm = this
-      let index = z + y
+      const index = z + y
       if (!x[y].children) {
         x[y].children = []
       }
@@ -422,9 +422,9 @@ export default {
     },
     getNode (e) {
       let vm = this
-      let list = e.split('')
+      const list = e.split('')
       if (list.length === 1) {
-        let index = Number(list[0])
+        const index = Number(list[0])
         vm.sqlLetter(vm.sqlOption.conditionFieldJson[index], true)
         if (vm.sqlOption.conditionFieldJson[index + 1]) {
           vm.checkSQLData(vm.sqlOption.conditionFieldJson, index + 1, '')
@@ -432,12 +432,12 @@ export default {
       } else {
         let nodeItem = vm.sqlOption.conditionFieldJson
         for (let i = 0; i < list.length - 1; i++) {
-          let index = Number(list[i])
-          let mid = nodeItem[index].children
+          const index = Number(list[i])
+          const mid = nodeItem[index].children
           nodeItem = mid
         }
-        let last = Number(list.pop())
-        let newIndex = list.join('')
+        const last = Number(list.pop())
+        const newIndex = list.join('')
         vm.sqlLetter(nodeItem[last], false)
         if (nodeItem[last + 1]) {
           vm.checkSQLData(nodeItem, last + 1, newIndex)
@@ -489,7 +489,7 @@ export default {
     getRuleData () {
       let vm = this
       let str = vm.ruleLetter.join('')
-      let Js = vm.sqlOption.conditionFieldJson
+      const Js = vm.sqlOption.conditionFieldJson
       if (Js.length === 1 && Js[0].children.length > 0) {
         str = str.substr(1)
         str = str.substr(0, str.length - 1)
@@ -500,9 +500,9 @@ export default {
         let index = 0
         index = str.indexOf(e, 0)
         while (index !== -1) {
-          let i = index + 1
-          let startIndex = index + e.length
-          let item = []
+          const i = index + 1
+          const startIndex = index + e.length
+          const item = []
           if (['abs', 'ceil', 'floor', 'round', 'lcase'].indexOf(e) !== -1) {
             let endIndex = index + e.length
             while (str[endIndex] !== ')') {
@@ -525,10 +525,10 @@ export default {
             item[0] = String(endIndex + 1)
             item[1] = String(lastIndex + 1)
             item[2] = e
-            let str1 = str
-            let str2 = str
-            let key = str1.substring(endIndex + 1, index - 1)
-            let string = str2.substring(startIndex + 1, lastIndex)
+            const str1 = str
+            const str2 = str
+            const key = str1.substring(endIndex + 1, index - 1)
+            const string = str2.substring(startIndex + 1, lastIndex)
             item[3] = key + ',' + string
           }
           if (e === 'trim') {
@@ -562,13 +562,13 @@ export default {
     },
     getDetail () {
       let vm = this
-      let data = {
-        'brokerId': localStorage.getItem('brokerId'),
-        'id': sessionStorage.getItem('ruleId')
+      const data = {
+        brokerId: localStorage.getItem('brokerId'),
+        id: sessionStorage.getItem('ruleId')
       }
       API.ruleDetail(data).then(res => {
         if (res.data.status === 200) {
-          for (let key in vm.ruleItem) {
+          for (const key in vm.ruleItem) {
             if (res.data.data[key] || key === 'ruleDescription') {
               vm.ruleItem[key] = res.data.data[key]
               if (key === 'conditionFieldJson') {
@@ -655,7 +655,7 @@ export default {
     },
     update (e) {
       let vm = this
-      let data = Object.assign({}, vm.ruleItem)
+      const data = Object.assign({}, vm.ruleItem)
       vm.$refs[e].validate((valid) => {
         if (!valid) {
           if (e === 'sql') {
@@ -752,14 +752,14 @@ export default {
       })
     },
     addConditionItem () {
-      let item = {
-        'connectionOperator': '',
-        'columnName': '',
-        'conditionalOperator': '',
-        'sqlCondition': '',
-        'functionType': '',
-        'columnMark': '',
-        'children': []
+      const item = {
+        connectionOperator: '',
+        columnName: '',
+        conditionalOperator: '',
+        sqlCondition: '',
+        functionType: '',
+        columnMark: '',
+        children: []
       }
       this.sqlOption.conditionFieldJson.push(item)
     },
@@ -786,8 +786,8 @@ export default {
       }
     },
     selField (e) {
-      let list = []
-      for (let key in this.columnName) {
+      const list = []
+      for (const key in this.columnName) {
         list.push(key)
       }
       if (e.length === list.length + 1) {

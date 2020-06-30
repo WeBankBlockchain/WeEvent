@@ -29,13 +29,19 @@
             label="File Md5"
           >
             <template slot-scope="scope">
-              <span :title='scope.row.fileMd5'>{{scope.row.fileMd5}}</span>
+              <span :title='scope.row.fileMd5'>{{scope.row.fileMd5 ? scope.row.fileMd5 : '-'}}</span>
             </template>
           </el-table-column>
           <el-table-column
             label="File Size"
             prop="fileSize"
             :formatter="checkFileSize"
+          >
+          </el-table-column>
+          <el-table-column
+            label="Status"
+            prop="status"
+            :formatter="checkSta"
           >
           </el-table-column>
           <el-table-column
@@ -47,6 +53,7 @@
           <el-table-column
             label="Process"
             prop="process"
+            :formatter="checkProcess"
           >
           </el-table-column>
         </el-table>
@@ -92,13 +99,13 @@
         <el-tooltip v-show="scope.row.overWrite === '1'" class="item" effect="dark" :content="$t('file.fileCover')" placement="top">
           <i class='el-icon-warning' style='font-size:18px;color:#006cff'></i>
         </el-tooltip>
-        <a class='el-icon-delete-solid' style='font-size:18px;margin-left:10px;cursor:pointer' @click.stop='deleteItem(scope.row)'></a>
+        <!-- <a class='el-icon-delete-solid' style='font-size:18px;margin-left:10px;cursor:pointer' @click.stop='deleteItem(scope.row)'></a> -->
       </template>
     </el-table-column>
   </el-table>
-  <el-dialog :title="$t('tableCont.addTopic')" :visible.sync="dialogFormVisible" center width='450px' :close-on-click-modal='false'>
+  <el-dialog :title="$t('file.addOne')" :visible.sync="dialogFormVisible" center width='450px' :close-on-click-modal='false'>
     <el-form :model="form" :rules="rules" ref='form' label-position="top">
-      <el-form-item :label="$t('common.name') + ':'" prop='name'>
+      <el-form-item :label="$t('file.boundTopic') + ':'" prop='name'>
         <el-select v-model="form.name" @visible-change='selectShow'>
           <el-option v-for="(item, index) in listTopic" :key="index" :label="item.topicName" :value="item.topicName"></el-option>
           <el-pagination
@@ -200,6 +207,7 @@ export default {
           { required: true, validator: roles, trigger: 'change' }
         ]
       },
+      downList: {},
       pageIndex: 0,
       total: 0
     }
@@ -225,14 +233,14 @@ export default {
       this.dialogFormVisible = true
     },
     getData () {
-      let vm = this
+      const vm = this
       vm.loading = true
       setTimeout(fun => {
         const url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId')
         API.listTransport(url).then(res => {
           if (res.data.status === 200) {
             vm.tableData = [].concat(res.data.data)
-            let det = []
+            const det = []
             vm.tableData.forEach(item => {
               vm.$set(item, 'detail', det)
             })
@@ -251,10 +259,10 @@ export default {
       }, 500)
     },
     addTopic (form) {
-      let vm = this
+      const vm = this
       vm.$refs.form.validate((valid) => {
         if (valid) {
-          let data = {
+          const data = {
             topicName: vm.form.name,
             brokerId: Number(localStorage.getItem('brokerId')),
             groupId: localStorage.getItem('groupId'),
@@ -310,13 +318,13 @@ export default {
     editItem (e) {
     },
     deleteItem (e) {
-      let vm = this
+      const vm = this
       vm.$confirm(vm.$t('file.deleteTopic'), vm.$t('file.isDelete'), {
         confirmButtonText: vm.$t('common.ok'),
         cancelButtonText: vm.$t('common.cancel'),
         type: 'warning'
       }).then(() => {
-        let data = {
+        const data = {
           topicName: e.topicName,
           id: e.id,
           role: e.role,
@@ -344,43 +352,114 @@ export default {
     rowClick (e) {
       this.$refs.table.toggleRowExpansion(e)
     },
-    readDetail (e) {
-      let vm = this
-      const url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topicName=' + e.topicName + '&role=' + e.role
-      API.fileStatus(url).then(res => {
+    downStatus (e) {
+      const vm = this
+      const url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topicName=' + e.topicName
+      API.downLoadStatus(url).then(res => {
         if (res.data.status === 200) {
-          let list = res.data.data
-          let newList = []
-          list.forEach(item => {
-            const e = {
-              fileName: item.file.fileName,
-              fileSize: item.file.fileSize,
-              fileMd5: item.file.fileMd5,
-              process: item.process,
-              speed: item.speed
-            }
-            newList.push(e)
-          })
-          vm.$set(e, 'detail', newList)
+          if (res.data.data && res.data.data.length > 0) {
+            const list = res.data.data
+            const newList = []
+            list.forEach(item => {
+              const e = {
+                fileName: item.file.fileName,
+                fileSize: item.file.fileSize,
+                fileMd5: item.file.fileMd5,
+                process: item.process,
+                speed: item.speed
+              }
+              newList.push(e)
+            })
+            vm.$set(e, 'detail', newList)
+          } else {
+            const name = e.topicName
+            window.clearInterval(vm.downLoadList[name])
+          }
         } else {
+          const name = e.topicName
+          window.clearInterval(vm.downLoadList[name])
           vm.$store.commit('set_Msg', vm.$message({
             type: 'warning',
-            message: vm.$t('tableCont.getDataError'),
+            message: res.data.message,
             duration: 0,
             showClose: true
           }))
         }
+      }).catch(e => {
+        const name = e.topicName
+        window.clearInterval(vm.downLoadList[name])
       })
+    },
+    upStatus (e) {
+      const vm = this
+      const url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topicName=' + e.topicName
+      API.uploadStatus(url).then(res => {
+        if (res.data.status === 200) {
+          if (res.data.data && res.data.data.length > 0) {
+            const list = res.data.data
+            const newList = []
+            list.forEach(item => {
+              const e = {
+                fileName: item.fileName,
+                fileSize: item.fileSize,
+                fileMd5: item.fileMD5,
+                process: item.process,
+                speed: item.speed,
+                status: item.status
+              }
+              newList.push(e)
+            })
+            vm.$set(e, 'detail', newList)
+          } else {
+            const name = e.topicName
+            window.clearInterval(vm.downLoadList[name])
+          }
+        } else {
+          const name = e.topicName
+          window.clearInterval(vm.downLoadList[name])
+          vm.$store.commit('set_Msg', vm.$message({
+            type: 'warning',
+            message: res.data.message,
+            duration: 0,
+            showClose: true
+          }))
+        }
+      }).catch(e => {
+        const name = e.topicName
+        window.clearInterval(vm.downLoadList[name])
+      })
+    },
+    readDetail (e) {
+      const vm = this
+      const name = e.topicName
+      if (vm.downLoadList[name]) {
+        window.clearInterval(vm.downLoadList[name])
+        delete vm.downLoadList[name]
+        vm.$set(e, 'detail', [])
+      } else {
+        if (e.role === '0') {
+          vm.downLoadList[name] = setInterval(fun => {
+            vm.downStatus(e)
+          }, 1000)
+        } else {
+          vm.downLoadList[name] = setInterval(fun => {
+            vm.upStatus(e)
+          }, 1000)
+        }
+      }
     },
     checkFileSize (e) {
       const b = 1024
       const mb = 1024 * 1024
       const g = 1024 * 1024 * 1024
       const size = e.fileSize
-      if (size < b) {
+      if (!size) {
+        return '-'
+      }
+      if (size < mb) {
         return (size / b).toFixed(1) + ' KB'
       }
-      if (size >= b && size < g) {
+      if (size >= mb && size < g) {
         return (size / mb).toFixed(1) + ' MB'
       }
       if (size >= g) {
@@ -388,8 +467,11 @@ export default {
       }
     },
     checkSpeed (e) {
-      let nu = e.speed.split('B/s')
-      let size = Number(nu[0])
+      if (!e.speed) {
+        return '-'
+      }
+      const nu = e.speed.split('B/s')
+      const size = Number(nu[0])
       const b = 1024
       const mb = 1024 * 1024
       if (size < b) {
@@ -399,10 +481,30 @@ export default {
         return (size / mb).toFixed(1) + ' MB / s'
       }
     },
+    checkProcess (e) {
+      if (e.process) {
+        return e.process
+      } else {
+        return '-'
+      }
+    },
+    checkSta (e) {
+      const s = e.status
+      if (s === '0') {
+        return 'uploading'
+      } else if (s === '1') {
+        return 'success'
+      } else if (s === '2') {
+        return 'faild'
+      } else {
+        return '-'
+      }
+    },
     fileOption (e) {
       if (e.role === '1') {
         // upload file
         sessionStorage.setItem('uploadName', e.topicName)
+        sessionStorage.setItem('overWrite', e.overWrite)
         Bus.$emit('openUploader', {
           topicName: e.topicName,
           brokerId: localStorage.getItem('brokerId'),
@@ -427,7 +529,7 @@ export default {
       }
     },
     chooseFile () {
-      let input = document.createElement('input')
+      const input = document.createElement('input')
       input.attributes.type = 'file'
       input.focus()
     },
@@ -457,7 +559,7 @@ export default {
       })
     },
     dFile (e) {
-      const url = con.ROOT + 'file/download?groupId=' + localStorage.getItem('groupId') + '&brokerId=' + localStorage.getItem('brokerId') + '&topicName=' + e.topic + '&fileId=' + e.fileId
+      const url = con.ROOT + 'file/download?topic=' + e.topic + '&fileName=' + e.fileName
       var xhr = new XMLHttpRequest()
       var formData = new FormData()
       xhr.open('get', url)
@@ -465,7 +567,7 @@ export default {
       xhr.responseType = 'blob'
       xhr.onload = function (e) {
         if (this.status === 200) {
-          let blob = this.response
+          const blob = this.response
           const f = this.getResponseHeader('filename')
           const filename = decodeURI(f)
           if (window.navigator.msSaveOrOpenBlob) {
@@ -513,6 +615,12 @@ export default {
     groupId (nVal) {
       if (nVal !== '-1') {
       }
+    }
+  },
+  beforeDestroy () {
+    let vm = this
+    for (const key in vm.downLoadList) {
+      window.clearInterval(vm.downLoadList(key))
     }
   }
 }

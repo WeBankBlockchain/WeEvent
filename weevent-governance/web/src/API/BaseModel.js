@@ -1,5 +1,5 @@
 import axios from 'axios'
-import {Message} from 'element-ui'
+import { Message } from 'element-ui'
 import qs from 'qs'
 import store from '../store'
 import i18n from '../i18n/index'
@@ -8,7 +8,7 @@ const con = require('../../config/config.js')
 class BaseModule {
   constructor () {
     this.$http = axios.create({
-      timeout: 5 * 1000,
+      timeout: 10 * 1000,
       withCredentials: true
     })
 
@@ -34,8 +34,8 @@ class BaseModule {
 
     this.$http.interceptors.response.use(config => {
       return new Promise((resolve, reject) => {
-        let data = config.data
-        let status = config.status
+        const data = config.data
+        const status = config.status
         if (((status >= 200 && status < 300) || status === 302) && data) {
           if (data.code === 302000) {
             store.commit('back', true)
@@ -67,7 +67,6 @@ class BaseModule {
           duration: 0,
           showClose: true
         }))
-        return error
       } else {
         store.commit('set_Msg', Message({
           type: 'error',

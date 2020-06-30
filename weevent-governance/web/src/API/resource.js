@@ -224,8 +224,16 @@ class ResoruceService extends BaseModel {
     return this.request(api.listFile, data)
   }
 
-  fileStatus (data) {
-    return this.request(api.fileStatus, data)
+  checkUploaded (data) {
+    return this.request(api.checkUploaded, data)
+  }
+
+  downLoadStatus (data) {
+    return this.request(api.downLoadStatus, data)
+  }
+
+  uploadStatus (data) {
+    return this.request(api.uploadStatus, data)
   }
 
   checkUpload (data) {

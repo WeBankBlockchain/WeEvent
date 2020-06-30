@@ -1,9 +1,10 @@
-
 {
   "login": {
     "method": "post",
     "url": "user/login",
-    "headers": {"Content-Type": "application/x-www-form-urlencoded"}
+    "headers": {
+      "Content-Type": "application/x-www-form-urlencoded"
+    }
   },
   "getVersion": {
     "method": "get",
@@ -189,9 +190,17 @@
     "method": "get",
     "url": "file/listFile"
   },
-  "fileStatus": {
+  "checkUploaded": {
     "method": "get",
-    "url": "file/status"
+    "url": "file/checkUploaded"
+  },
+  "downLoadStatus": {
+    "method": "get",
+    "url": "file/downLoadStatus"
+  },
+  "uploadStatus": {
+    "method": "get",
+    "url": "file/uploadStatus"
   },
   "checkUpload": {
     "method": "get",

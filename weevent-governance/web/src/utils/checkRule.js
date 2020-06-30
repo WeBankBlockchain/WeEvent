@@ -2,15 +2,15 @@ import i18n from '../i18n'
 import { checkCurrentData, checkCurrentTime } from './formatTime.js'
 export const checkRule = (e, s) => {
   let pass = true
-  let nodes = document.getElementsByClassName('tree_content')
-  let lang = i18n.locale
+  const nodes = document.getElementsByClassName('tree_content')
+  const lang = i18n.locale
   if (nodes) {
     for (let i = 0; i < nodes.length; i++) {
-      let war = nodes[i].childNodes[nodes[i].childNodes.length - 1]
+      const war = nodes[i].childNodes[nodes[i].childNodes.length - 1]
       let warning = ''
       let item = nodes[i].attributes[0].value
-      let index = nodes[i].attributes[1].nodeValue
-      let payLoad = JSON.parse(s)
+      const index = nodes[i].attributes[1].nodeValue
+      const payLoad = JSON.parse(s)
       item = JSON.parse(item)
       if (index !== '00' && !item.connectionOperator) {
         // not first line and connectionOperator is empty
@@ -26,10 +26,10 @@ export const checkRule = (e, s) => {
         } else {
           if (item.functionType) {
             if (['abs', 'ceil', 'floor', 'round'].indexOf(item.functionType) !== -1) {
-              let fun = Math[item.functionType]
-              let operator = item.conditionalOperator
-              let val = item.sqlCondition
-              let patrn = /^(-)?\d+(\.\d+)?$/
+              const fun = Math[item.functionType]
+              const operator = item.conditionalOperator
+              const val = item.sqlCondition
+              const patrn = /^(-)?\d+(\.\d+)?$/
               if (patrn.exec(val) == null) {
                 // data type error - not a number
                 pass = false
@@ -59,8 +59,8 @@ export const checkRule = (e, s) => {
               }
             }
             if (['substring', 'concat', 'trim', 'lcase'].indexOf(item.functionType) !== -1) {
-              let operator = item.conditionalOperator
-              let val = item.sqlCondition
+              const operator = item.conditionalOperator
+              const val = item.sqlCondition
               // val witch ""
               if (val[0] !== '"' || val[val.length - 1] !== '"') {
                 warning = i18n.messages[lang].ruleCheck.inputString
@@ -77,8 +77,8 @@ export const checkRule = (e, s) => {
                       warning = i18n.messages[lang].ruleCheck.inputRule
                       console.log('columnMark is empty')
                     } else {
-                      let indexList = item.columnMark
-                      let index = indexList.split(',')
+                      const indexList = item.columnMark
+                      const index = indexList.split(',')
                       if (index.length > 2) {
                         warning = i18n.messages[lang].ruleCheck.errorParameter
                         pass = false
@@ -105,8 +105,8 @@ export const checkRule = (e, s) => {
                       warning = i18n.messages[lang].ruleCheck.inputRule
                       console.log('columnMark is empty')
                     } else {
-                      let t = payLoad[item.columnMark]
-                      let type = typeof (t)
+                      const t = payLoad[item.columnMark]
+                      const type = typeof (t)
                       if (type !== 'string') {
                         pass = false
                         warning = i18n.messages[lang].ruleCheck.columnMarkError
@@ -122,7 +122,7 @@ export const checkRule = (e, s) => {
       }
       if (pass) {
         if (item.functionType !== 'now' && item.functionType !== 'currentDate' && item.functionType !== 'currentTime') {
-          let type = typeof (payLoad[item.columnName])
+          const type = typeof (payLoad[item.columnName])
           if (type === 'string') {
             if (item.sqlCondition[0] !== '"' || item.sqlCondition[item.sqlCondition.length - 1] !== '"') {
               pass = false
@@ -136,7 +136,7 @@ export const checkRule = (e, s) => {
               }
             }
           } else if (type === 'number') {
-            let re = /^(-)?\d+(\.\d+)?$/
+            const re = /^(-)?\d+(\.\d+)?$/
             if (re.exec(item.sqlCondition) == null) {
               pass = false
               warning = i18n.messages[lang].ruleCheck.typeErrorNumber
@@ -144,10 +144,10 @@ export const checkRule = (e, s) => {
             }
           }
         } else {
-          let t = payLoad[item.columnName]
-          let type = typeof (t)
+          const t = payLoad[item.columnName]
+          const type = typeof (t)
           if (item.functionType === 'now') {
-            let reg = /^(\d{4})(-|\/)(\d{2})\2(\d{2}) (\d{2}):(\d{2}):(\d{2})$/
+            const reg = /^(\d{4})(-|\/)(\d{2})\2(\d{2}) (\d{2}):(\d{2}):(\d{2})$/
             if (type !== 'string') {
               pass = false
               warning = i18n.messages[lang].ruleCheck.errorTime
@@ -156,7 +156,7 @@ export const checkRule = (e, s) => {
                 pass = false
                 warning = i18n.messages[lang].ruleCheck.errorTime
               } else {
-                let time = t.split(' ')
+                const time = t.split(' ')
                 if (!checkCurrentData(time[0]) || !checkCurrentTime(time[1])) {
                   pass = false
                   warning = i18n.messages[lang].ruleCheck.notAdate
@@ -164,7 +164,7 @@ export const checkRule = (e, s) => {
               }
             }
           } else if (item.functionType === 'currentDate') {
-            let reg = /^(\d{4})(-|\/)(\d{2})\2(\d{2})$/
+            const reg = /^(\d{4})(-|\/)(\d{2})\2(\d{2})$/
             if (type !== 'string') {
               pass = false
               warning = i18n.messages[lang].ruleCheck.typeDateError
@@ -180,7 +180,7 @@ export const checkRule = (e, s) => {
               }
             }
           } else {
-            let reg = /^(\d{2}):(\d{2}):(\d{2})$/
+            const reg = /^(\d{2}):(\d{2}):(\d{2})$/
             if (type !== 'string') {
               pass = false
               warning = i18n.messages[lang].ruleCheck.typeTimeError

@@ -34,6 +34,7 @@
 import Bus from './js/bus'
 import SparkMD5 from 'spark-md5'
 import $ from 'jquery'
+import API from '../../API/resource'
 const con = require('../../../config/config.js')
 export default {
   data () {
@@ -49,7 +50,7 @@ export default {
         testChunks: true,
         forceChunkSize: true,
         checkChunkUploadedByResponse: function (chunk, message) {
-          let objMessage = JSON.parse(message)
+          const objMessage = JSON.parse(message)
           if (objMessage.skipUpload) {
             return true
           }
@@ -78,18 +79,38 @@ export default {
   },
   methods: {
     onFileAdded (file) {
+      const vm = this
       file.topicName = sessionStorage.getItem('uploadName')
-      this.computeMD5(file)
-      Bus.$emit('fileAdded')
-      this.$emit('pop', true)
+      const ov = sessionStorage.getItem('overWrite')
+      if (ov === '0') {
+        const url = '?fileName=' + file.name + '&brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topicName=' + sessionStorage.getItem('uploadName')
+        API.checkUploaded(url).then(res => {
+          if (res.data.status === 200 && !res.data.data) {
+            vm.computeMD5(file)
+            Bus.$emit('fileAdded')
+            vm.$emit('pop', true)
+          } else {
+            this.$store.commit('set_Msg', this.$message({
+              type: 'warning',
+              message: res.data.msg,
+              duration: 0,
+              showClose: true
+            }))
+          }
+        })
+      } else {
+        vm.computeMD5(file)
+        Bus.$emit('fileAdded')
+        vm.$emit('pop', true)
+      }
     },
     onFileProgress (rootFile, file, chunk) {
     },
     onFileSuccess (rootFile, file, response, chunk) {
-      let res = JSON.parse(response)
+      const res = JSON.parse(response)
       // 服务器自定义的错误（即虽返回200，但是是错误的情况），这种错误是Uploader无法拦截的
       if (res.status !== 200) {
-        this.$message({ message: res.message, type: 'error' })
+        this.$message({ message: res.msg, type: 'error' })
         // 文件状态设为“失败”
         this.statusSet(file.id, 'failed')
         return
@@ -111,16 +132,16 @@ export default {
     },
     //  计算md5，实现断点续传及秒传
     computeMD5 (file) {
-      let fileReader = new FileReader()
-      let time = new Date().getTime()
-      let blobSlice =
+      const fileReader = new FileReader()
+      const time = new Date().getTime()
+      const blobSlice =
         File.prototype.slice ||
         File.prototype.mozSlice ||
         File.prototype.webkitSlice
       let currentChunk = 0
       const chunkSize = 1048576
-      let chunks = Math.ceil(file.size / chunkSize)
-      let spark = new SparkMD5.ArrayBuffer()
+      const chunks = Math.ceil(file.size / chunkSize)
+      const spark = new SparkMD5.ArrayBuffer()
       // 文件状态设为"计算MD5"
       this.statusSet(file.id, 'md5')
       file.pause()
@@ -137,7 +158,7 @@ export default {
             )
           })
         } else {
-          let md5 = spark.end()
+          const md5 = spark.end()
           this.computeMD5Success(md5, file)
           console.log(
             `MD5计算完毕：${file.name} \nMD5：${md5} \n分片：${chunks} 大小:${
@@ -152,8 +173,8 @@ export default {
         file.cancel()
       }
       function loadNext () {
-        let start = currentChunk * chunkSize
-        let end = start + chunkSize >= file.size ? file.size : start + chunkSize
+        const start = currentChunk * chunkSize
+        const end = start + chunkSize >= file.size ? file.size : start + chunkSize
         fileReader.readAsArrayBuffer(blobSlice.call(file.file, start, end))
       }
     },
@@ -170,7 +191,7 @@ export default {
       this.statusRemove(file.id)
     },
     statusSet (id, status) {
-      let statusMap = {
+      const statusMap = {
         md5: {
           text: 'check MD5',
           bgc: '#fff'

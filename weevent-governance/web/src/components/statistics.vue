@@ -94,17 +94,17 @@ export default {
   },
   methods: {
     getTopic () {
-      let vm = this
-      let data = {
-        'beginDate': vm.selectTime[0],
-        'endDate': vm.selectTime[1],
-        'topicList': [],
-        'groupId': localStorage.getItem('groupId'),
-        'brokerId': localStorage.getItem('brokerId')
+      const vm = this
+      const data = {
+        beginDate: vm.selectTime[0],
+        endDate: vm.selectTime[1],
+        topicList: [],
+        groupId: localStorage.getItem('groupId'),
+        brokerId: localStorage.getItem('brokerId')
       }
       API.historicalData(data).then(res => {
         if (res.data.status === 200) {
-          let resData = res.data.data
+          const resData = res.data.data
           vm.topicList = []
           for (var key in resData) {
             vm.topicList.push(key)
@@ -115,29 +115,29 @@ export default {
       })
     },
     beginDate (e) {
-      let vm = this
-      let data = {
-        'beginDate': vm.selectTime[0],
-        'endDate': vm.selectTime[1],
-        'topicList': vm.topic,
-        'groupId': localStorage.getItem('groupId'),
-        'brokerId': localStorage.getItem('brokerId')
+      const vm = this
+      const data = {
+        beginDate: vm.selectTime[0],
+        endDate: vm.selectTime[1],
+        topicList: vm.topic,
+        groupId: localStorage.getItem('groupId'),
+        brokerId: localStorage.getItem('brokerId')
       }
       vm.getTopic()
       API.historicalData(data).then(res => {
         if (res.data.status === 200) {
-          let resData = res.data.data
+          const resData = res.data.data
           if (!resData || resData.length === 0) {
             Highcharts.chart('chart', vm.option).showNoData()
             return
           }
-          let chart = new Promise(function (resolve, reject) {
-            let topic = []
+          const chart = new Promise(function (resolve, reject) {
+            const topic = []
             vm.option.series = []
             for (var key in resData) {
-              let item = {
-                'name': key,
-                'data': resData[key]
+              const item = {
+                name: key,
+                data: resData[key]
               }
               if (e) {
                 if (vm.option.series.length < 5) {
@@ -183,22 +183,21 @@ export default {
       if (!e) {
         vm.getDate()
       } else {
-        let timeList = getTimeList(e[0], e[1])
+        const timeList = getTimeList(e[0], e[1])
         vm.option.xAxis.categories = [].concat(timeList)
       }
       this.beginDate(true)
     },
     getDate () {
-      let data = getLastWeek()
-      let start = new Date(data[0]).getTime()
-      let end = new Date(data[data.length - 1]).getTime()
+      const data = getLastWeek()
+      const start = new Date(data[0]).getTime()
+      const end = new Date(data[data.length - 1]).getTime()
       this.selectTime.push(start)
       this.selectTime.push(end)
       this.option.xAxis.categories = [].concat(data)
       this.beginDate(true)
     },
     selectChange (e) {
-      console.log(e)
       if (!e) {
         let vm = this
         if (vm.topic.length === 0) {
