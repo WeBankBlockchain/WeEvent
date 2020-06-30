@@ -134,7 +134,7 @@ export default {
           vm.total = res.data.total
           const last = Math.ceil(res.data.total / vm.pageSize)
           this.pageIndex = last
-          let data = {
+          const data = {
             pageIndex: last - 1,
             pageSize: vm.pageSize,
             brokerId: Number(localStorage.getItem('brokerId')),
@@ -162,9 +162,9 @@ export default {
       })
     },
     getLsitData () {
-      let vm = this
+      const vm = this
       vm.loading = true
-      let data = {
+      const data = {
         pageIndex: vm.pageIndex - 1,
         pageSize: vm.pageSize,
         brokerId: Number(localStorage.getItem('brokerId')),
@@ -173,8 +173,8 @@ export default {
       API.topicList(data).then(res => {
         if (res.status === 200) {
           vm.total = res.data.total
-          let listData = res.data.topicInfoList.reverse()
-          let det = {
+          const listData = res.data.topicInfoList.reverse()
+          const det = {
             topicName: '',
             createdTimestamp: '',
             topicAddress: '',
@@ -291,7 +291,7 @@ export default {
         vm.tableData = []
         const url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topic=' + vm.topicName
         API.topicInfo(url).then(res => {
-          let time = getDateDetail(res.data.createdTimestamp)
+          const time = getDateDetail(res.data.createdTimestamp)
           res.data.createdTimestamp = time
           const item = {
             topicName: res.data.topicName,
@@ -320,7 +320,7 @@ export default {
       API.topicInfo(url).then(res => {
         let time = getDateDetail(res.data.createdTimestamp)
         res.data.createdTimestamp = time
-        let item = {
+        const item = {
           topicName: res.data.topicName,
           creater: '——',
           createdTimestamp: time,
