@@ -78,7 +78,7 @@ export default {
         }
       }
       if (e === '4-1') {
-        let url = this.$route.path
+        const url = this.$route.path
         if (url === '/ruleDetail') {
           this.$store.commit('set_active', e)
           this.$emit('selecChange', e)
