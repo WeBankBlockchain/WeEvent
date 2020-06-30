@@ -181,20 +181,18 @@ public class SessionStore {
     }
 
     public void unSubscribe(String clientId, List<String> topics) {
-        this.getSession(clientId).ifPresent(context -> {
-            topics.forEach(topic -> {
-                Optional<SubscribeData> subscribeData = context.getSubscribeDataList().stream().filter(item -> item.getTopic().equals(topic)).findFirst();
-                subscribeData.ifPresent(subscribe -> {
-                    try {
-                        log.info("unSubscribe, clientId: {} topic: {} subscriptionId: {}", clientId, topic, subscribe.getSubscriptionId());
-                        this.consumer.unSubscribe(subscribe.getSubscriptionId());
-                        context.getSubscribeDataList().remove(subscribe);
-                    } catch (BrokerException e) {
-                        log.error("unSubscribe failed, {}", e.toString());
-                    }
-                });
+        this.getSession(clientId).ifPresent(context -> topics.forEach(topic -> {
+            Optional<SubscribeData> subscribeData = context.getSubscribeDataList().stream().filter(item -> item.getTopic().equals(topic)).findFirst();
+            subscribeData.ifPresent(subscribe -> {
+                try {
+                    log.info("unSubscribe, clientId: {} topic: {} subscriptionId: {}", clientId, topic, subscribe.getSubscriptionId());
+                    this.consumer.unSubscribe(subscribe.getSubscriptionId());
+                    context.getSubscribeDataList().remove(subscribe);
+                } catch (BrokerException e) {
+                    log.error("unSubscribe failed, {}", e.toString());
+                }
             });
-        });
+        }));
     }
 
     private Optional<SessionContext> getSession(String clientId) {
@@ -263,6 +261,7 @@ public class SessionStore {
                             case EXACTLY_ONCE:
                             default:
                                 log.error("DOT NOT support Qos=2");
+                                break;
                         }
                     });
         });

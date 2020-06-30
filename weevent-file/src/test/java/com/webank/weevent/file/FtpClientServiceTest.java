@@ -1,24 +1,25 @@
 package com.webank.weevent.file;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.file.ftpclient.FtpClientService;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
-
-import java.io.File;
-import java.io.IOException;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @Slf4j
 public class FtpClientServiceTest {
     private String ftpHost = "127.0.0.1";
     private int ftpPort = 21;
     private String ftpUser = "ftpuser";
-    private String ftpPassWord = "abcd1234";
+    private String ftpPassWord = "";
 
 
     @Test
@@ -31,7 +32,7 @@ public class FtpClientServiceTest {
             ftpClientService.connect(this.ftpHost, this.ftpPort, this.ftpUser, this.ftpPassWord);
 
             // list dir
-            String[] dir = ftpClientService.getFileList("./");
+            List<String> dir = ftpClientService.getFileList("./");
             for (String fileName : dir) {
                 System.out.println(fileName);
             }
@@ -45,7 +46,7 @@ public class FtpClientServiceTest {
 
     @Test
     @Ignore
-    public void testFtpUpLoad() throws  BrokerException {
+    public void testFtpUpLoad() throws BrokerException {
         FtpClientService ftpClientService = new FtpClientService();
         ftpClientService.connect(this.ftpHost, this.ftpPort, this.ftpUser, this.ftpPassWord);
 
@@ -93,12 +94,14 @@ public class FtpClientServiceTest {
     }
 
     @Test
-    public void testGetFileList() throws IOException {
+    public void testGetFileList() throws BrokerException {
         FtpClientService ftpClientService = mock(FtpClientService.class);
-        String[] fileList = {"test1.txt", "test2.txt"};
+        List<String> fileList = new ArrayList<>();
+        fileList.add("test1.txt");
+        fileList.add("test2.txt");
         when(ftpClientService.getFileList("./")).thenReturn(fileList);
-        String[] ret = ftpClientService.getFileList("./");
-        Assert.assertArrayEquals(ret, fileList);
+        List<String> ret = ftpClientService.getFileList("./");
+        Assert.assertEquals(ret, fileList);
     }
 
 }
