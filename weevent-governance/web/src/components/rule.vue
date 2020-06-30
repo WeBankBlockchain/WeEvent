@@ -109,10 +109,9 @@
         </el-pagination>
     </div>
     <el-dialog :title="$t('rule.creatRule')" :visible.sync="createRule" :close-on-click-modal='false'>
-      <div class='warning_part'>
-        <img src="../assets/image/icon_tips.svg" alt="">
-        <p>{{$t('rule.creatRuleRemark')}}</p>
-      </div>
+      <el-tooltip popper-class='rule_des' effect="light" :content="$t('rule.creatRuleRemark')" placement="bottom-start">
+        <i :class="{'el-icon-warning': true, 'en_warning': lang === 'en'}"></i>
+      </el-tooltip>
       <el-form :model="rule" :rules="rules" ref='rule'>
         <el-form-item :label="$t('rule.ruleName')  + ' :'" prop='ruleName'>
           <el-input v-model="rule.ruleName" size='small' autocomplete="off"></el-input>
@@ -173,11 +172,11 @@ export default {
       total: 0,
       ruleList: [],
       rule: {
-        'ruleName': '',
-        'payloadType': '1',
-        'payloadMap': '',
-        'conditionType': '1',
-        'ruleDescription': ''
+        ruleName: '',
+        payloadType: '1',
+        payloadMap: '',
+        conditionType: '1',
+        ruleDescription: ''
       },
       ruleStatic: {},
       rules: {
@@ -196,6 +195,9 @@ export default {
     },
     groupId () {
       return this.$store.state.groupId
+    },
+    lang () {
+      return this.$store.state.lang
     }
   },
   watch: {
@@ -221,12 +223,12 @@ export default {
   },
   methods: {
     getRuleList () {
-      let data = {
-        'ruleName': this.ruleName,
-        'brokerId': localStorage.getItem('brokerId'),
-        'groupId': localStorage.getItem('groupId'),
-        'pageNumber': this.pageNum,
-        'pageSize': 10
+      const data = {
+        ruleName: this.ruleName,
+        brokerId: localStorage.getItem('brokerId'),
+        groupId: localStorage.getItem('groupId'),
+        pageNumber: this.pageNum,
+        pageSize: 10
       }
       API.ruleList(data).then(res => {
         if (res.data.status === 200) {
@@ -262,8 +264,8 @@ export default {
     },
     ruleStart (e) {
       let data = {
-        'id': e.id,
-        'brokerId': e.brokerId
+        id: e.id,
+        brokerId: e.brokerId
       }
       API.ruleStart(data).then(res => {
         if (res.data.status === 200) {
@@ -284,9 +286,9 @@ export default {
     },
     ruleStop (e) {
       let data = {
-        'id': e.id,
-        'brokerId': e.brokerId,
-        'status': 0
+        id: e.id,
+        brokerId: e.brokerId,
+        status: 0
       }
       API.ruleStop(data).then(res => {
         if (res.data.status === 200) {
@@ -306,7 +308,7 @@ export default {
       })
     },
     ruleDelete (e) {
-      let vm = this
+      const vm = this
       vm.$confirm(vm.$t('rule.isDelete'), vm.$t('rule.deleteRule'), {
         confirmButtonText: vm.$t('common.ok'),
         cancelButtonText: vm.$t('common.cancel'),
@@ -344,12 +346,12 @@ export default {
       vm.$refs.rule.validate((valid) => {
         if (valid) {
           let data = {
-            'ruleName': vm.rule.ruleName,
-            'payloadType': vm.rule.payloadType,
-            'payloadMap': JSON.parse(this.rule.payloadMap),
-            'brokerId': localStorage.getItem('brokerId'),
-            'groupId': localStorage.getItem('groupId'),
-            'ruleDescription': vm.rule.ruleDescription
+            ruleName: vm.rule.ruleName,
+            payloadType: vm.rule.payloadType,
+            payloadMap: JSON.parse(this.rule.payloadMap),
+            brokerId: localStorage.getItem('brokerId'),
+            groupId: localStorage.getItem('groupId'),
+            ruleDescription: vm.rule.ruleDescription
           }
           API.ruleAdd(data).then(res => {
             if (res.data.status === 200) {
@@ -378,12 +380,12 @@ export default {
     },
     readRuleDetial (e) {
       let vm = this
-      let id = e.id
-      let str = '?idList=' + id
+      const id = e.id
+      const str = '?idList=' + id
       API.ruleStatic(str).then(res => {
         if (res.data.errorCode === 0) {
-          let list = res.data.data.statisticRuleMap
-          for (let key in list) {
+          const list = res.data.data.statisticRuleMap
+          for (const key in list) {
             if (key === String(id)) {
               vm.ruleStatic = list[key]
             }
