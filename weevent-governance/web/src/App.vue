@@ -13,7 +13,7 @@ export default {
   },
   beforeCreate () {
     if (self === top) {
-      let antiCLickjack = document.getElementById('app')
+      const antiCLickjack = document.getElementById('app')
       antiCLickjack.parentNode.removeChild(antiCLickjack)
     } else {
       top.location = self.location
