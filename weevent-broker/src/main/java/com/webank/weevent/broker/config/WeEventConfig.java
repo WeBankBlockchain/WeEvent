@@ -37,10 +37,4 @@ public class WeEventConfig {
 
     @Value("${mqtt.broker.keepalive:60}")
     private Integer keepAlive;
-
-    @Value("${file.path:./logs/file}")
-    private String filePath;
-
-    @Value("${file.chunk.size:1048576}")
-    private int fileChunkSize;
 }
