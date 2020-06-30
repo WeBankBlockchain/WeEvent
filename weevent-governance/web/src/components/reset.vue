@@ -59,7 +59,7 @@ export default {
     submit (formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          let data = {
+          const data = {
             username: this.ruleForm2.name,
             password: this.ruleForm2.newPass
           }

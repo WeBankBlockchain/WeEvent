@@ -137,16 +137,16 @@ export default {
   },
   methods: {
     addItem (e) {
-      let item = {
-        'connectionOperator': '',
-        'columnName': '',
-        'conditionalOperator': '',
-        'sqlCondition': '',
-        'functionType': '',
-        'columnMark': '',
-        'children': []
+      const item = {
+        connectionOperator: '',
+        columnName: '',
+        conditionalOperator: '',
+        sqlCondition: '',
+        functionType: '',
+        columnMark: '',
+        children: []
       }
-      let index = e.split('-').pop()
+      const index = e.split('-').pop()
       this.treeData[index].children.push(item)
     },
     delItem (e) {
