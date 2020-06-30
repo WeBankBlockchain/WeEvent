@@ -316,7 +316,7 @@ export default {
       functionArray: []
     }
   },
-  components: {tree, ruleDes},
+  components: { tree, ruleDes },
   computed: {
     brokerId () {
       return this.$store.state.brokerId
@@ -331,9 +331,9 @@ export default {
   watch: {
     createRule (nVal) {
       if (!nVal) {
-        let vm = this
+        const vm = this
         vm.$nextTick(fun => {
-          for (let key in vm.rule) {
+          for (const key in vm.rule) {
             if (key === 'payloadMap') {
               vm.rule.payloadMap = ''
               vm.rule.payloadMap = JSON.stringify(vm.ruleItem.payloadMap)
@@ -359,12 +359,12 @@ export default {
           }
         }
         vm.$nextTick(fun => {
-          for (let key in vm.sqlOption) {
+          for (const key in vm.sqlOption) {
             if (key === 'selectField') {
               if (vm.ruleItem.selectField) {
                 vm.sqlOption.selectField = [].concat(vm.ruleItem.selectField.split(','))
-                let listColumnName = []
-                for (let key in vm.columnName) {
+                const listColumnName = []
+                for (const key in vm.columnName) {
                   listColumnName.push(key)
                 }
                 if (vm.sqlOption.selectField.length === listColumnName.length + 1) {
@@ -432,7 +432,7 @@ export default {
       } else {
         let nodeItem = vm.sqlOption.conditionFieldJson
         for (let i = 0; i < list.length - 1; i++) {
-          let index = Number(list[i])
+          const index = Number(list[i])
           const mid = nodeItem[index].children
           nodeItem = mid
         }
@@ -528,7 +528,7 @@ export default {
             const str1 = str
             const str2 = str
             const key = str1.substring(endIndex + 1, index - 1)
-            let string = str2.substring(startIndex + 1, lastIndex)
+            const string = str2.substring(startIndex + 1, lastIndex)
             item[3] = key + ',' + string
           }
           if (e === 'trim') {
@@ -562,13 +562,13 @@ export default {
     },
     getDetail () {
       let vm = this
-      let data = {
+      const data = {
         brokerId: localStorage.getItem('brokerId'),
         id: sessionStorage.getItem('ruleId')
       }
       API.ruleDetail(data).then(res => {
         if (res.data.status === 200) {
-          for (let key in vm.ruleItem) {
+          for (const key in vm.ruleItem) {
             if (res.data.data[key] || key === 'ruleDescription') {
               vm.ruleItem[key] = res.data.data[key]
               if (key === 'conditionFieldJson') {
@@ -655,7 +655,7 @@ export default {
     },
     update (e) {
       let vm = this
-      let data = Object.assign({}, vm.ruleItem)
+      const data = Object.assign({}, vm.ruleItem)
       vm.$refs[e].validate((valid) => {
         if (!valid) {
           if (e === 'sql') {
@@ -752,7 +752,7 @@ export default {
       })
     },
     addConditionItem () {
-      let item = {
+      const item = {
         connectionOperator: '',
         columnName: '',
         conditionalOperator: '',
@@ -786,8 +786,8 @@ export default {
       }
     },
     selField (e) {
-      let list = []
-      for (let key in this.columnName) {
+      const list = []
+      for (const key in this.columnName) {
         list.push(key)
       }
       if (e.length === list.length + 1) {
