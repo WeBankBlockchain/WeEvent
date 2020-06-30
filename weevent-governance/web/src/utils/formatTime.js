@@ -101,16 +101,16 @@ const getAge = (y, m, d) => {
 }
 
 const getLastWeek = () => {
-  let lastWeek = []
+  const lastWeek = []
   for (let i = 6; i > -1; i--) {
     let time = new Date().getTime()
     time = time - (i * 24 * 3600 * 1000)
-    let y = new Date(time).getFullYear()
+    const y = new Date(time).getFullYear()
     let m = new Date(time).getMonth() + 1
     m = m > 9 ? m : '0' + m
     let d = new Date(time).getDate()
     d = d > 9 ? d : '0' + d
-    let day = y + '-' + m + '-' + d
+    const day = y + '-' + m + '-' + d
     lastWeek.push(day)
   }
   return lastWeek
@@ -118,9 +118,9 @@ const getLastWeek = () => {
 
 const getTimeList = (start, end) => {
   let n = 0
-  let getDayList = []
+  const getDayList = []
   do {
-    let d = 24 * 3600 * 1000
+    const d = 24 * 3600 * 1000
     var thisData = d * n + start
     getDayList.push(getDate(thisData))
     n++
@@ -129,10 +129,10 @@ const getTimeList = (start, end) => {
 }
 
 const checkCurrentData = (t) => {
-  let time = t.split('-')
-  let intYear = parseInt(time[0], 10)
-  let intMonth = parseInt(time[1], 10)
-  let intDay = parseInt(time[2], 10)
+  const time = t.split('-')
+  const intYear = parseInt(time[0], 10)
+  const intMonth = parseInt(time[1], 10)
+  const intDay = parseInt(time[2], 10)
   if (intYear < 1900 || intMonth > 12 || intMonth < 0 || intDay > 31 || intDay < 0) {
     return false
   }
@@ -158,10 +158,10 @@ const checkCurrentData = (t) => {
 }
 
 const checkCurrentTime = (t) => {
-  let time = t.split(':')
-  let intHou = parseInt(time[0], 10)
-  let intMin = parseInt(time[1], 10)
-  let intSes = parseInt(time[2], 10)
+  const time = t.split(':')
+  const intHou = parseInt(time[0], 10)
+  const intMin = parseInt(time[1], 10)
+  const intSes = parseInt(time[2], 10)
   if (intHou > 23 || intMin > 59 || intSes > 59) {
     return false
   }

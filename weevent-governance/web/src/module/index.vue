@@ -89,7 +89,7 @@ export default {
       }
     },
     getMenu () {
-      let url = this.$route.path
+      const url = this.$route.path
       switch (url) {
         case '/':
           this.$store.commit('set_active', '1-1')
@@ -154,15 +154,15 @@ export default {
     }
   },
   mounted () {
-    let vm = this
-    let H = document.body.clientWidth
+    const vm = this
+    const H = document.body.clientWidth
     if (H < 740) {
       vm.arrow = false
     } else {
       vm.arrow = true
     }
     window.onresize = function () {
-      let w = document.body.clientWidth
+      const w = document.body.clientWidth
       if (w < 740) {
         vm.arrow = false
       } else {
