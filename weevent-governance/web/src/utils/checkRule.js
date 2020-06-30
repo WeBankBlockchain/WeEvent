@@ -59,8 +59,8 @@ export const checkRule = (e, s) => {
               }
             }
             if (['substring', 'concat', 'trim', 'lcase'].indexOf(item.functionType) !== -1) {
-              let operator = item.conditionalOperator
-              let val = item.sqlCondition
+              const operator = item.conditionalOperator
+              const val = item.sqlCondition
               // val witch ""
               if (val[0] !== '"' || val[val.length - 1] !== '"') {
                 warning = i18n.messages[lang].ruleCheck.inputString
@@ -145,7 +145,7 @@ export const checkRule = (e, s) => {
           }
         } else {
           const t = payLoad[item.columnName]
-          let type = typeof (t)
+          const type = typeof (t)
           if (item.functionType === 'now') {
             const reg = /^(\d{4})(-|\/)(\d{2})\2(\d{2}) (\d{2}):(\d{2}):(\d{2})$/
             if (type !== 'string') {

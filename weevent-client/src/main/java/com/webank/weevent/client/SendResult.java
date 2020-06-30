@@ -48,9 +48,4 @@ public class SendResult {
         this.status = status;
     }
 
-    public SendResult(SendResultStatus status, String topic, String eventId) {
-        this.status = status;
-        this.topic = topic;
-        this.eventId = eventId;
-    }
 }
