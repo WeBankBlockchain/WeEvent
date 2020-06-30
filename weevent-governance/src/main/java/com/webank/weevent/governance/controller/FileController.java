@@ -10,7 +10,6 @@ import java.nio.charset.StandardCharsets;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.HEAD;
 
 import com.webank.weevent.governance.common.GovernanceException;
 import com.webank.weevent.governance.common.GovernanceResult;
@@ -93,7 +92,7 @@ public class FileController {
         if (StringUtils.isBlank(downloadFile)) {
             throw new GovernanceException("download file not exist");
         }
-//        String fileName = downloadFile.substring(downloadFile.lastIndexOf("/") + 1);
+
         try {
             response.setHeader("filename", URLEncoder.encode(fileName, StandardCharsets.UTF_8.toString()));
         } catch (UnsupportedEncodingException e) {
@@ -158,6 +157,16 @@ public class FileController {
                            @RequestParam(name = "filePath") String filePath) throws GovernanceException {
         log.info("download file, groupId:{}, brokerId:{}, filePath:{}.", groupId, brokerId, filePath);
         this.fileService.genPemFile(groupId, brokerId, filePath);
+    }
+
+    @RequestMapping(path = "/checkUploaded")
+    @ResponseBody
+    public GovernanceResult checkUploaded(@RequestParam(name = "groupId") String groupId,
+                                          @RequestParam(name = "brokerId") Integer brokerId,
+                                          @RequestParam(name = "topicName") String topicName,
+                                          @RequestParam(name = "fileName") String fileName) throws GovernanceException {
+        log.info("checkUploaded, groupId:{}, topic:{}, fileName:{}.", groupId, topicName, fileName);
+        return this.fileService.checkUploaded(groupId, brokerId, topicName, fileName);
     }
 
 }
