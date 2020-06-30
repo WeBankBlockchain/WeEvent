@@ -23,7 +23,7 @@ export const checkLoad = (value, remakeItem, array, selectField) => {
         const key = item[3].split(',')
         const e = key[0]
         if (newPayload[e] !== undefined) {
-          let newType = typeof (newPayload[e])
+          const newType = typeof (newPayload[e])
           let oldType = typeof (remakeItem[e])
           if (newType !== oldType) {
             return false
@@ -33,7 +33,7 @@ export const checkLoad = (value, remakeItem, array, selectField) => {
         }
       }
       if (item[2] === 'concat') {
-        let key = item[3].split(',')
+        const key = item[3].split(',')
         for (let i = 0; i < key.length; i++) {
           const e = item[i]
           if (newPayload[e] !== undefined) {
@@ -71,7 +71,7 @@ export const checkLoad = (value, remakeItem, array, selectField) => {
         }
       }
       if (item[2] === 'currentDate') {
-        let e = item[3]
+        const e = item[3]
         if (newPayload[e] !== undefined) {
           let newType = typeof (newPayload[e])
           let oldType = typeof (remakeItem[e])
@@ -79,7 +79,7 @@ export const checkLoad = (value, remakeItem, array, selectField) => {
             return false
           } else {
             const reg = /^(\d{4})(-|\/)(\d{2})\2(\d{2})$/
-            let t = newPayload[e]
+            const t = newPayload[e]
             if (t.match(reg) == null) {
               return false
             } else {

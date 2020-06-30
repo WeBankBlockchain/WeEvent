@@ -33,7 +33,7 @@ CREATE TABLE  t_topic (
    PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 comment '主题表';
 
-CREATE TABLE  t_file_transport (
+CREATE TABLE  t_file_transport_channel (
   `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `topic_name` VARCHAR(256) NOT NULL COMMENT '主题名称',
   `creater` VARCHAR(256) DEFAULT NULL COMMENT '创建人',
@@ -48,7 +48,25 @@ CREATE TABLE  t_file_transport (
   `last_update` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP comment '修改日期',
   `delete_at` BIGINT(16) NOT NULL DEFAULT  0 COMMENT '0 表示 未删除, 时间戳 表示 已经被删除',
    PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 comment '主题表';
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 comment '传输通道表';
+
+CREATE TABLE  t_file_transport_status (
+  `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT '主键id',
+  `topic_name` VARCHAR(256) NOT NULL COMMENT '主题名称',
+  `creater` VARCHAR(256) DEFAULT NULL COMMENT '创建人',
+  `broker_id` INT(11) NOT NULL COMMENT 'broker主键id',
+  `group_id` VARCHAR(64) DEFAULT NULL COMMENT '群组id',
+  `description` VARCHAR(256) DEFAULT NULL COMMENT '主题描述',
+  `file_name` VARCHAR(256) NOT NULL COMMENT '文件名',
+  `file_md5` VARCHAR(32) NOT NULL COMMENT '文件MD5',
+  `file_size` BIGINT(16) NOT NULL COMMENT '文件大小',
+  `transport_status` VARCHAR(1) DEFAULT NULL COMMENT '文件传输状态',
+  `create_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建日期',
+  `last_update` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP comment '修改日期',
+  `delete_at` BIGINT(16) NOT NULL DEFAULT  0 COMMENT '0 表示 未删除, 时间戳 表示 已经被删除',
+   PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 comment '文件传输状态表';
+
 
 CREATE TABLE t_permission (
   `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT '主键 id',
@@ -137,5 +155,6 @@ CREATE TABLE t_timer_scheduler (
 ALTER TABLE t_broker ADD CONSTRAINT brokerUrlDeleteAt UNIQUE (broker_url, delete_at) ;
 ALTER TABLE t_rule_engine ADD CONSTRAINT ruleNameDeleteAt UNIQUE (rule_name, delete_at);
 ALTER TABLE t_topic ADD CONSTRAINT topicNameBrokerGroupDelete UNIQUE (topic_name,broker_id,group_id,delete_at);
-ALTER TABLE t_file_transport ADD CONSTRAINT topicBrokerGroupDelete UNIQUE (topic_name,broker_id,group_id,delete_at);
+ALTER TABLE t_file_transport_channel ADD CONSTRAINT topicBrokerGroupDelete UNIQUE (topic_name,broker_id,group_id);
 ALTER TABLE t_topic_historical ADD CONSTRAINT brokerIdGroupIdEventId UNIQUE (brokerId, groupId, eventId);
+ALTER TABLE t_file_transport_status ADD CONSTRAINT topicBrokerGroupFileName UNIQUE (topic_name,broker_id,group_id,file_name);
