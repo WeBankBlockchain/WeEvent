@@ -95,7 +95,7 @@ export default {
       if (res.data.errorCode === 0) {
         vm.ruleStatic = []
         const list = res.data.data.statisticRuleMap
-        let idList = this.$route.query.list.split(',')
+        const idList = this.$route.query.list.split(',')
         idList.forEach(e => {
           for (const key in list) {
             if (e === key) {
