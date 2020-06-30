@@ -150,7 +150,7 @@ export default {
       this.treeData[index].children.push(item)
     },
     delItem (e) {
-      let index = e.split('-').pop()
+      const index = e.split('-').pop()
       this.treeData.splice(index, 1)
     },
     changeItem (e) {

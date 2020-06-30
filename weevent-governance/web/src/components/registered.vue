@@ -177,13 +177,13 @@ export default {
     },
     submit (formName) {
       this.$refs[formName].validate((valid) => {
-        let sha256 = require('js-sha256').sha256
+        const sha256 = require('js-sha256').sha256
         let oldPass = sha256(this.ruleForm2.name + this.ruleForm2.pass)
         oldPass = oldPass.toUpperCase()
         let passWord = sha256(this.ruleForm2.name + this.ruleForm2.newPass)
         passWord = passWord.toUpperCase()
         if (valid) {
-          let data = {
+          const data = {
             username: this.ruleForm2.name,
             oldPassword: oldPass,
             password: passWord

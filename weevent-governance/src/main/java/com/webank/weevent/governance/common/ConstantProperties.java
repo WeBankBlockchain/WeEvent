@@ -63,4 +63,11 @@ public class ConstantProperties {
     public final static int UPLOAD_CHUNK_FAIL_RETRY_COUNT = 5;
     public final static long WAIT1S = 1000;
 
+
+    // file transport status
+    public final static String UPLOADING = "0";
+    public final static String SUCCESS = "1";
+    public final static String FAILED = "2";
+
+
 }
