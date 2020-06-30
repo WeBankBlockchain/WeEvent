@@ -29,13 +29,19 @@
             label="File Md5"
           >
             <template slot-scope="scope">
-              <span :title='scope.row.fileMd5'>{{scope.row.fileMd5}}</span>
+              <span :title='scope.row.fileMd5'>{{scope.row.fileMd5 ? scope.row.fileMd5 : '-'}}</span>
             </template>
           </el-table-column>
           <el-table-column
             label="File Size"
             prop="fileSize"
             :formatter="checkFileSize"
+          >
+          </el-table-column>
+          <el-table-column
+            label="Status"
+            prop="status"
+            :formatter="checkSta"
           >
           </el-table-column>
           <el-table-column
@@ -47,6 +53,7 @@
           <el-table-column
             label="Process"
             prop="process"
+            :formatter="checkProcess"
           >
           </el-table-column>
         </el-table>
@@ -252,7 +259,7 @@ export default {
       }, 500)
     },
     addTopic (form) {
-      let vm = this
+      const vm = this
       vm.$refs.form.validate((valid) => {
         if (valid) {
           const data = {
@@ -311,13 +318,13 @@ export default {
     editItem (e) {
     },
     deleteItem (e) {
-      let vm = this
+      const vm = this
       vm.$confirm(vm.$t('file.deleteTopic'), vm.$t('file.isDelete'), {
         confirmButtonText: vm.$t('common.ok'),
         cancelButtonText: vm.$t('common.cancel'),
         type: 'warning'
       }).then(() => {
-        let data = {
+        const data = {
           topicName: e.topicName,
           id: e.id,
           role: e.role,
@@ -345,10 +352,10 @@ export default {
     rowClick (e) {
       this.$refs.table.toggleRowExpansion(e)
     },
-    downloadFile (e) {
-      let vm = this
-      const url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topicName=' + e.topicName + '&role=' + e.role
-      API.fileStatus(url).then(res => {
+    downStatus (e) {
+      const vm = this
+      const url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topicName=' + e.topicName
+      API.downLoadStatus(url).then(res => {
         if (res.data.status === 200) {
           if (res.data.data && res.data.data.length > 0) {
             const list = res.data.data
@@ -383,17 +390,62 @@ export default {
         window.clearInterval(vm.downLoadList[name])
       })
     },
+    upStatus (e) {
+      const vm = this
+      const url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topicName=' + e.topicName
+      API.uploadStatus(url).then(res => {
+        if (res.data.status === 200) {
+          if (res.data.data && res.data.data.length > 0) {
+            const list = res.data.data
+            const newList = []
+            list.forEach(item => {
+              const e = {
+                fileName: item.fileName,
+                fileSize: item.fileSize,
+                fileMd5: item.fileMD5,
+                process: item.process,
+                speed: item.speed,
+                status: item.status
+              }
+              newList.push(e)
+            })
+            vm.$set(e, 'detail', newList)
+          } else {
+            const name = e.topicName
+            window.clearInterval(vm.downLoadList[name])
+          }
+        } else {
+          const name = e.topicName
+          window.clearInterval(vm.downLoadList[name])
+          vm.$store.commit('set_Msg', vm.$message({
+            type: 'warning',
+            message: res.data.message,
+            duration: 0,
+            showClose: true
+          }))
+        }
+      }).catch(e => {
+        const name = e.topicName
+        window.clearInterval(vm.downLoadList[name])
+      })
+    },
     readDetail (e) {
-      let vm = this
+      const vm = this
       const name = e.topicName
       if (vm.downLoadList[name]) {
         window.clearInterval(vm.downLoadList[name])
         delete vm.downLoadList[name]
         vm.$set(e, 'detail', [])
       } else {
-        vm.downLoadList[name] = setInterval(fun => {
-          vm.downloadFile(e)
-        }, 1000)
+        if (e.role === '0') {
+          vm.downLoadList[name] = setInterval(fun => {
+            vm.downStatus(e)
+          }, 1000)
+        } else {
+          vm.downLoadList[name] = setInterval(fun => {
+            vm.upStatus(e)
+          }, 1000)
+        }
       }
     },
     checkFileSize (e) {
@@ -401,10 +453,13 @@ export default {
       const mb = 1024 * 1024
       const g = 1024 * 1024 * 1024
       const size = e.fileSize
-      if (size < b) {
+      if (!size) {
+        return '-'
+      }
+      if (size < mb) {
         return (size / b).toFixed(1) + ' KB'
       }
-      if (size >= b && size < g) {
+      if (size >= mb && size < g) {
         return (size / mb).toFixed(1) + ' MB'
       }
       if (size >= g) {
@@ -412,6 +467,9 @@ export default {
       }
     },
     checkSpeed (e) {
+      if (!e.speed) {
+        return '-'
+      }
       const nu = e.speed.split('B/s')
       const size = Number(nu[0])
       const b = 1024
@@ -423,10 +481,30 @@ export default {
         return (size / mb).toFixed(1) + ' MB / s'
       }
     },
+    checkProcess (e) {
+      if (e.process) {
+        return e.process
+      } else {
+        return '-'
+      }
+    },
+    checkSta (e) {
+      const s = e.status
+      if (s === '0') {
+        return 'uploading'
+      } else if (s === '1') {
+        return 'success'
+      } else if (s === '2') {
+        return 'faild'
+      } else {
+        return '-'
+      }
+    },
     fileOption (e) {
       if (e.role === '1') {
         // upload file
         sessionStorage.setItem('uploadName', e.topicName)
+        sessionStorage.setItem('overWrite', e.overWrite)
         Bus.$emit('openUploader', {
           topicName: e.topicName,
           brokerId: localStorage.getItem('brokerId'),

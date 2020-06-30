@@ -34,6 +34,7 @@
 import Bus from './js/bus'
 import SparkMD5 from 'spark-md5'
 import $ from 'jquery'
+import API from '../../API/resource'
 const con = require('../../../config/config.js')
 export default {
   data () {
@@ -78,10 +79,30 @@ export default {
   },
   methods: {
     onFileAdded (file) {
+      const vm = this
       file.topicName = sessionStorage.getItem('uploadName')
-      this.computeMD5(file)
-      Bus.$emit('fileAdded')
-      this.$emit('pop', true)
+      const ov = sessionStorage.getItem('overWrite')
+      if (ov === '0') {
+        const url = '?fileName=' + file.name + '&brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topicName=' + sessionStorage.getItem('uploadName')
+        API.checkUploaded(url).then(res => {
+          if (res.data.status === 200 && !res.data.data) {
+            vm.computeMD5(file)
+            Bus.$emit('fileAdded')
+            vm.$emit('pop', true)
+          } else {
+            this.$store.commit('set_Msg', this.$message({
+              type: 'warning',
+              message: res.data.msg,
+              duration: 0,
+              showClose: true
+            }))
+          }
+        })
+      } else {
+        vm.computeMD5(file)
+        Bus.$emit('fileAdded')
+        vm.$emit('pop', true)
+      }
     },
     onFileProgress (rootFile, file, chunk) {
     },
@@ -119,7 +140,7 @@ export default {
         File.prototype.webkitSlice
       let currentChunk = 0
       const chunkSize = 1048576
-      let chunks = Math.ceil(file.size / chunkSize)
+      const chunks = Math.ceil(file.size / chunkSize)
       const spark = new SparkMD5.ArrayBuffer()
       // 文件状态设为"计算MD5"
       this.statusSet(file.id, 'md5')
