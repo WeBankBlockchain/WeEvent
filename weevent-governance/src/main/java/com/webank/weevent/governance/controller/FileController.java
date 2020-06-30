@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.webank.weevent.governance.common.GovernanceException;
 import com.webank.weevent.governance.common.GovernanceResult;
-import com.webank.weevent.governance.entity.FileTransportEntity;
+import com.webank.weevent.governance.entity.FileTransportChannelEntity;
 import com.webank.weevent.governance.service.FileService;
 import com.webank.weevent.governance.utils.ParamCheckUtils;
 
@@ -52,7 +52,7 @@ public class FileController {
 
     @PostMapping(path = "/openTransport")
     @ResponseBody
-    public GovernanceResult openTransport(@RequestBody FileTransportEntity fileTransport) throws GovernanceException {
+    public GovernanceResult openTransport(@RequestBody FileTransportChannelEntity fileTransport) throws GovernanceException {
         log.info("openTransport, fileTransport:{}.", fileTransport.toString());
 
         return this.fileService.openTransport(fileTransport);
@@ -80,20 +80,19 @@ public class FileController {
     }
 
     @RequestMapping(path = "/download")
-    public void download(@RequestParam(name = "groupId") String groupId,
-                         @RequestParam(name = "brokerId") Integer brokerId,
-                         @RequestParam(name = "fileId") String fileId,
+    public void download(@RequestParam(name = "topic") String topic,
+                         @RequestParam(name = "fileName") String fileName,
                          HttpServletResponse response) throws GovernanceException {
-        log.info("download file, groupId:{}, brokerId:{}, fileId:{}.", groupId, brokerId, fileId);
+        log.info("download file, topic:{}, fileName:{}.", topic, fileName);
         response.setHeader("content-type", "application/octet-stream");
         response.setContentType("application/octet-stream; charset=UTF-8");
 
-        ParamCheckUtils.validateFileId(fileId);
-        String downloadFile = this.fileService.downloadFile(groupId, brokerId, fileId);
+        ParamCheckUtils.validateFileName(fileName);
+        String downloadFile = this.fileService.downloadFile(topic, fileName);
         if (StringUtils.isBlank(downloadFile)) {
             throw new GovernanceException("download file not exist");
         }
-        String fileName = downloadFile.substring(downloadFile.lastIndexOf("/") + 1);
+
         try {
             response.setHeader("filename", URLEncoder.encode(fileName, StandardCharsets.UTF_8.toString()));
         } catch (UnsupportedEncodingException e) {
@@ -110,9 +109,9 @@ public class FileController {
                 os.flush();
                 i = bis.read(buffer);
             }
-            log.info("download file success, fileId:{}, fileName:{}", fileId, fileName);
+            log.info("download file success, topic:{}, fileName:{}", topic, fileName);
         } catch (IOException e) {
-            log.error("download file error, groupId:{} fileId:{}", groupId, fileId, e);
+            log.error("download file error, topic:{} fileName:{}", topic, fileName, e);
             throw new GovernanceException("download file error", e);
         }
     }
@@ -126,14 +125,22 @@ public class FileController {
         return this.fileService.listFile(groupId, brokerId, topicName);
     }
 
-    @RequestMapping(path = "/status")
+    @RequestMapping(path = "/downLoadStatus")
     @ResponseBody
-    public GovernanceResult status(@RequestParam(name = "groupId") String groupId,
-                                   @RequestParam(name = "brokerId") Integer brokerId,
-                                   @RequestParam(name = "topicName") String topicName,
-                                   @RequestParam(name = "role") String role) throws GovernanceException {
-        log.info("status, groupId:{}, topic:{}, role:{}.", groupId, topicName, role);
-        return this.fileService.status(groupId, brokerId, topicName, role);
+    public GovernanceResult downLoadStatus(@RequestParam(name = "groupId") String groupId,
+                                           @RequestParam(name = "brokerId") Integer brokerId,
+                                           @RequestParam(name = "topicName") String topicName) throws GovernanceException {
+        log.info("status, groupId:{}, topic:{}.", groupId, topicName);
+        return this.fileService.downLoadStatus(groupId, brokerId, topicName);
+    }
+
+    @RequestMapping(path = "/uploadStatus")
+    @ResponseBody
+    public GovernanceResult uploadStatus(@RequestParam(name = "groupId") String groupId,
+                                         @RequestParam(name = "brokerId") Integer brokerId,
+                                         @RequestParam(name = "topicName") String topicName) throws GovernanceException {
+        log.info("status, groupId:{}, topic:{}.", groupId, topicName);
+        return this.fileService.uploadStatus(groupId, brokerId, topicName);
     }
 
     @RequestMapping(path = "/listTransport")
@@ -146,7 +153,7 @@ public class FileController {
 
     @PostMapping(path = "/closeTransport")
     @ResponseBody
-    public GovernanceResult closeTransport(@RequestBody FileTransportEntity fileTransport) throws GovernanceException {
+    public GovernanceResult closeTransport(@RequestBody FileTransportChannelEntity fileTransport) throws GovernanceException {
         log.info("closeTransport, groupId:{}, brokerId:{}, transportId:{}, roleId:{}, topic:{}.", fileTransport.getGroupId(),
                 fileTransport.getBrokerId(), fileTransport.getId(), fileTransport.getRole(), fileTransport.getTopicName());
         return fileService.closeTransport(fileTransport);
@@ -158,6 +165,16 @@ public class FileController {
                            @RequestParam(name = "filePath") String filePath) throws GovernanceException {
         log.info("download file, groupId:{}, brokerId:{}, filePath:{}.", groupId, brokerId, filePath);
         this.fileService.genPemFile(groupId, brokerId, filePath);
+    }
+
+    @RequestMapping(path = "/checkUploaded")
+    @ResponseBody
+    public GovernanceResult checkFileIsUploaded(@RequestParam(name = "groupId") String groupId,
+                                                @RequestParam(name = "brokerId") Integer brokerId,
+                                                @RequestParam(name = "topicName") String topicName,
+                                                @RequestParam(name = "fileName") String fileName) throws GovernanceException {
+        log.info("checkFileIsUploaded, groupId:{}, topic:{}, fileName:{}.", groupId, topicName, fileName);
+        return this.fileService.checkFileIsUploaded(groupId, brokerId, topicName, fileName);
     }
 
 }
