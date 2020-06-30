@@ -1,11 +1,11 @@
 {
   "getAll": {
     "methods": "get",
-    "url": "weevent-broker/group/all"
+    "url": "weevent-broker/admin/group/all"
   },
   "nodeList": {
     "methods": "get",
-    "url": "weevent-broker/node/nodeList"
+    "url": "weevent-broker/admin/node/nodeList"
   },
   "general": {
     "methods": "get",
@@ -13,22 +13,22 @@
   },
   "transDaily": {
     "methods": "get",
-    "url": "weevent-broker/group/transDaily"
+    "url": "weevent-broker/admin/group/transDaily"
   },
   "transList": {
     "methods": "get",
-    "url": "weevent-broker/transaction/transList"
+    "url": "weevent-broker/admin/transaction/transList"
   },
   "blockList": {
     "methods": "get",
-    "url": "weevent-broker/block/blockList"
+    "url": "weevent-broker/admin/block/blockList"
   },
   "blockByNumber": {
     "methods": "get",
-    "url": "weevent-broker/block/blockByNumber"
+    "url": "weevent-broker/admin/block/blockByNumber"
   },
   "getEvent": {
     "methods": "get",
-    "url": "weevent-broker/block/transactionReceipt"
+    "url": "weevent-broker/admin/block/transactionReceipt"
   }
 }

@@ -84,7 +84,7 @@ export default {
     },
     getNode () {
       this.loading = true
-      const url = '/' + localStorage.getItem('groupId') + '/1/10?brokerId=' + localStorage.getItem('brokerId') + '&oldBrokerMgr=true'
+      const url = '?groupId=' + localStorage.getItem('groupId') + '&pageNumber=1&pageSize=10&brokerId=' + localStorage.getItem('brokerId')
       API.nodeList(url).then(res => {
         if (res.status === 200) {
           this.tableData = res.data.data.pageData

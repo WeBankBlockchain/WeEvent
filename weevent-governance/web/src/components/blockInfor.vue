@@ -72,13 +72,13 @@ export default {
     },
     getLastData () {
       this.loading = true
-      const url = '/' + this.groupId + '/' + this.pageIndex + '/10?brokerId=' + this.brokerId + '&oldBrokerMgr=true'
+      const url = '?groupId=' + this.groupId + '&pageNumber=' + this.pageIndex + '&pageSize=10&brokerId=' + this.brokerId
       API.blockList(url).then(res => {
         if (res.status === 200) {
           this.total = res.data.data.total
           const last = Math.ceil(res.data.data.total / 10)
           this.pageIndex = last
-          const url = '/' + this.groupId + '/' + last + '/10?brokerId=' + this.brokerId + '&oldBrokerMgr=true'
+          const url = '?groupId=' + this.groupId + '&pageNumber=' + last + '&pageSize=10&brokerId=' + this.brokerId
           API.blockList(url).then(res => {
             if (res.status === 200) {
               this.tableData = res.data.data.pageData.reverse()
@@ -90,7 +90,7 @@ export default {
     },
     blockList () {
       this.loading = true
-      const url = '/' + this.groupId + '/' + this.pageIndex + '/10?brokerId=' + this.brokerId + '&oldBrokerMgr=true'
+      const url = '?groupId=' + this.groupId + '&pageNumber=' + this.pageIndex + '&pageSize=10&brokerId=' + this.brokerId
       API.blockList(url).then(res => {
         if (res.status === 200) {
           this.tableData = res.data.data.pageData.reverse()

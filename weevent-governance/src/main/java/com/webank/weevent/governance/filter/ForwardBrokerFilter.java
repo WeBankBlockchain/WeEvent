@@ -11,15 +11,16 @@ import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.webank.weevent.governance.common.ConstantProperties;
 import com.webank.weevent.governance.entity.BrokerEntity;
 import com.webank.weevent.governance.service.BrokerService;
 import com.webank.weevent.governance.service.CommonService;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.jsoup.helper.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
+@Slf4j
 @WebFilter(urlPatterns = "/weevent-broker/*")
 public class ForwardBrokerFilter implements Filter {
 
@@ -33,11 +34,11 @@ public class ForwardBrokerFilter implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
+
         HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse res = (HttpServletResponse) response;
         String idStr = req.getParameter("brokerId");
         String brokerUrl = req.getParameter("brokerUrl");
-        Boolean oldBrokerMgr = Boolean.valueOf(req.getParameter("oldBrokerMgr"));
         String originUrl = req.getRequestURI();
         // get tail of brokerEntity url
         String subStrUrl = originUrl.substring(originUrl.indexOf("/weevent-broker/") + "/weevent-broker".length());
@@ -47,65 +48,9 @@ public class ForwardBrokerFilter implements Filter {
             brokerUrl = brokerEntity.getBrokerUrl();
         }
         // get complete forward brokerEntity url
-        String newUrl = "";
-        String weEventUrl = "";
-        if(oldBrokerMgr) {
-            weEventUrl = mappingWeEventUrl(subStrUrl);
-            newUrl = brokerUrl + "/admin" + weEventUrl;
-        } else {
-            newUrl = brokerUrl + subStrUrl;
-        }
+        String newUrl = brokerUrl + subStrUrl;
         // get client according url
         CloseableHttpResponse closeResponse = commonService.getCloseResponse(req, newUrl);
         commonService.writeResponse(closeResponse, res);
-    }
-
-    private String mappingWeEventUrl(String subStrUrl) {
-        String weEventUrl = "";
-        if (subStrUrl.contains(ConstantProperties.BROKER_TRANS_DAILY)) {
-            weEventUrl = spliceNewUrl(subStrUrl, ConstantProperties.BROKER_TRANS_DAILY);
-        } else if (subStrUrl.contains(ConstantProperties.BROKER_GROUP_GENERAL)) {
-            weEventUrl = spliceNewUrl(subStrUrl, ConstantProperties.BROKER_GROUP_GENERAL);
-        } else if (subStrUrl.contains(ConstantProperties.BROKER_TRANS_LIST)) {
-            weEventUrl = spliceNewUrl(subStrUrl, ConstantProperties.BROKER_TRANS_LIST);
-        } else if (subStrUrl.contains(ConstantProperties.BROKER_BLOCK_LIST)) {
-            weEventUrl = spliceNewUrl(subStrUrl, ConstantProperties.BROKER_BLOCK_LIST);
-        } else if (subStrUrl.contains(ConstantProperties.BROKER_NODE_LIST)) {
-            weEventUrl = spliceNewUrl(subStrUrl, ConstantProperties.BROKER_NODE_LIST);
-
-        }
-        return weEventUrl;
-    }
-
-    private String spliceNewUrl(String subStrUrl, String key) {
-        if (subStrUrl.contains(ConstantProperties.QUESTION_MARK)) {
-            String midUrl = subStrUrl.substring(subStrUrl.indexOf(key) + key.length() + 1, subStrUrl.indexOf(ConstantProperties.QUESTION_MARK));
-            String afterUrl = subStrUrl.substring(subStrUrl.indexOf(ConstantProperties.QUESTION_MARK) + 1, subStrUrl.length() - 1);
-            if (key.equals(ConstantProperties.BROKER_TRANS_DAILY) || key.equals(ConstantProperties.BROKER_GROUP_GENERAL)) {
-                midUrl = new StringBuffer(ConstantProperties.QUESTION_MARK).append("groupId=").append(midUrl).append(ConstantProperties.AND_SYMBOL).append(afterUrl).toString();
-                return key + midUrl;
-            } else {
-                // if key.equals(this.blockList) || key.equals(this.nodeList) || key.equals(this.transList)
-                String[] split = midUrl.split(ConstantProperties.LAYER_SEPARATE);
-                midUrl = new StringBuffer(ConstantProperties.QUESTION_MARK).append("groupId=").append(split[0]).append(ConstantProperties.AND_SYMBOL)
-                        .append("pageNumber=").append(split[1]).append(ConstantProperties.AND_SYMBOL).append("pageSize=").append(split[2])
-                        .append(ConstantProperties.AND_SYMBOL).append(afterUrl).toString();
-                return key + midUrl;
-            }
-        } else {
-            String midUrl = subStrUrl.substring(subStrUrl.indexOf(key) + key.length() + 1);
-            if (key.equals(ConstantProperties.BROKER_TRANS_DAILY) || key.equals(ConstantProperties.BROKER_GROUP_GENERAL)) {
-                midUrl = new StringBuffer(ConstantProperties.QUESTION_MARK).append("groupId=").append(midUrl).toString();
-                return key + midUrl;
-            } else {
-                // if key.equals(this.blockList) || key.equals(this.nodeList) || key.equals(this.transList)
-                String[] split = midUrl.split(ConstantProperties.LAYER_SEPARATE);
-                midUrl = new StringBuffer(ConstantProperties.QUESTION_MARK).append("groupId=").append(split[0]).append(ConstantProperties.AND_SYMBOL)
-                        .append("pageNumber=").append(split[1]).append(ConstantProperties.AND_SYMBOL).append("pageSize=").append(split[2])
-                        .toString();
-                return key + midUrl;
-            }
-        }
-
     }
 }

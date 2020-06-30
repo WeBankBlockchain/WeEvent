@@ -104,7 +104,7 @@ export default {
     },
     transList () {
       this.loading = true
-      let url = '/' + localStorage.getItem('groupId') + '/' + this.pageIndex + '/10?brokerId=' + localStorage.getItem('brokerId') + '&oldBrokerMgr=true'
+      let url = '?groupId=' + localStorage.getItem('groupId') + '&pageNumber=' + this.pageIndex + '&pageSize=10&brokerId=' + localStorage.getItem('brokerId')
       if (sessionStorage.getItem('blockHash')) {
         url = url + '&transactionHash=' + sessionStorage.getItem('blockHash')
       }
