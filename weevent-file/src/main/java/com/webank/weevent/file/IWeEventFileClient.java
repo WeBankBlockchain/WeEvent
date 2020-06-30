@@ -59,7 +59,6 @@ public interface IWeEventFileClient {
      * @return send result, SendResult.SUCCESS if success, and return SendResult.eventId
      * @throws BrokerException broker exception
      * @throws IOException IOException
-     * @throws BrokerException BrokerException
      */
     FileChunksMeta publishFile(String topic, String localFile, boolean overwrite) throws BrokerException, IOException;
 
