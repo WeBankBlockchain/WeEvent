@@ -140,7 +140,7 @@ public class FileControllerTest extends JUnitTestBase {
      */
     @Test
     public void testStatus() throws Exception {
-        String url = "/file/status?brokerId=" + brokerIdMap.get("brokerId") + "&groupId=" + this.defaultGroupId + "&topicName=" + this.senderTransport + "&role=1";
+        String url = "/file/uploadStatus?brokerId=" + brokerIdMap.get("brokerId") + "&groupId=" + this.defaultGroupId + "&topicName=" + this.senderTransport;
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token)).andReturn();
         MockHttpServletResponse response = mvcResult.getResponse();
