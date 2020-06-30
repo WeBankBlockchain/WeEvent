@@ -13,7 +13,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * FileTransportEntity class.
+ * FileTransportChannelEntity class.
  *
  * @author v_wbhwliu
  * @version 1.3
@@ -23,10 +23,10 @@ import lombok.Setter;
 @Getter
 @EqualsAndHashCode(callSuper = false)
 @Entity
-@Table(name = "t_file_transport",
+@Table(name = "t_file_transport_channel",
         uniqueConstraints = {@UniqueConstraint(name = "topicBrokerGroupDelete",
                 columnNames = {"topic_name", "broker_id", "group_id"})})
-public class FileTransportEntity extends TopicBase {
+public class FileTransportChannelEntity extends TopicBase {
 
     @Column(name = "role", columnDefinition = "varchar(1)")
     private String role;
