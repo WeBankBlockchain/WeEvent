@@ -112,7 +112,7 @@ export default {
     },
     getServer () {
       const brokerId = localStorage.getItem('brokerId')
-      let vm = this
+      const vm = this
       API.getServer('').then(res => {
         if (res.status === 200) {
           if (res.data.length) {
@@ -121,7 +121,7 @@ export default {
               res.data.forEach(e => {
                 if (e.id === Number(brokerId)) {
                   vm.server = e.name
-                  let id = e.id
+                  const id = e.id
                   vm.$store.commit('set_id', id)
                   vm.$store.commit('setConfigRule', e.isConfigRule)
                   localStorage.setItem('brokerId', id)
@@ -129,7 +129,7 @@ export default {
               })
             } else {
               vm.server = res.data[0].name
-              let id = res.data[0].id
+              const id = res.data[0].id
               vm.$store.commit('set_id', id)
               vm.$store.commit('setConfigRule', res.data[0].isConfigRule)
               localStorage.setItem('brokerId', id)
@@ -159,7 +159,21 @@ export default {
             vm.$store.commit('set_groupId', res.data.data[0])
             localStorage.setItem('groupId', res.data.data[0])
           })
+        } else {
+          vm.$store.commit('set_Msg', vm.$message({
+            type: 'warning',
+            message: res.data.message,
+            duration: 0,
+            showClose: true
+          }))
         }
+      }).catch(e => {
+        vm.$store.commit('set_Msg', vm.$message({
+          type: 'warning',
+          message: e,
+          duration: 0,
+          showClose: true
+        }))
       })
     },
     selectLang (e) {

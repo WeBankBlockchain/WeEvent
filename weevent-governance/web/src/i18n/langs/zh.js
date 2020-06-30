@@ -181,7 +181,7 @@ module.exports = {
     stop: '停止',
     read: '查看',
     delete: '删除',
-    creatRuleRemark: '数据流转类型的规则可以对设备上报的数据进行简单处理，并将处理后的数据流转到其他Topic，支持JSON数据格式',
+    creatRuleRemark: '什么是规则: 一种实时计算过程。支持用户通过自定义的方式，从某个主题订阅消息，进行数据过滤、转换等操作后，自动将数据发布到其他Topic或者写入数据库中。暂时只支持JSON格式的数据流。',
     dataType: '数据格式',
     enterPayload: '请填写业务事件的样例,例如:{"name":"kevin","age": 20}',
     commit: '提交',
@@ -318,6 +318,8 @@ module.exports = {
     optionMapDes: '对于复杂的条件语句，该页面现在不仅支持条件语句的水平关联，还支持条件语句的嵌套。单击每个条件栏末尾的“添加”按钮以生成相应的子选项栏, 该选项栏将与其父级形成嵌套关系<br/>例如: (abs(age) >= 20 and name != "Kevin") or age >= 30'
   },
   file: {
+    addOne: '新增文件传输通道',
+    boundTopic: '绑定的主题',
     creatTime: '创建时间',
     creater: '创建人',
     roles: '操作角色',
@@ -332,7 +334,7 @@ module.exports = {
     deleteTopic: '确认删除该通道?',
     uploadList: '上传列表',
     noFile: '暂无',
-    overwrite: '是否覆盖文件?',
+    overwrite: '是否允许覆盖同名文件?',
     transpoartList: '通道列表',
     certified: '已认证',
     uncertified: '未认证',

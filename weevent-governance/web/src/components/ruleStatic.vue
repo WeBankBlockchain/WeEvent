@@ -89,15 +89,15 @@ export default {
     }
   },
   mounted () {
-    let str = '?idList=' + this.$route.query.list
-    let vm = this
+    const str = '?idList=' + this.$route.query.list
+    const vm = this
     API.ruleStatic(str).then(res => {
       if (res.data.errorCode === 0) {
         vm.ruleStatic = []
-        let list = res.data.data.statisticRuleMap
+        const list = res.data.data.statisticRuleMap
         let idList = this.$route.query.list.split(',')
         idList.forEach(e => {
-          for (let key in list) {
+          for (const key in list) {
             if (e === key) {
               vm.ruleStatic.push(list[key])
             }
@@ -111,10 +111,10 @@ export default {
       this.$router.go(-1)
     },
     timeFormatter (e) {
-      let time = e.startTime
-      let str = time.split('T')
-      let ymd = str[0]
-      let hms = str[1].split('.')
+      const time = e.startTime
+      const str = time.split('T')
+      const ymd = str[0]
+      const hms = str[1].split('.')
       return ymd + ' ' + hms[0]
     }
   }

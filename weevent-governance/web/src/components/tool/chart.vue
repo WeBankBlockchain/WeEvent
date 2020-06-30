@@ -77,12 +77,12 @@ export default {
   },
   methods: {
     beginDate () {
-      let vm = this
+      const vm = this
       const data = {
-        'beginDate': vm.selectTime[0],
-        'endDate': vm.selectTime[1],
-        'groupId': localStorage.getItem('groupId'),
-        'brokerId': localStorage.getItem('brokerId')
+        beginDate: vm.selectTime[0],
+        endDate: vm.selectTime[1],
+        groupId: localStorage.getItem('groupId'),
+        brokerId: localStorage.getItem('brokerId')
       }
       vm.option.series[0].data = []
       const chart = new Promise(function (resolve, reject) {

@@ -7,7 +7,7 @@ const os = require('os')
 var needHost = ''
 
 try {
-  let network = os.networkInterfaces()
+  const network = os.networkInterfaces()
   needHost = network[Object.keys(network)[0]][1].address
 } catch (e) {
   needHost = 'localhost'
