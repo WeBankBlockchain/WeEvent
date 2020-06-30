@@ -65,13 +65,13 @@ export default {
   },
   methods: {
     menuSelect (e) {
-      let active = this.$store.state.active
+      const active = this.$store.state.active
       if (e !== active) {
         this.$store.commit('set_active', e)
         this.$emit('selecChange', e)
       }
       if (e === '1-2') {
-        let url = this.$route.path
+        const url = this.$route.path
         if (url === '/transactionInfor') {
           this.$store.commit('set_active', e)
           this.$emit('selecChange', e)

@@ -161,7 +161,6 @@ module.exports = {
   },
   rule: {
     dataGuide: 'User Guide',
-    creatRuleRemark: 'Streaming processor support Topic event in JSON format',
     useText: 'Tutorials',
     creatNewRule: 'New Rule',
     creatRule: 'Create Rule',
@@ -182,6 +181,7 @@ module.exports = {
     stop: 'Stop',
     read: 'View',
     delete: 'Delete',
+    creatRuleRemark: 'What is a rule: a real-time calculation process. Support users to subscribe to a message from a topic in a custom way, perform data filtering, conversion and other operations, and automatically publish data to other topics or write to the database. For the time being, only data streams in JSON format are supported.',
     dataType: 'Data type',
     enterPayload: 'Please input event payload sample,Examples:{"name":"kevin","age": 20}',
     commit: 'Commit',
@@ -318,6 +318,8 @@ module.exports = {
     optionMapDes: 'For complex conditional statements, the page now supports not only the horizontal association of conditional statements, but also the nesting of conditional statements Click the "Add" button at the end of each condition bar to generate a corresponding sub-option bar. Changing the option bar will form a nesting relationship with its parent<br/>E.g: (abs(age) >= 20 and name != "Kevin") or age >= 30'
   },
   file: {
+    addOne: 'New File Transmission',
+    boundTopic: 'Bound Topic',
     creatTime: 'Creat Time',
     creater: 'Creater',
     roles: 'Roles',
