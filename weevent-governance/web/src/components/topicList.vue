@@ -121,9 +121,9 @@ export default {
   methods: {
     // 数据获取
     getLastPage () {
-      let vm = this
+      const vm = this
       vm.loading = true
-      let data = {
+      const data = {
         pageIndex: 0,
         pageSize: vm.pageSize,
         brokerId: Number(localStorage.getItem('brokerId')),
@@ -132,7 +132,7 @@ export default {
       API.topicList(data).then(res => {
         if (res.status === 200) {
           vm.total = res.data.total
-          let last = Math.ceil(res.data.total / vm.pageSize)
+          const last = Math.ceil(res.data.total / vm.pageSize)
           this.pageIndex = last
           let data = {
             pageIndex: last - 1,
@@ -142,8 +142,8 @@ export default {
           }
           API.topicList(data).then(res => {
             if (res.status === 200) {
-              let listData = res.data.topicInfoList.reverse()
-              let det = {
+              const listData = res.data.topicInfoList.reverse()
+              const det = {
                 topicName: '',
                 createdTimestamp: '',
                 topicAddress: '',
@@ -175,10 +175,10 @@ export default {
           vm.total = res.data.total
           let listData = res.data.topicInfoList.reverse()
           let det = {
-            'topicName': '',
-            'createdTimestamp': '',
-            'topicAddress': '',
-            'lastTimestamp': ''
+            topicName: '',
+            createdTimestamp: '',
+            topicAddress: '',
+            lastTimestamp: ''
           }
           listData.forEach(item => {
             vm.$set(item, 'detail', det)
@@ -199,9 +199,9 @@ export default {
     },
     readDetail (e) {
       var vm = this
-      let url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topic=' + e.topicName
+      const url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topic=' + e.topicName
       API.topicState(url).then(res => {
-        let time = getDateDetail(res.data.createdTimestamp)
+        const time = getDateDetail(res.data.createdTimestamp)
         res.data.createdTimestamp = time
         res.data.lastTimestamp = getDateDetail(res.data.lastTimestamp)
         vm.$set(e, 'detail', res.data)
@@ -289,11 +289,11 @@ export default {
       var vm = this
       if (vm.topicName) {
         vm.tableData = []
-        let url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topic=' + vm.topicName
+        const url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topic=' + vm.topicName
         API.topicInfo(url).then(res => {
           let time = getDateDetail(res.data.createdTimestamp)
           res.data.createdTimestamp = time
-          let item = {
+          const item = {
             topicName: res.data.topicName,
             creater: '——',
             createdTimestamp: time,
@@ -316,7 +316,7 @@ export default {
     if (sessionStorage.getItem('topic')) {
       var vm = this
       vm.tableData = []
-      let url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topic=' + sessionStorage.getItem('topic')
+      const url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topic=' + sessionStorage.getItem('topic')
       API.topicInfo(url).then(res => {
         let time = getDateDetail(res.data.createdTimestamp)
         res.data.createdTimestamp = time
