@@ -77,7 +77,7 @@ export default {
   },
   methods: {
     getNodeList () {
-      let url = '?brokerId=' + localStorage.getItem('brokerId')
+      const url = '?brokerId=' + localStorage.getItem('brokerId')
       API.getNodes(url).then(res => {
         if (res.data.code === 0) {
           this.nodeList = [].concat(res.data.data)
@@ -97,7 +97,7 @@ export default {
       })
     },
     subscription () {
-      let vm = this
+      const vm = this
       vm.tableData = []
       vm.loading = true
       let nodelist = ''
@@ -105,15 +105,15 @@ export default {
       const url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&nodeInstances=' + nodelist
       API.subscription(url).then(res => {
         if (res.data.code === 0) {
-          let data = res.data.data
-          let list = []
-          for (let key in data) {
-            let cont = data[key]
+          const data = res.data.data
+          const list = []
+          for (const key in data) {
+            const cont = data[key]
             if (JSON.stringify(cont) !== '{}') {
               // check if it is empty
-              let arr = Object.keys(cont)
+              const arr = Object.keys(cont)
               if (arr.length) {
-                for (let x in cont) {
+                for (const x in cont) {
                   vm.$set(cont[x], 'ip', key)
                   vm.$set(cont[x], 'childs', arr.length)
                   list.push(cont[x])
@@ -152,7 +152,7 @@ export default {
       })
     },
     spanMethod ({ row, cloumn, rowIndex, columnIndex }) {
-      let table = this.tableData
+      const table = this.tableData
       if (columnIndex === 0) {
         // 先判断是第一行否存在并行 (根据row.childs个数确定该IP下有多少个topic)
         if (rowIndex === 0) {
