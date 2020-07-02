@@ -17,7 +17,7 @@ List lombok = [
 
 allprojects {
     group "com.webank.weevent"
-    version "1.0.1"
+    version "1.0.2"
 
     apply plugin: "java"
     apply plugin: "maven"
@@ -74,7 +74,7 @@ allprojects {
             // fix security bug
             force "com.alibaba:fastjson:1.2.70"
             // force use netty
-            force "io.netty:netty-all:4.1.44.Final"
+            force "io.netty:netty-all:4.1.50.Final"
         }
     }
 
