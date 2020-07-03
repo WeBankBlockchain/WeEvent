@@ -24,7 +24,7 @@ export const checkLoad = (value, remakeItem, array, selectField) => {
         const e = key[0]
         if (newPayload[e] !== undefined) {
           const newType = typeof (newPayload[e])
-          let oldType = typeof (remakeItem[e])
+          const oldType = typeof (remakeItem[e])
           if (newType !== oldType) {
             return false
           }
@@ -37,8 +37,8 @@ export const checkLoad = (value, remakeItem, array, selectField) => {
         for (let i = 0; i < key.length; i++) {
           const e = item[i]
           if (newPayload[e] !== undefined) {
-            let newType = typeof (newPayload[e])
-            let oldType = typeof (remakeItem[e])
+            const newType = typeof (newPayload[e])
+            const oldType = typeof (remakeItem[e])
             if (newType !== oldType) {
               return false
             }
@@ -50,8 +50,8 @@ export const checkLoad = (value, remakeItem, array, selectField) => {
       if (item[2] === 'now') {
         const e = item[3]
         if (newPayload[e] !== undefined) {
-          let newType = typeof (newPayload[e])
-          let oldType = typeof (remakeItem[e])
+          const newType = typeof (newPayload[e])
+          const oldType = typeof (remakeItem[e])
           if (newType !== oldType) {
             return false
           } else {
@@ -93,15 +93,15 @@ export const checkLoad = (value, remakeItem, array, selectField) => {
         }
       }
       if (item[2] === 'currentTime') {
-        let e = item[3]
+        const e = item[3]
         if (newPayload[e] !== undefined) {
-          let newType = typeof (newPayload[e])
-          let oldType = typeof (remakeItem[e])
+          const newType = typeof (newPayload[e])
+          const oldType = typeof (remakeItem[e])
           if (newType !== oldType) {
             return false
           } else {
             const reg = /^(\d{2}):(\d{2}):(\d{2})$/
-            let t = newPayload[e]
+            const t = newPayload[e]
             if (t.match(reg) == null) {
               return false
             } else {
@@ -115,10 +115,10 @@ export const checkLoad = (value, remakeItem, array, selectField) => {
         }
       }
     } else {
-      let e = item[3]
+      const e = item[3]
       if (newPayload[e] !== undefined) {
-        let newType = typeof (newPayload[e])
-        let oldType = typeof (remakeItem[e])
+        const newType = typeof (newPayload[e])
+        const oldType = typeof (remakeItem[e])
         if (newType !== oldType) {
           return false
         }
