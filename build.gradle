@@ -1,4 +1,4 @@
-println("Notice: current gradle version is " + gradle.gradleVersion + ", WeEvent support gradle version in [4.10, 5.0)")
+println("Notice: current gradle version is " + gradle.gradleVersion)
 
 ext {
     // spring
@@ -33,7 +33,7 @@ ext {
 
     // org.fisco-bcos.web3sdk
     web3sdkVersion = [
-            fisco: "2.2.4"
+            fisco: "2.2.5"
     ]
     // fabric
     fabricVersion = "1.4.4"
