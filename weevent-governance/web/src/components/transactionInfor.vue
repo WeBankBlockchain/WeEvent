@@ -114,7 +114,7 @@ export default {
         if (res.data.code === 0) {
           const tableData = res.data.data.pageData
           tableData.forEach(e => {
-            this.$set(e, 'logs', {'address': '', 'topics': [], 'hasEvent': false})
+            this.$set(e, 'logs', {address: '', topics: [], hasEvent: false})
           })
           this.tableData = tableData
           this.total = res.data.data.total

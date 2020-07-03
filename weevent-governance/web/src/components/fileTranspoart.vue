@@ -540,8 +540,8 @@ export default {
       }
     },
     getLsitData () {
-      let vm = this
-      let data = {
+      const vm = this
+      const data = {
         pageIndex: vm.pageIndex - 1,
         pageSize: 10,
         brokerId: Number(localStorage.getItem('brokerId')),

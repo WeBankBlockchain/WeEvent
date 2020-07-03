@@ -201,9 +201,9 @@ export default {
       var vm = this
       const url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topic=' + e.topicName
       API.topicState(url).then(res => {
-        const time = getDateDetail(res.data.createdTimestamp)
+        const time = getDateDetail(res.data.data.createdTimestamp)
         res.data.createdTimestamp = time
-        res.data.lastTimestamp = getDateDetail(res.data.lastTimestamp)
+        res.data.lastTimestamp = getDateDetail(res.data.data.lastTimestamp)
         vm.$set(e, 'detail', res.data)
       })
     },
@@ -238,10 +238,10 @@ export default {
       this.dialogFormVisible = true
     },
     addTopic (form) {
-      let vm = this
+      const vm = this
       vm.$refs.form.validate((valid) => {
         if (valid) {
-          let data = {
+          const data = {
             topic: vm.form.name,
             creater: localStorage.getItem('user'),
             brokerId: Number(localStorage.getItem('brokerId')),
@@ -318,7 +318,7 @@ export default {
       vm.tableData = []
       const url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topic=' + sessionStorage.getItem('topic')
       API.topicInfo(url).then(res => {
-        let time = getDateDetail(res.data.createdTimestamp)
+        const time = getDateDetail(res.data.createdTimestamp)
         res.data.createdTimestamp = time
         const item = {
           topicName: res.data.topicName,

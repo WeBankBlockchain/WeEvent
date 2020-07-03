@@ -288,7 +288,7 @@ export default {
         cancelButtonText: vm.$t('common.cancel'),
         type: 'warning'
       }).then(() => {
-        let data = {
+        const data = {
           id: e.id
         }
         API.dbDelete(data).then(res => {
@@ -313,7 +313,7 @@ export default {
       })
     },
     checkJDBC () {
-      let vm = this
+      const vm = this
       vm.$refs.form.validate((valid) => {
         let data = {
           datasourceName: vm.form.datasourceName,
