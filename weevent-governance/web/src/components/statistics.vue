@@ -179,7 +179,7 @@ export default {
       })
     },
     getTime (e) {
-      let vm = this
+      const vm = this
       if (!e) {
         vm.getDate()
       } else {
