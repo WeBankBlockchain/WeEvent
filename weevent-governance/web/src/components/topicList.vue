@@ -134,7 +134,7 @@ export default {
           vm.total = res.data.total
           const last = Math.ceil(res.data.total / vm.pageSize)
           this.pageIndex = last
-          let data = {
+          const data = {
             pageIndex: last - 1,
             pageSize: vm.pageSize,
             brokerId: Number(localStorage.getItem('brokerId')),
@@ -162,9 +162,9 @@ export default {
       })
     },
     getLsitData () {
-      let vm = this
+      const vm = this
       vm.loading = true
-      let data = {
+      const data = {
         pageIndex: vm.pageIndex - 1,
         pageSize: vm.pageSize,
         brokerId: Number(localStorage.getItem('brokerId')),
@@ -173,8 +173,8 @@ export default {
       API.topicList(data).then(res => {
         if (res.status === 200) {
           vm.total = res.data.total
-          let listData = res.data.topicInfoList.reverse()
-          let det = {
+          const listData = res.data.topicInfoList.reverse()
+          const det = {
             topicName: '',
             createdTimestamp: '',
             topicAddress: '',
@@ -201,9 +201,9 @@ export default {
       var vm = this
       const url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topic=' + e.topicName
       API.topicState(url).then(res => {
-        const time = getDateDetail(res.data.createdTimestamp)
+        const time = getDateDetail(res.data.data.createdTimestamp)
         res.data.createdTimestamp = time
-        res.data.lastTimestamp = getDateDetail(res.data.lastTimestamp)
+        res.data.lastTimestamp = getDateDetail(res.data.data.lastTimestamp)
         vm.$set(e, 'detail', res.data)
       })
     },
@@ -238,10 +238,10 @@ export default {
       this.dialogFormVisible = true
     },
     addTopic (form) {
-      let vm = this
+      const vm = this
       vm.$refs.form.validate((valid) => {
         if (valid) {
-          let data = {
+          const data = {
             topic: vm.form.name,
             creater: localStorage.getItem('user'),
             brokerId: Number(localStorage.getItem('brokerId')),
@@ -291,7 +291,7 @@ export default {
         vm.tableData = []
         const url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topic=' + vm.topicName
         API.topicInfo(url).then(res => {
-          let time = getDateDetail(res.data.createdTimestamp)
+          const time = getDateDetail(res.data.createdTimestamp)
           res.data.createdTimestamp = time
           const item = {
             topicName: res.data.topicName,
@@ -318,9 +318,9 @@ export default {
       vm.tableData = []
       const url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topic=' + sessionStorage.getItem('topic')
       API.topicInfo(url).then(res => {
-        let time = getDateDetail(res.data.createdTimestamp)
+        const time = getDateDetail(res.data.createdTimestamp)
         res.data.createdTimestamp = time
-        let item = {
+        const item = {
           topicName: res.data.topicName,
           creater: '——',
           createdTimestamp: time,

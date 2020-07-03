@@ -244,7 +244,7 @@ export default {
     },
     editServer () {
       this.isEdit = false
-      let data = {
+      const data = {
         name: this.form.name,
         brokerUrl: this.form.brokerUrl,
         id: this.brokerId
@@ -285,7 +285,7 @@ export default {
       })
     },
     adit (e) {
-      let vm = this
+      const vm = this
       vm.$set(this.form, 'name', e.name)
       vm.$set(this.form, 'brokerUrl', e.brokerUrl)
       vm.$set(this.form, 'userIdList', [])
@@ -342,7 +342,7 @@ export default {
     },
     readRule (e) {
       const list = e.ruleIdList.join(',')
-      this.$router.push({path: './ruleStatic', query: {'list': list}})
+      this.$router.push({path: './ruleStatic', query: {list: list}})
     },
     back () {
       this.$router.go(-1)

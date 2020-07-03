@@ -214,7 +214,7 @@ export default {
     addURL () {
       const vm = this
       vm.$refs.form.validate((valid) => {
-        let data = {
+        const data = {
           datasourceName: vm.form.datasourceName,
           databaseType: vm.form.databaseType,
           username: vm.form.username,
@@ -282,13 +282,13 @@ export default {
       this.type = 2
     },
     deleteItem (e) {
-      let vm = this
+      const vm = this
       vm.$confirm(vm.$t('common.isDelete'), vm.$t('rule.deleteAddress'), {
         confirmButtonText: vm.$t('common.ok'),
         cancelButtonText: vm.$t('common.cancel'),
         type: 'warning'
       }).then(() => {
-        let data = {
+        const data = {
           id: e.id
         }
         API.dbDelete(data).then(res => {
@@ -313,7 +313,7 @@ export default {
       })
     },
     checkJDBC () {
-      let vm = this
+      const vm = this
       vm.$refs.form.validate((valid) => {
         let data = {
           datasourceName: vm.form.datasourceName,

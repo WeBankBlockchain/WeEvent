@@ -45,7 +45,7 @@ public interface IWeEventFileClient {
      * @param topic topic name
      * @param publicPem public pem path string
      * @throws BrokerException broker exception
-     * @throws BrokerException BrokerException
+     * @throws IOException IOException
      */
     void openTransport4Sender(String topic, String publicPem) throws BrokerException, IOException;
 
@@ -59,7 +59,6 @@ public interface IWeEventFileClient {
      * @return send result, SendResult.SUCCESS if success, and return SendResult.eventId
      * @throws BrokerException broker exception
      * @throws IOException IOException
-     * @throws BrokerException BrokerException
      */
     FileChunksMeta publishFile(String topic, String localFile, boolean overwrite) throws BrokerException, IOException;
 
@@ -172,5 +171,14 @@ public interface IWeEventFileClient {
      */
     void genPemFile(String filePath) throws BrokerException;
 
+    /**
+     * Check if the receiver end has a file.
+     *
+     * @param fileName file name
+     * @param topic topic name
+     * @param groupId group id
+     * @return is file exist
+     * @throws BrokerException BrokerException
+     */
     boolean isFileExist(String fileName, String topic, String groupId) throws BrokerException;
 }

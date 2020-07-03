@@ -148,7 +148,7 @@ export default {
       })
     },
     listGroup () {
-      let vm = this
+      const vm = this
       API.listGroup('?brokerId=' + localStorage.getItem('brokerId')).then(res => {
         // if groupId is not existed so set it
         // else use existed groupId

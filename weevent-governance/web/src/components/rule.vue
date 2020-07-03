@@ -263,7 +263,7 @@ export default {
       }
     },
     ruleStart (e) {
-      let data = {
+      const data = {
         id: e.id,
         brokerId: e.brokerId
       }
@@ -285,7 +285,7 @@ export default {
       })
     },
     ruleStop (e) {
-      let data = {
+      const data = {
         id: e.id,
         brokerId: e.brokerId,
         status: 0
@@ -314,9 +314,9 @@ export default {
         cancelButtonText: vm.$t('common.cancel'),
         type: 'warning'
       }).then(() => {
-        let data = {
-          'id': e.id,
-          'brokerId': e.brokerId
+        const data = {
+          id: e.id,
+          brokerId: e.brokerId
         }
         API.ruleDelete(data).then(res => {
           if (res.data.status === 200) {
@@ -342,10 +342,10 @@ export default {
       this.$router.push('./ruleDetail')
     },
     addRule () {
-      let vm = this
+      const vm = this
       vm.$refs.rule.validate((valid) => {
         if (valid) {
-          let data = {
+          const data = {
             ruleName: vm.rule.ruleName,
             payloadType: vm.rule.payloadType,
             payloadMap: JSON.parse(this.rule.payloadMap),
@@ -379,7 +379,7 @@ export default {
       })
     },
     readRuleDetial (e) {
-      let vm = this
+      const vm = this
       const id = e.id
       const str = '?idList=' + id
       API.ruleStatic(str).then(res => {

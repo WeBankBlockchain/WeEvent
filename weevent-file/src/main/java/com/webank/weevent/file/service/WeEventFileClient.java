@@ -365,8 +365,6 @@ public class WeEventFileClient implements IWeEventFileClient {
             PemFile privatePemFile = new PemFile(pair.getPrivate(), PRIVATE_KEY_DESC);
             PemFile publicPemFile = new PemFile(pair.getPublic(), PUBLIC_KEY_DESC);
 
-
-            System.out.println(filePath + PATH_SEPARATOR + account + PRIVATE_KEY_SUFFIX);
             privatePemFile.write(filePath + PATH_SEPARATOR + account + PRIVATE_KEY_SUFFIX);
             publicPemFile.write(filePath + PATH_SEPARATOR + account + PUBLIC_KEY_SUFFIX);
         } catch (IOException | NoSuchProviderException | NoSuchAlgorithmException | InvalidAlgorithmParameterException e) {
@@ -416,7 +414,7 @@ public class WeEventFileClient implements IWeEventFileClient {
         void onException(Throwable e);
     }
 
-    static class FileEventListener implements EventListener{
+    static class FileEventListener implements EventListener {
         private final String receivePath;
         private final FtpInfo ftpInfo;
         private final FileListener fileListener;

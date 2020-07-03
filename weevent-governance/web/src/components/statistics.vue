@@ -115,8 +115,8 @@ export default {
       })
     },
     beginDate (e) {
-      let vm = this
-      let data = {
+      const vm = this
+      const data = {
         beginDate: vm.selectTime[0],
         endDate: vm.selectTime[1],
         topicList: vm.topic,
@@ -126,7 +126,7 @@ export default {
       vm.getTopic()
       API.historicalData(data).then(res => {
         if (res.data.status === 200) {
-          let resData = res.data.data
+          const resData = res.data.data
           if (!resData || resData.length === 0) {
             Highcharts.chart('chart', vm.option).showNoData()
             return
@@ -179,11 +179,11 @@ export default {
       })
     },
     getTime (e) {
-      let vm = this
+      const vm = this
       if (!e) {
         vm.getDate()
       } else {
-        let timeList = getTimeList(e[0], e[1])
+        const timeList = getTimeList(e[0], e[1])
         vm.option.xAxis.categories = [].concat(timeList)
       }
       this.beginDate(true)

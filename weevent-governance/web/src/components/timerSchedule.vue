@@ -178,7 +178,7 @@ export default {
     addURL () {
       const vm = this
       vm.$refs.form.validate((valid) => {
-        let data = {
+        const data = {
           schedulerName: this.form.schedulerName,
           ruleDatabaseId: this.form.ruleDatabaseId,
           periodParams: this.form.periodParams,
@@ -239,13 +239,13 @@ export default {
       this.type = 2
     },
     deleteItem (e) {
-      let vm = this
+      const vm = this
       vm.$confirm(vm.$t('common.isDelete'), vm.$t('rule.deleteAddress'), {
         confirmButtonText: vm.$t('common.ok'),
         cancelButtonText: vm.$t('common.cancel'),
         type: 'warning'
       }).then(() => {
-        let data = {
+        const data = {
           id: e.id,
           brokerId: localStorage.getItem('brokerId')
         }
