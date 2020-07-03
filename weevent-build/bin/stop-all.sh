@@ -16,7 +16,6 @@ do
     fi
 
     cd ${current_path}
-    sleep 1
 done
 
 # finally stop zookeeper
