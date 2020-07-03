@@ -285,7 +285,7 @@ export default {
       })
     },
     ruleStop (e) {
-      let data = {
+      const data = {
         id: e.id,
         brokerId: e.brokerId,
         status: 0
