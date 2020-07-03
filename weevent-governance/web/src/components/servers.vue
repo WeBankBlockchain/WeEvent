@@ -342,7 +342,7 @@ export default {
     },
     readRule (e) {
       const list = e.ruleIdList.join(',')
-      this.$router.push({path: './ruleStatic', query: {'list': list}})
+      this.$router.push({path: './ruleStatic', query: {list: list}})
     },
     back () {
       this.$router.go(-1)

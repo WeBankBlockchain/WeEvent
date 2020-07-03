@@ -349,7 +349,7 @@ export default {
     },
     createSQL (nVal) {
       if (!nVal) {
-        let vm = this
+        const vm = this
         vm.crrentTable = true
         const nodes = document.getElementsByClassName('tree_content')
         if (nodes) {
@@ -580,7 +580,7 @@ export default {
               }
             }
           }
-          for (let key in vm.rule) {
+          for (const key in vm.rule) {
             if (key === 'payloadMap') {
               vm.rule[key] = JSON.stringify(res.data.data.payloadMap)
             } else if (key === 'payloadType') {
@@ -589,7 +589,7 @@ export default {
               vm.rule[key] = res.data.data[key]
             }
           }
-          for (let key in vm.sqlOption) {
+          for (const key in vm.sqlOption) {
             if (key === 'selectField' || key === 'conditionType' || key === 'conditionFieldJson') {
               if (res.data.data.selectField) {
                 vm.sqlOption.selectField = [].concat(res.data.data.selectField.split(','))
@@ -617,8 +617,8 @@ export default {
           }
           vm.fullSQL = res.data.data.fullSQL
           vm.columnName = Object.assign({}, JSON.parse(res.data.data.payload))
-          let listColumnName = []
-          for (let key in vm.columnName) {
+          const listColumnName = []
+          for (const key in vm.columnName) {
             listColumnName.push(key)
           }
           if (vm.sqlOption.selectField.length === listColumnName.length + 1) {
@@ -764,8 +764,8 @@ export default {
       this.sqlOption.conditionFieldJson.push(item)
     },
     getLsitData () {
-      let vm = this
-      let data = {
+      const vm = this
+      const data = {
         pageIndex: vm.pageIndex - 1,
         pageSize: 10,
         brokerId: Number(localStorage.getItem('brokerId')),
@@ -799,7 +799,7 @@ export default {
     selChange (e) {
       this.sqlOption.selectField = []
       if (e) {
-        for (let key in this.columnName) {
+        for (const key in this.columnName) {
           this.sqlOption.selectField.push(key)
         }
         this.sqlOption.selectField.push('eventId')

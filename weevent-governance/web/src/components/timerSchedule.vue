@@ -245,7 +245,7 @@ export default {
         cancelButtonText: vm.$t('common.cancel'),
         type: 'warning'
       }).then(() => {
-        let data = {
+        const data = {
           id: e.id,
           brokerId: localStorage.getItem('brokerId')
         }
