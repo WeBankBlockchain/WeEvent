@@ -5,7 +5,8 @@ drop table IF EXISTS t_rule_database;
 drop table IF EXISTS t_rule_engine;
 drop table IF EXISTS t_rule_engine_condition;
 drop table IF EXISTS t_topic;
-drop table IF EXISTS t_file_transport;
+drop table IF EXISTS t_file_transport_channel;
+drop table IF EXISTS t_file_transport_status;
 drop table IF EXISTS t_topic_historical;
 drop table IF EXISTS t_timer_scheduler;
 
