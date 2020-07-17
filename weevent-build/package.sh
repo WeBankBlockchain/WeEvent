@@ -76,10 +76,13 @@ function build_weevent(){
     yellow_echo "build web in node.js"
     cd ${top_path}/weevent-governance/web
     if [[ -e build-web.sh ]];then
-        chmod +x build-web.sh
         dos2unix build-web.sh
     fi
-    ./build-web.sh
+    bash build-web.sh
+    if [[ $? -ne 0 ]];then
+        echo "build web failed."
+        exit 1
+    fi
 
     # gradle clean then build
     yellow_echo "build java in gradle"
