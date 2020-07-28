@@ -6,14 +6,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-import com.webank.weevent.governance.common.ConstantCode;
-import com.webank.weevent.governance.common.GovernanceException;
-import com.webank.weevent.governance.common.GovernanceResult;
-import com.webank.weevent.governance.entity.AccountEntity;
-import com.webank.weevent.governance.entity.BaseResponse;
-import com.webank.weevent.governance.service.AccountService;
-import com.webank.weevent.governance.utils.JwtUtils;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -25,6 +17,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.webank.weevent.governance.common.ConstantCode;
+import com.webank.weevent.governance.common.GovernanceException;
+import com.webank.weevent.governance.common.GovernanceResponse;
+import com.webank.weevent.governance.entity.AccountEntity;
+import com.webank.weevent.governance.service.AccountService;
+import com.webank.weevent.governance.utils.JwtUtils;
+
 @RestController
 @CrossOrigin
 @RequestMapping(value = "/user")
@@ -34,53 +33,53 @@ public class AccountController {
     private AccountService accountService;
 
     @RequestMapping("/check/{param}/{type}")
-    public GovernanceResult checkData(@PathVariable String param, @PathVariable Integer type) {
+    public GovernanceResponse<Object> checkData(@PathVariable String param, @PathVariable Integer type) {
         return accountService.checkData(param, type);
     }
 
     @PostMapping(value = "/register")
-    public GovernanceResult register(@Valid @RequestBody AccountEntity user, BindingResult result) throws GovernanceException {
+    public GovernanceResponse<Object> register(@Valid @RequestBody AccountEntity user, BindingResult result) throws GovernanceException {
         return accountService.register(user);
     }
 
     @PostMapping(value = "/update")
-    public GovernanceResult updatePassword(@RequestBody AccountEntity user) {
+    public GovernanceResponse<Object> updatePassword(@RequestBody AccountEntity user) {
         return accountService.updatePassword(user);
     }
 
     @PostMapping(value = "/reset")
-    public GovernanceResult resetPassword(@RequestBody AccountEntity user) {
+    public GovernanceResponse<Object> resetPassword(@RequestBody AccountEntity user) {
         return accountService.resetPassword(user);
     }
 
     @GetMapping("/getUserId")
-    public GovernanceResult getUserId(@RequestParam String username) {
+    public GovernanceResponse<Integer> getUserId(@RequestParam String username) {
         return accountService.getUserId(username);
     }
 
     @RequestMapping("/require")
-    public BaseResponse authRequire() {
-        return new BaseResponse(ConstantCode.USER_NOT_LOGGED_IN);
+    public GovernanceResponse<Object> authRequire() {
+        return new GovernanceResponse<>(ConstantCode.USER_NOT_LOGGED_IN);
     }
 
     /**
      * Query all account except themselves
      */
     @RequestMapping("/accountList")
-    public GovernanceResult accountEntityList(AccountEntity accountEntity, HttpServletRequest request,
+    public GovernanceResponse<List<AccountEntity>> accountEntityList(AccountEntity accountEntity, HttpServletRequest request,
                                               HttpServletResponse response) throws GovernanceException {
         List<AccountEntity> accountEntities = accountService.accountEntityList(request, accountEntity, JwtUtils.getAccountId(request));
-        return new GovernanceResult(accountEntities);
+        return new GovernanceResponse<>(accountEntities);
     }
 
     /**
      * delete user by id
      */
     @RequestMapping("/delete")
-    public GovernanceResult deleteUser(@RequestBody AccountEntity accountEntity, HttpServletRequest request,
+    public GovernanceResponse<Boolean> deleteUser(@RequestBody AccountEntity accountEntity, HttpServletRequest request,
                                        HttpServletResponse response) throws GovernanceException {
         accountService.deleteUser(request, accountEntity);
-        return new GovernanceResult(true);
+        return new GovernanceResponse<>(true);
     }
 
 

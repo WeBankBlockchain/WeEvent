@@ -11,22 +11,6 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.webank.weevent.client.BaseResponse;
-import com.webank.weevent.client.BrokerException;
-import com.webank.weevent.client.JsonHelper;
-import com.webank.weevent.governance.common.ConstantProperties;
-import com.webank.weevent.governance.common.ErrorCode;
-import com.webank.weevent.governance.common.GovernanceException;
-import com.webank.weevent.governance.common.GovernanceResult;
-import com.webank.weevent.governance.entity.BrokerEntity;
-import com.webank.weevent.governance.entity.TopicEntity;
-import com.webank.weevent.governance.entity.TopicPage;
-import com.webank.weevent.governance.entity.TopicPageEntity;
-import com.webank.weevent.governance.enums.IsDeleteEnum;
-import com.webank.weevent.governance.repository.TopicRepository;
-
-import com.fasterxml.jackson.core.type.TypeReference;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -37,6 +21,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.webank.weevent.client.BaseResponse;
+import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.JsonHelper;
+import com.webank.weevent.governance.common.ConstantProperties;
+import com.webank.weevent.governance.common.ErrorCode;
+import com.webank.weevent.governance.common.GovernanceException;
+import com.webank.weevent.governance.common.GovernanceResponse;
+import com.webank.weevent.governance.entity.BrokerEntity;
+import com.webank.weevent.governance.entity.TopicEntity;
+import com.webank.weevent.governance.entity.TopicPage;
+import com.webank.weevent.governance.entity.TopicPageEntity;
+import com.webank.weevent.governance.enums.IsDeleteEnum;
+import com.webank.weevent.governance.repository.TopicRepository;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * topic service
@@ -167,7 +168,7 @@ public class TopicService {
     }
 
     @Transactional(rollbackFor = Throwable.class)
-    public GovernanceResult open(Integer brokerId, String topic, String creater, String groupId, HttpServletRequest request,
+    public GovernanceResponse<Object> open(Integer brokerId, String topic, String creater, String groupId, HttpServletRequest request,
                                  HttpServletResponse response) throws GovernanceException {
         BrokerEntity brokerEntity = brokerService.getBroker(brokerId);
         if (brokerEntity == null) {
@@ -178,7 +179,7 @@ public class TopicService {
             boolean exist = exist(topic, brokerEntity.getBrokerUrl(), groupId, request);
             if (exist) {
                 log.info("topic already exists,topic{}", topic);
-                return new GovernanceResult(ErrorCode.TOPIC_EXISTS);
+                return new GovernanceResponse<>(ErrorCode.TOPIC_EXISTS);
             }
             TopicEntity topicEntity = new TopicEntity();
             topicEntity.setBrokerId(brokerId);
@@ -199,7 +200,7 @@ public class TopicService {
         }
         log.info("url: {}", url);
 
-        return new GovernanceResult(invokeBrokerCGI(request, url, new TypeReference<BaseResponse<Boolean>>() {
+        return new GovernanceResponse<>(invokeBrokerCGI(request, url, new TypeReference<BaseResponse<Boolean>>() {
         }).getData());
 
     }

@@ -4,12 +4,6 @@ package com.webank.weevent.governance.junit;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.webank.weevent.client.JsonHelper;
-import com.webank.weevent.governance.JUnitTestBase;
-import com.webank.weevent.governance.common.GovernanceResult;
-import com.webank.weevent.governance.utils.JwtUtils;
-
-import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
 import org.junit.After;
 import org.junit.Assert;
@@ -23,6 +17,14 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+
+import com.webank.weevent.client.JsonHelper;
+import com.webank.weevent.governance.JUnitTestBase;
+import com.webank.weevent.governance.common.GovernanceResponse;
+import com.webank.weevent.governance.common.GovernanceResult;
+import com.webank.weevent.governance.utils.JwtUtils;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class BrokerControllerTest extends JUnitTestBase {
@@ -69,8 +71,8 @@ public class BrokerControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/add").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        GovernanceResult governanceResult = JsonHelper.json2Object(response.getContentAsString(), GovernanceResult.class);
-        Assert.assertEquals("100108", governanceResult.getStatus().toString());
+        GovernanceResponse<?> governanceResponse = JsonHelper.json2Object(response.getContentAsString(), GovernanceResponse.class);
+        Assert.assertEquals("100108", governanceResponse.getCode().toString());
     }
 
     @Test

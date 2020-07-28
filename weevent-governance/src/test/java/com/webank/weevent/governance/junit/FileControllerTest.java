@@ -6,16 +6,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.webank.weevent.client.JsonHelper;
-import com.webank.weevent.governance.JUnitTestBase;
-import com.webank.weevent.governance.common.ErrorCode;
-import com.webank.weevent.governance.common.GovernanceResult;
-import com.webank.weevent.governance.entity.FileTransportChannelEntity;
-import com.webank.weevent.governance.utils.JwtUtils;
-import com.webank.weevent.governance.utils.Utils;
-
-import com.fasterxml.jackson.core.type.TypeReference;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
 import org.junit.After;
 import org.junit.Assert;
@@ -29,6 +19,17 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.webank.weevent.client.JsonHelper;
+import com.webank.weevent.governance.JUnitTestBase;
+import com.webank.weevent.governance.common.ErrorCode;
+import com.webank.weevent.governance.common.GovernanceResponse;
+import com.webank.weevent.governance.entity.FileTransportChannelEntity;
+import com.webank.weevent.governance.utils.JwtUtils;
+import com.webank.weevent.governance.utils.Utils;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class FileControllerTest extends JUnitTestBase {
@@ -126,9 +127,9 @@ public class FileControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mvcResult.getResponse();
         String result = response.getContentAsString();
         Assert.assertNotNull(result);
-        GovernanceResult governanceResult = JsonHelper.json2Object(result, GovernanceResult.class);
-        Assert.assertEquals(200, (int) governanceResult.getStatus());
-        List<FileTransportChannelEntity> transportList = (List<FileTransportChannelEntity>) governanceResult.getData();
+        GovernanceResponse<?> governanceResponse = JsonHelper.json2Object(result, GovernanceResponse.class);
+        Assert.assertEquals(200, (int) governanceResponse.getCode());
+        List<FileTransportChannelEntity> transportList = (List<FileTransportChannelEntity>) governanceResponse.getData();
         Assert.assertNotNull(transportList);
         Assert.assertTrue(transportList.size() > 0);
     }
@@ -146,8 +147,8 @@ public class FileControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mvcResult.getResponse();
         String result = response.getContentAsString();
         Assert.assertNotNull(result);
-        GovernanceResult governanceResult = JsonHelper.json2Object(result, GovernanceResult.class);
-        Assert.assertEquals(200, (int) governanceResult.getStatus());
+        GovernanceResponse<?> governanceResponse = JsonHelper.json2Object(result, GovernanceResponse.class);
+        Assert.assertEquals(200, (int) governanceResponse.getCode());
     }
 
     /**
@@ -163,8 +164,8 @@ public class FileControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mvcResult.getResponse();
         String result = response.getContentAsString();
         Assert.assertNotNull(result);
-        GovernanceResult governanceResult = JsonHelper.json2Object(result, GovernanceResult.class);
-        Assert.assertEquals(200, (int) governanceResult.getStatus());
+        GovernanceResponse<?> governanceResponse = JsonHelper.json2Object(result, GovernanceResponse.class);
+        Assert.assertEquals(200, (int) governanceResponse.getCode());
     }
 
     /**
@@ -187,8 +188,8 @@ public class FileControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mvcResult.getResponse();
         String result = response.getContentAsString();
         Assert.assertNotNull(result);
-        GovernanceResult governanceResult = JsonHelper.json2Object(result, GovernanceResult.class);
-        Assert.assertEquals(200, (int) governanceResult.getStatus());
+        GovernanceResponse<?> governanceResponse = JsonHelper.json2Object(result, GovernanceResponse.class);
+        Assert.assertEquals(200, (int) governanceResponse.getCode());
 
         String rootPath = System.getProperty("user.dir") + File.separator;
         String filePath = rootPath + "logs" + File.separator + "upload" + File.separator + fileId;
@@ -213,9 +214,9 @@ public class FileControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/add").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        GovernanceResult governanceResult = JsonHelper.json2Object(response.getContentAsString(), GovernanceResult.class);
-        brokerIdMap.put("brokerId", (Integer) governanceResult.getData());
-        Assert.assertEquals(governanceResult.getStatus().toString(), "200");
+        GovernanceResponse<?> governanceResponse = JsonHelper.json2Object(response.getContentAsString(), GovernanceResponse.class);
+        brokerIdMap.put("brokerId", (Integer) governanceResponse.getData());
+        Assert.assertEquals(governanceResponse.getCode().toString(), "200");
     }
 
     //delete broker by id
@@ -237,8 +238,8 @@ public class FileControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mvcResult.getResponse();
         String result = response.getContentAsString();
         Assert.assertNotNull(result);
-        GovernanceResult governanceResult = JsonHelper.json2Object(result, GovernanceResult.class);
-        Boolean isSuccess = (Boolean) governanceResult.getData();
+        GovernanceResponse<?> governanceResponse = JsonHelper.json2Object(result, GovernanceResponse.class);
+        Boolean isSuccess = (Boolean) governanceResponse.getData();
         Assert.assertTrue(isSuccess);
 
         String contentReceiver = "{\"brokerId\":\"" + this.brokerIdMap.get("brokerId")
@@ -249,8 +250,8 @@ public class FileControllerTest extends JUnitTestBase {
         response = mvcResult.getResponse();
         result = response.getContentAsString();
         Assert.assertNotNull(result);
-        governanceResult = JsonHelper.json2Object(result, GovernanceResult.class);
-        isSuccess = (Boolean) governanceResult.getData();
+        governanceResponse = JsonHelper.json2Object(result, GovernanceResponse.class);
+        isSuccess = (Boolean) governanceResponse.getData();
         Assert.assertTrue(isSuccess);
 
     }
@@ -280,8 +281,8 @@ public class FileControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mvcResult.getResponse();
         String result = response.getContentAsString();
         Assert.assertNotNull(result);
-        GovernanceResult governanceResult = JsonHelper.json2Object(result, GovernanceResult.class);
-        Boolean isSuccess = (Boolean) governanceResult.getData();
+        GovernanceResponse<?> governanceResponse = JsonHelper.json2Object(result, GovernanceResponse.class);
+        Boolean isSuccess = (Boolean) governanceResponse.getData();
         Assert.assertTrue(isSuccess);
     }
 
@@ -294,8 +295,8 @@ public class FileControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mvcResult.getResponse();
         String result = response.getContentAsString();
         Assert.assertNotNull(result);
-        GovernanceResult governanceResult = JsonHelper.json2Object(result, GovernanceResult.class);
-        Boolean isSuccess = (Boolean) governanceResult.getData();
+        GovernanceResponse<?> governanceResponse = JsonHelper.json2Object(result, GovernanceResponse.class);
+        Boolean isSuccess = (Boolean) governanceResponse.getData();
         Assert.assertTrue(isSuccess);
     }
 }
