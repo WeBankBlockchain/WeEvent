@@ -39,6 +39,9 @@ public class FileTransportStatusEntity extends TopicBase {
 
     @Column(name = "file_size")
     private Long fileSize;
+    
+    @Column(name = "speed", columnDefinition = "varchar(32)")
+    private String speed;
 
     // cost time in second
     @Transient
@@ -50,8 +53,9 @@ public class FileTransportStatusEntity extends TopicBase {
     @Transient
     private String process;
     // speed in Byte/s
-    @Transient
-    private String speed;
+    
+    //@Transient
+    //private String speed;
 
 //    @Transient
 //    private FileChunksMetaStatus fileChunksMetaStatus;
