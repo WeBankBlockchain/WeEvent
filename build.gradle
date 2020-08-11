@@ -83,14 +83,14 @@ ext {
 
 buildscript {
     repositories {
+     	mavenLocal()
         maven {
             url "http://maven.aliyun.com/nexus/content/groups/public/"
         }
         maven {
             url "https://plugins.gradle.org/m2/"
         }
-        mavenLocal()
-        mavenCentral()
+        // mavenCentral()
     }
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:2.1.14.RELEASE")
@@ -121,14 +121,14 @@ allprojects {
     }
 
     repositories {
+    	mavenLocal()
         // jms.jar
         maven { url "http://repository.jboss.org/nexus/content/groups/public/"}
         maven { url "http://maven.aliyun.com/nexus/content/groups/public/" }
         // "org.ethereum.solcJ-all-0.4.25"
         // maven { url "https://dl.bintray.com/ethereum/maven/" }
         //maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
-        mavenLocal()
-        mavenCentral()
+        // mavenCentral()
         jcenter()
     }
 
