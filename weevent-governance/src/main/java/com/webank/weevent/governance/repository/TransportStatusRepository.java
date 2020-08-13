@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 public interface TransportStatusRepository extends JpaRepository<FileTransportStatusEntity, Long> {
 
 	List<FileTransportStatusEntity> queryByBrokerIdAndGroupIdAndTopicName(Integer brokerId, String groupId,
-			String topicName);
+                                                                          String topicName);
 
 	FileTransportStatusEntity queryByBrokerIdAndGroupIdAndTopicNameAndFileName(Integer brokerId, String groupId, String topicName, String fileName);
 
@@ -28,4 +28,5 @@ public interface TransportStatusRepository extends JpaRepository<FileTransportSt
 	@Modifying
 	@Query(value = "update t_file_transport_status set speed=:speed where id =:id", nativeQuery = true)
 	void updateTransportSpeed(@Param("speed") String speed, @Param("id") Long id);
+	
 }

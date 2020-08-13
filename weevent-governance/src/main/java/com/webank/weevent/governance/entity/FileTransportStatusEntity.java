@@ -54,11 +54,7 @@ public class FileTransportStatusEntity extends TopicBase {
     private String process;
     // speed in Byte/s
     
-    //@Transient
-    //private String speed;
-
 //    @Transient
 //    private FileChunksMetaStatus fileChunksMetaStatus;
-
-
+    
 }
