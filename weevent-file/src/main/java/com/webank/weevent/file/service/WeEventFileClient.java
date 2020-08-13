@@ -198,6 +198,13 @@ public class WeEventFileClient implements IWeEventFileClient {
             // publish local file
             validateLocalFile(filePath);
 
+            // check if topic is exist
+            IProducer iProducer = this.fileTransportService.getProducer();
+            if (!iProducer.exist(topic, this.groupId)) {
+                log.info("topic: " + topic + " not exist in group: " + groupId + ", open topic: " + topic + " groupID: " + groupId);
+                iProducer.open(topic, this.groupId);
+            }
+
             FileChunksTransport fileChunksTransport = new FileChunksTransport(this.fileTransportService);
             FileChunksMeta fileChunksMeta = fileChunksTransport.upload(filePath, topic, this.groupId, overwrite);
             return fileChunksMeta;
