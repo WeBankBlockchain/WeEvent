@@ -82,6 +82,10 @@ public class FileTransportService {
         return this.diskFiles;
     }
 
+    public IProducer getProducer() {
+        return this.producer;
+    }
+
     public FileChunksMetaPlus verify(String eventId, String groupId) throws BrokerException {
         WeEvent event = this.producer.getEvent(eventId, groupId);
         if (this.isFileEvent(event)) {
