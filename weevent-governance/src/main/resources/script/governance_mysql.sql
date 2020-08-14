@@ -61,6 +61,7 @@ CREATE TABLE  t_file_transport_status (
   `file_md5` VARCHAR(32) NOT NULL COMMENT '文件MD5',
   `file_size` BIGINT(16) NOT NULL COMMENT '文件大小',
   `transport_status` VARCHAR(1) DEFAULT NULL COMMENT '文件传输状态',
+  `speed` VARCHAR(32) DEFAULT NULL COMMENT '文件传输速率',
   `create_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建日期',
   `last_update` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP comment '修改日期',
   `delete_at` BIGINT(16) NOT NULL DEFAULT  0 COMMENT '0 表示 未删除, 时间戳 表示 已经被删除',
