@@ -14,8 +14,7 @@ dependencies {
     }
 
     // depend project
-    implementation(project(":weevent-client"))
-    implementation(project(":weevent-core"))
+    api project(":weevent-core")
 
     implementation("commons-net:commons-net:${commonsNetVersion}")
 
