@@ -126,6 +126,7 @@ CREATE TABLE  t_file_transport_status (
     group_id VARCHAR (64),
     topic_name VARCHAR (128),
     transport_status VARCHAR(1),
+    speed VARCHAR(64),
     PRIMARY KEY (id)
 );
 
