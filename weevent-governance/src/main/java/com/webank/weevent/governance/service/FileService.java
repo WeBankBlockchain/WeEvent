@@ -27,6 +27,7 @@ import com.webank.weevent.governance.common.ConstantProperties;
 import com.webank.weevent.governance.common.ErrorCode;
 import com.webank.weevent.governance.common.GovernanceException;
 import com.webank.weevent.governance.common.GovernanceResult;
+import com.webank.weevent.governance.entity.FileChunksMetaEntity;
 import com.webank.weevent.governance.entity.FileTransportChannelEntity;
 import com.webank.weevent.governance.entity.FileTransportStatusEntity;
 import com.webank.weevent.governance.entity.UploadChunkParam;
@@ -38,6 +39,7 @@ import com.webank.weevent.governance.utils.Utils;
 import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -287,12 +289,25 @@ public class FileService {
 
     public GovernanceResult downLoadStatus(String groupId, Integer brokerId, String topic) throws GovernanceException {
         List<FileChunksMetaStatus> fileChunksMetaStatusList = null;
+        List<FileChunksMetaEntity> chunksMetaEntities = new ArrayList<FileChunksMetaEntity>(); 
         IWeEventFileClient fileClient = this.getIWeEventFileClient(groupId, brokerId);
         FileTransportStats status = fileClient.status(topic);
         if (status.getReceiver().containsKey(groupId)) {
             fileChunksMetaStatusList = status.getReceiver().get(groupId).get(topic);
+            for (FileChunksMetaStatus fileChunksMetaStatus : fileChunksMetaStatusList) {
+            	FileChunksMeta chunksMeta = fileChunksMetaStatus.getFile();
+            	FileChunksMetaEntity fileChunksMetaEntity = new FileChunksMetaEntity(); 
+            	BeanUtils.copyProperties(chunksMeta, fileChunksMetaEntity);
+            	if(Objects.equals(fileChunksMetaStatus.getProcess(), "100.00%")) {
+            		fileChunksMetaEntity.setStatus("success");
+            	} else {
+            		fileChunksMetaEntity.setStatus("downloading");
+            	}
+            	BeanUtils.copyProperties(fileChunksMetaStatus, fileChunksMetaEntity);
+            	chunksMetaEntities.add(fileChunksMetaEntity);
+			}
         }
-        return GovernanceResult.ok(fileChunksMetaStatusList);
+        return GovernanceResult.ok(chunksMetaEntities);
     }
 
     public GovernanceResult uploadStatus(String groupId, Integer brokerId, String topic) throws GovernanceException {
@@ -304,16 +319,22 @@ public class FileService {
         if (status.getSender().containsKey(groupId)) {
             List<FileChunksMetaStatus> fileChunksMetaStatusList = status.getSender().get(groupId).get(topic);
             fileTransportStatusList.forEach(fileTransportStatusEntity -> fileChunksMetaStatusList.forEach(fileChunksMetaStatus -> {
+            	log.info("fileChunksMetaStatus.getSpeed():=" + fileChunksMetaStatus.getSpeed());
                 if (Objects.equals(fileChunksMetaStatus.getFile().getFileName(), fileTransportStatusEntity.getFileName())) {
-                    fileTransportStatusEntity.setTime(fileChunksMetaStatus.getTime());
-                    fileTransportStatusEntity.setProcess(fileChunksMetaStatus.getProcess());
-                    fileTransportStatusEntity.setReadyChunk(fileChunksMetaStatus.getReadyChunk());
-                    fileTransportStatusEntity.setSpeed(fileChunksMetaStatus.getSpeed());
+                	BeanUtils.copyProperties(fileChunksMetaStatus, fileTransportStatusEntity);
                 }
                 if (Objects.equals(fileTransportStatusEntity.getStatus(), ConstantProperties.SUCCESS)) {
                     fileTransportStatusEntity.setProcess("100%");
+                } else {
+                	String speed = fileChunksMetaStatus.getSpeed();
+                	this.transportStatusRepository.updateTransportSpeed(speed, fileTransportStatusEntity.getId().longValue());
                 }
             }));
+            for (FileTransportStatusEntity fileTransportStatusEntity : fileTransportStatusList) {
+            	if (Objects.equals(fileTransportStatusEntity.getStatus(), ConstantProperties.SUCCESS)) {
+                    fileTransportStatusEntity.setProcess("100%");
+                }
+			}
         }
         return GovernanceResult.ok(fileTransportStatusList);
     }
