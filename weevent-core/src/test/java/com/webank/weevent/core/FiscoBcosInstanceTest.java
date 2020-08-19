@@ -2,6 +2,7 @@ package com.webank.weevent.core;
 
 import java.util.HashMap;
 
+import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.core.config.FiscoConfig;
 import com.webank.weevent.client.SendResult;
 import com.webank.weevent.client.WeEvent;
@@ -25,8 +26,12 @@ public class FiscoBcosInstanceTest extends JUnitTestBase {
 
     private FiscoConfig fiscoConfig;
 
+    private FiscoBcosInstance fiscoBcosInstance;
+
+    private IProducer iProducer;
+
     @Before
-    public void before() {
+    public void before() throws BrokerException {
         log.info("=============================={}.{}==============================",
                 this.getClass().getSimpleName(),
                 this.testName.getMethodName());
@@ -38,6 +43,10 @@ public class FiscoBcosInstanceTest extends JUnitTestBase {
         // "com.webank.weevent.broker" is package name of a spring boot server
         this.fiscoConfig = new FiscoConfig();
         Assert.assertTrue(this.fiscoConfig.load(""));
+        this.fiscoBcosInstance = new FiscoBcosInstance(this.fiscoConfig);
+        this.iProducer = this.fiscoBcosInstance.buildProducer();
+        Assert.assertTrue(this.iProducer.startProducer());
+        Assert.assertTrue(this.iProducer.open(this.topicName, this.groupId));
     }
 
     /**
@@ -45,12 +54,8 @@ public class FiscoBcosInstanceTest extends JUnitTestBase {
      */
     @Test
     public void testBuildProducer() throws Exception {
-        FiscoBcosInstance fiscoBcosInstance = new FiscoBcosInstance(this.fiscoConfig);
-        IProducer iProducer = fiscoBcosInstance.buildProducer();
-        iProducer.startProducer();
-
         WeEvent weEvent = new WeEvent(this.topicName, "hello weevent".getBytes());
-        SendResult sendResult = iProducer.publish(weEvent, this.groupId, this.fiscoConfig.getWeb3sdkTimeout());
+        SendResult sendResult = this.iProducer.publish(weEvent, this.groupId, this.fiscoConfig.getWeb3sdkTimeout());
         Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
     }
 
@@ -59,8 +64,7 @@ public class FiscoBcosInstanceTest extends JUnitTestBase {
      */
     @Test
     public void testBuildConsumer() throws Exception {
-        FiscoBcosInstance fiscoBcosInstance = new FiscoBcosInstance(this.fiscoConfig);
-        IConsumer iConsumer = fiscoBcosInstance.buildConsumer();
+        IConsumer iConsumer = this.fiscoBcosInstance.buildConsumer();
         iConsumer.startConsumer();
         Assert.assertTrue(iConsumer.isStarted());
 
