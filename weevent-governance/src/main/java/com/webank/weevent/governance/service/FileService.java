@@ -127,7 +127,7 @@ public class FileService {
     private void openTransport4Receiver(FileTransportChannelEntity fileTransport) throws GovernanceException {
         IWeEventFileClient fileClient;
         try {
-            fileClient = buildIWeEventFileClient(fileTransport.getGroupId(), fileTransport.getBrokerId());
+            fileClient = this.buildIWeEventFileClient(fileTransport.getGroupId(), fileTransport.getBrokerId());
             if (StringUtils.isBlank(fileTransport.getPrivateKey())) {
                 fileClient.openTransport4Receiver(fileTransport.getTopicName(), new IWeEventFileClient.FileListener() {
                     @Override
@@ -299,7 +299,7 @@ public class FileService {
             	FileChunksMetaEntity fileChunksMetaEntity = new FileChunksMetaEntity(); 
             	BeanUtils.copyProperties(chunksMeta, fileChunksMetaEntity);
             	if(Objects.equals(fileChunksMetaStatus.getProcess(), "100.00%")) {
-            		fileChunksMetaEntity.setStatus("success");
+            		fileChunksMetaEntity.setStatus("1");
             	} else {
             		fileChunksMetaEntity.setStatus("downloading");
             	}
