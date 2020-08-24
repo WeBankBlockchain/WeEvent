@@ -221,7 +221,7 @@ public class AdminRest {
     }
 
     /**
-     * checkGroupId.
+     * validateGroupId.
      */
     @RequestMapping(path = "/validateGroupId")
     public BaseResponse<ErrorCode> validateGroupId(@RequestParam(value = "groupId") String groupId) throws BrokerException {

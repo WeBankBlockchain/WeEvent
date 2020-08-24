@@ -40,7 +40,7 @@ public class WeEventClient implements IWeEventClient {
     private final String password;
 
     // default STOMP url, ws://localhost:8080/weevent-broker/stomp
-    private final String brokerStompUrl = "ws://localhost:8080/weevent-broker/stomp";
+    private final String brokerStompUrl = "ws://localhost:7000/weevent-broker/stomp";
     private List<String> subscribeIdList;
     private HttpClientHelper httpClientHelper;
     private WebSocketTransport transport;
