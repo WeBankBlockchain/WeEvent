@@ -168,4 +168,9 @@ public class FabricTopicAdmin implements IEventTopic {
     public List<String> listOperator(String groupId, String topicName) {
         return null;
     }
+
+    @Override
+    public void validateGroupId(String channelName) throws BrokerException {
+        this.validateChannelName(channelName);
+    }
 }
