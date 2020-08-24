@@ -40,7 +40,7 @@ public class WeEventClient implements IWeEventClient {
     private final String password;
 
     // default STOMP url, ws://localhost:8080/weevent-broker/stomp
-    private final String brokerStompUrl = "ws://localhost:7000/weevent-broker/stomp";
+    private final String brokerStompUrl = "ws://localhost:8080/weevent-broker/stomp";
     private List<String> subscribeIdList;
     private HttpClientHelper httpClientHelper;
     private WebSocketTransport transport;
@@ -57,6 +57,7 @@ public class WeEventClient implements IWeEventClient {
         this.subscribeIdList = Collections.synchronizedList(new ArrayList<>());
 
         buildStomp();
+        checkGroupId(brokerUrl, groupId);
     }
 
     @Override
@@ -292,6 +293,17 @@ public class WeEventClient implements IWeEventClient {
             return new URI(url);
         } catch (URISyntaxException e) {
             throw new BrokerException("invalid url format, eg: " + brokerStompUrl);
+        }
+    }
+
+    private void checkGroupId(String brokerUrl, String groupId) throws BrokerException {
+        if (StringUtils.isNotBlank(groupId)) {
+            HttpGet httpGet = new HttpGet(String.format("%s/checkGroupId?groupId=%s",
+                    brokerUrl.concat("/admin"),
+                    groupId));
+
+            this.httpClientHelper.invokeCGI(httpGet, new TypeReference<BaseResponse<ErrorCode>>() {
+            });
         }
     }
 

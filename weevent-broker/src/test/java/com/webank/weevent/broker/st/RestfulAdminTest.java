@@ -153,4 +153,14 @@ public class RestfulAdminTest extends JUnitTestBase {
         Assert.assertEquals(0, rsp.getBody().getCode());
         Assert.assertNotNull(rsp.getBody().getData());
     }
+
+    @Test
+    public void testCheckGroupIdExist() {
+        ResponseEntity<BaseResponse> rsp = admin.getForEntity(url + "checkGroupId?groupId={groupId}", BaseResponse.class, groupId);
+
+        Assert.assertEquals(200, rsp.getStatusCodeValue());
+        Assert.assertNotNull(rsp.getBody());
+        Assert.assertEquals(0, rsp.getBody().getCode());
+        Assert.assertNotNull(rsp.getBody().getData());
+    }
 }
