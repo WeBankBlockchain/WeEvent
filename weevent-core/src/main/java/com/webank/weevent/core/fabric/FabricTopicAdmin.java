@@ -171,6 +171,6 @@ public class FabricTopicAdmin implements IEventTopic {
 
     @Override
     public void validateGroupId(String channelName) throws BrokerException {
-        validateChannelName(channelName);
+        this.validateChannelName(channelName);
     }
 }
