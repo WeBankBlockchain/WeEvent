@@ -57,7 +57,7 @@ public class WeEventClient implements IWeEventClient {
         this.subscribeIdList = Collections.synchronizedList(new ArrayList<>());
 
         buildStomp();
-        checkGroupId(brokerUrl, groupId);
+        validateGroupId(brokerUrl, groupId);
     }
 
     @Override
@@ -296,9 +296,9 @@ public class WeEventClient implements IWeEventClient {
         }
     }
 
-    private void checkGroupId(String brokerUrl, String groupId) throws BrokerException {
-        if (StringUtils.isNotBlank(groupId)) {
-            HttpGet httpGet = new HttpGet(String.format("%s/checkGroupId?groupId=%s",
+    private void validateGroupId(String brokerUrl, String groupId) throws BrokerException {
+        if (StringUtils.isNotBlank(groupId) && !groupId.equals(WeEvent.DEFAULT_GROUP_ID)) {
+            HttpGet httpGet = new HttpGet(String.format("%s/validateGroupId?groupId=%s",
                     brokerUrl.concat("/admin"),
                     groupId));
 

@@ -223,10 +223,10 @@ public class AdminRest {
     /**
      * checkGroupId.
      */
-    @RequestMapping(path = "/checkGroupId")
-    public BaseResponse<ErrorCode> checkGroupIdExist(@RequestParam(value = "groupId") String groupId) throws BrokerException {
+    @RequestMapping(path = "/validateGroupId")
+    public BaseResponse<ErrorCode> validateGroupId(@RequestParam(value = "groupId") String groupId) throws BrokerException {
         log.info("groupId: {} ", groupId);
-
-        return BaseResponse.buildSuccess(this.consumer.checkGroupIdExist(groupId));
+        this.consumer.validateGroupId(groupId);
+        return BaseResponse.buildSuccess(ErrorCode.SUCCESS);
     }
 }

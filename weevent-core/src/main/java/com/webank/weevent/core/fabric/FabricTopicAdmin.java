@@ -170,8 +170,7 @@ public class FabricTopicAdmin implements IEventTopic {
     }
 
     @Override
-    public ErrorCode checkGroupIdExist(String channelName) throws BrokerException {
+    public void validateGroupId(String channelName) throws BrokerException {
         validateChannelName(channelName);
-        return ErrorCode.SUCCESS;
     }
 }

@@ -3,7 +3,6 @@ package com.webank.weevent.core;
 import java.util.List;
 
 import com.webank.weevent.client.BrokerException;
-import com.webank.weevent.client.ErrorCode;
 import com.webank.weevent.client.TopicInfo;
 import com.webank.weevent.client.TopicPage;
 import com.webank.weevent.client.WeEvent;
@@ -118,5 +117,5 @@ public interface IEventTopic {
 
     List<String> listOperator(String groupId, String topicName) throws BrokerException;
 
-    ErrorCode checkGroupIdExist(String groupId) throws BrokerException;
+    void validateGroupId(String groupId) throws BrokerException;
 }
