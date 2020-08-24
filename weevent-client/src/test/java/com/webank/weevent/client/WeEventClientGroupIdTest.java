@@ -49,23 +49,24 @@ public class WeEventClientGroupIdTest {
     }
 
     /**
-     * Method: publish(WeEvent weEvent, String groupId)
+     * test build WeEventClient groupId not exist
      */
     @Test
-    public void testPublishGroupId() throws Exception {
-        // test groupId
-        WeEvent weEvent = new WeEvent(this.topicName, "hello world".getBytes(StandardCharsets.UTF_8), this.extensions);
-        SendResult sendResult = this.weEventClient.publish(weEvent);
-        log.info("sendResult {}", sendResult);
-        Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
+    public void testBuildWeEventClientGroupIdNotExist() {
+        try {
+            IWeEventClient.builder().brokerUrl("http://localhost:7000/weevent-broker").groupId("notExist").build();
+            Assert.fail();
+        } catch (BrokerException e) {
+            Assert.assertEquals(ErrorCode.WEB3SDK_UNKNOWN_GROUP.getCode(), e.getCode());
+        }
     }
-
 
     /**
      * Method: publish(WeEvent weEvent)
      */
     @Test
     public void testPublish() throws Exception {
+        // test publish
         WeEvent weEvent = new WeEvent(this.topicName, "hello world".getBytes(StandardCharsets.UTF_8), this.extensions);
         SendResult sendResult = this.weEventClient.publish(weEvent);
         Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
@@ -254,7 +255,7 @@ public class WeEventClientGroupIdTest {
      */
     @Test
     public void testUnSubscribe() throws Exception {
-        String subscriptionId = this.weEventClient.subscribe(this.topicName, WeEvent.OFFSET_LAST, extensions,new IWeEventClient.EventListener() {
+        String subscriptionId = this.weEventClient.subscribe(this.topicName, WeEvent.OFFSET_LAST, extensions, new IWeEventClient.EventListener() {
             @Override
             public void onEvent(WeEvent event) {
                 log.info(event.toString());
