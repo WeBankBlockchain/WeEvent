@@ -219,4 +219,14 @@ public class AdminRest {
 
         return BaseResponse.buildSuccess(this.consumer.getContractContext(groupId));
     }
+
+    /**
+     * validateGroupId.
+     */
+    @RequestMapping(path = "/validateGroupId")
+    public BaseResponse<ErrorCode> validateGroupId(@RequestParam(value = "groupId") String groupId) throws BrokerException {
+        log.info("groupId: {} ", groupId);
+        this.consumer.validateGroupId(groupId);
+        return BaseResponse.buildSuccess(ErrorCode.SUCCESS);
+    }
 }

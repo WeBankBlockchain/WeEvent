@@ -57,6 +57,7 @@ public class WeEventClient implements IWeEventClient {
         this.subscribeIdList = Collections.synchronizedList(new ArrayList<>());
 
         buildStomp();
+        validateGroupId(brokerUrl, groupId);
     }
 
     @Override
@@ -292,6 +293,17 @@ public class WeEventClient implements IWeEventClient {
             return new URI(url);
         } catch (URISyntaxException e) {
             throw new BrokerException("invalid url format, eg: " + brokerStompUrl);
+        }
+    }
+
+    private void validateGroupId(String brokerUrl, String groupId) throws BrokerException {
+        if (StringUtils.isNotBlank(groupId) && !groupId.equals(WeEvent.DEFAULT_GROUP_ID)) {
+            HttpGet httpGet = new HttpGet(String.format("%s/validateGroupId?groupId=%s",
+                    brokerUrl.concat("/admin"),
+                    groupId));
+
+            this.httpClientHelper.invokeCGI(httpGet, new TypeReference<BaseResponse<ErrorCode>>() {
+            });
         }
     }
 
