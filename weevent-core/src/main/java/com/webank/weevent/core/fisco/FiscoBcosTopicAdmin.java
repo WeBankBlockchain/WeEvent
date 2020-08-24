@@ -145,6 +145,7 @@ public class FiscoBcosTopicAdmin implements IEventTopic {
         return fiscoBcosDelegate.getBlockHeight(Long.parseLong(groupId));
     }
 
+    @Override
     public void validateGroupId(String groupId) throws BrokerException {
         ParamCheckUtils.validateGroupId(groupId, fiscoBcosDelegate.listGroupId());
     }
@@ -216,5 +217,4 @@ public class FiscoBcosTopicAdmin implements IEventTopic {
 
         return fiscoBcosDelegate.listOperator(Long.parseLong(groupId), topicName);
     }
-
 }
