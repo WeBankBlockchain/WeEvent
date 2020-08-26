@@ -2,9 +2,7 @@ package com.webank.weevent.governance.common;
 
 import lombok.Getter;
 import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @Getter
 @Setter
 public class GovernanceResult {
@@ -12,8 +10,8 @@ public class GovernanceResult {
     // response status
     private Integer status;
 
-    // response msg
-    private String msg;
+    // response message
+    private String message;
 
     // response data
     private Object data;
@@ -22,8 +20,8 @@ public class GovernanceResult {
     private Integer totalCount;
 
 
-    public static GovernanceResult build(Integer status, String msg, Object data) {
-        return new GovernanceResult(status, msg, data);
+    public static GovernanceResult build(Integer status, String message, Object data) {
+        return new GovernanceResult(status, message, data);
     }
 
     public static GovernanceResult ok(Object data) {
@@ -38,25 +36,25 @@ public class GovernanceResult {
 
     }
 
-    public static GovernanceResult build(Integer status, String msg) {
-        return new GovernanceResult(status, msg, null);
+    public static GovernanceResult build(Integer status, String message) {
+        return new GovernanceResult(status, message, null);
     }
 
-    public GovernanceResult(Integer status, String msg, Object data) {
+    public GovernanceResult(Integer status, String message, Object data) {
         this.status = status;
-        this.msg = msg;
+        this.message = message;
         this.data = data;
     }
 
     public GovernanceResult(ErrorCode errorCode) {
         this.status = errorCode.getCode();
-        this.msg = errorCode.getCodeDesc();
+        this.message = errorCode.getCodeDesc();
         this.data = null;
     }
 
     public GovernanceResult(Object data) {
         this.status = 200;
-        this.msg = "OK";
+        this.message = "OK";
         this.data = data;
     }
 }

@@ -99,7 +99,7 @@ export default {
           }
         })
       } else {
-        vm.computeMD5(file)
+        // vm.computeMD5(file)
         Bus.$emit('fileAdded')
         vm.$emit('pop', true)
       }
@@ -110,7 +110,7 @@ export default {
       const res = JSON.parse(response)
       // 服务器自定义的错误（即虽返回200，但是是错误的情况），这种错误是Uploader无法拦截的
       if (res.status !== 200) {
-        this.$message({ message: res.msg, type: 'error' })
+        this.$message({ message: res.message, type: 'error' })
         // 文件状态设为“失败”
         this.statusSet(file.id, 'failed')
         return
