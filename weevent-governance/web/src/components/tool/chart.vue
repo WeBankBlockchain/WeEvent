@@ -136,7 +136,7 @@ export default {
         Highcharts.chart('chart', vm.option)
         this.$store.commit('set_Msg', this.$message({
           type: 'warning',
-          message: e.msg,
+          message: e.message,
           duration: 0,
           showClose: true
         }))
