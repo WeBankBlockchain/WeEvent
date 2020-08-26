@@ -210,7 +210,7 @@ export default {
           } else {
             this.$store.commit('set_Msg', this.$message({
               type: 'warning',
-              message: res.data.msg,
+              message: res.data.message,
               duration: 0,
               showClose: true
             }))
@@ -268,7 +268,7 @@ export default {
           } else {
             this.$store.commit('set_Msg', this.$message({
               type: 'warning',
-              message: res.data.msg,
+              message: res.data.message,
               duration: 0,
               showClose: true
             }))
