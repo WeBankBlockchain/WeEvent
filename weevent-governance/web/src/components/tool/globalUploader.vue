@@ -99,7 +99,7 @@ export default {
           }
         })
       } else {
-        // vm.computeMD5(file)
+        vm.computeMD5(file)
         Bus.$emit('fileAdded')
         vm.$emit('pop', true)
       }
