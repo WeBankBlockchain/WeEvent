@@ -170,7 +170,7 @@ export default {
         } else {
           vm.$store.commit('set_Msg', vm.$message({
             type: 'warning',
-            message: res.data.msg,
+            message: res.data.message,
             duration: 0,
             showClose: true
           }))
