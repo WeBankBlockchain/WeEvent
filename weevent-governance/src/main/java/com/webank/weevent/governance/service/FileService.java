@@ -401,7 +401,7 @@ public class FileService {
         try {
             boolean fileExist = fileClient.isFileExist(fileName, topic, groupId);
             if (fileExist) {
-                return GovernanceResult.build(200, "the file is already uploaded", true);
+                return GovernanceResult.build(ErrorCode.TRANSPORT_ALREADY_EXISTS.getCode(), "the file is already uploaded", true);
             }
             return GovernanceResult.ok(false);
         } catch (BrokerException e) {
