@@ -96,10 +96,12 @@ export default {
               duration: 0,
               showClose: true
             }))
+            this.$refs.uploader.files.pop()
+            this.$refs.uploader.fileList.pop()
           }
         })
       } else {
-        // vm.computeMD5(file)
+       	vm.computeMD5(file)
         Bus.$emit('fileAdded')
         vm.$emit('pop', true)
       }
