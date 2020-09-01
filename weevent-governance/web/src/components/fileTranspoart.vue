@@ -501,6 +501,8 @@ export default {
         return 'success'
       } else if (s === '2') {
         return 'faild'
+      } else if (s === '3'){
+      	return 'downloading'
       } else {
         return '-'
       }

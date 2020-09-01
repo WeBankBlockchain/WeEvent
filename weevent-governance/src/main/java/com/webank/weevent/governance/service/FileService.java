@@ -301,7 +301,7 @@ public class FileService {
             	if(Objects.equals(fileChunksMetaStatus.getProcess(), "100.00%")) {
             		fileChunksMetaEntity.setStatus("1");
             	} else {
-            		fileChunksMetaEntity.setStatus("downloading");
+            		fileChunksMetaEntity.setStatus("3");
             	}
             	BeanUtils.copyProperties(fileChunksMetaStatus, fileChunksMetaEntity);
             	chunksMetaEntities.add(fileChunksMetaEntity);
