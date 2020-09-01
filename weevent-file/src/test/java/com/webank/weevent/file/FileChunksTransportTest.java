@@ -21,6 +21,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 
 /**
@@ -80,8 +81,8 @@ public class FileChunksTransportTest {
 
             FileChunksMeta fileChunksMeta = null;
             try {
-                String fileMd5 = "d41d8cd98f00b204e9800998ecf8427e";
-                int fileSize = 1114;
+                String fileMd5 = "b0497e189ea2bb2a06e7ce54ffbf351c";
+                int fileSize = 1087;
                 fileChunksMeta = new FileChunksMeta(WeEventUtils.generateUuid(),
                         URLDecoder.decode("log4j2.xml", StandardCharsets.UTF_8.toString()),
                         fileSize,
@@ -92,11 +93,15 @@ public class FileChunksTransportTest {
                 e.printStackTrace();
             }
             if (fileChunksMeta != null) {
-                fileChunksMeta.initChunkSize(1024);
+                fileChunksMeta.initChunkSize(512);
+                for (int i = 0; i < 3; i++) {
+                    fileChunksMeta.getChunkStatus().set(i);
+                }
             }
 
             when(fileTransportService1.openChannel(Mockito.any())).thenReturn(fileChunksMeta);
             when(fileTransportService1.getReceiverFileChunksMeta(Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(fileChunksMeta);
+            when(fileTransportService1.closeChannel(Mockito.anyString(), Mockito.anyString())).thenReturn(fileChunksMeta);
 
             FileChunksTransport fileChunksTransport = new FileChunksTransport(fileTransportService1);
 
