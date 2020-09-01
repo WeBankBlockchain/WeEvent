@@ -362,11 +362,12 @@ export default {
             const newList = []
             list.forEach(item => {
               const e = {
-                fileName: item.file.fileName,
-                fileSize: item.file.fileSize,
-                fileMd5: item.file.fileMd5,
+                fileName: item.fileName,
+                fileSize: item.fileSize,
+                fileMd5: item.fileMd5,
                 process: item.process,
-                speed: item.speed
+                speed: item.speed,
+                status: item.status
               }
               newList.push(e)
             })
@@ -467,15 +468,19 @@ export default {
       }
     },
     checkSpeed (e) {
+      const b = 1024
       if (!e.speed) {
-        return '-'
+      	return (e.fileSize / b).toFixed(1) + ' KB / s'
       }
       const nu = e.speed.split('B/s')
       const size = Number(nu[0])
-      const b = 1024
       const mb = 1024 * 1024
       if (size < b) {
-        return (size / b).toFixed(1) + 'KB / s'
+        const v = (size / b).toFixed(1)
+        if(v === '0.0') {
+        	return (e.fileSize / b).toFixed(1) + ' KB / s'
+        }
+        return v + ' KB / s'
       }
       if (size >= b) {
         return (size / mb).toFixed(1) + ' MB / s'
@@ -620,7 +625,7 @@ export default {
   beforeDestroy () {
     let vm = this
     for (const key in vm.downLoadList) {
-      window.clearInterval(vm.downLoadList(key))
+      window.clearInterval(vm.downLoadList[key])
     }
   }
 }
