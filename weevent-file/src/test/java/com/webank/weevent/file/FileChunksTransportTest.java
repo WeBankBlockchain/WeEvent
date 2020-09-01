@@ -80,16 +80,20 @@ public class FileChunksTransportTest {
 
             FileChunksMeta fileChunksMeta = null;
             try {
+                String fileMd5 = "d41d8cd98f00b204e9800998ecf8427e";
+                int fileSize = 1114;
                 fileChunksMeta = new FileChunksMeta(WeEventUtils.generateUuid(),
                         URLDecoder.decode("log4j2.xml", StandardCharsets.UTF_8.toString()),
-                        1114,
-                        "d41d8cd98f00b204e9800998ecf8427e",
+                        fileSize,
+                        fileMd5,
                         this.topicName,
                         this.groupId, true);
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
-            fileChunksMeta.initChunkSize(1024);
+            if (fileChunksMeta != null) {
+                fileChunksMeta.initChunkSize(1024);
+            }
 
             when(fileTransportService1.openChannel(Mockito.any())).thenReturn(fileChunksMeta);
             when(fileTransportService1.getReceiverFileChunksMeta(Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(fileChunksMeta);
