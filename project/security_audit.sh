@@ -8,6 +8,7 @@ scan_code_script="cobra/cobra.py -f json -o /tmp/report.json -t "
 ignore_files=(
                #weevent-broker/src/main/resources/application-dev.properties
                #weevent-broker/src/main/resources/application-prod.properties
+               weevent-file/src/test/java/com/webank/weevent/file/FileChunksTransportTest.java
                .travis.yml
                project/*
               )
