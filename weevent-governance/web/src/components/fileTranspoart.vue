@@ -625,7 +625,7 @@ export default {
   beforeDestroy () {
     let vm = this
     for (const key in vm.downLoadList) {
-      window.clearInterval(vm.downLoadList(key))
+      window.clearInterval(vm.downLoadList[key])
     }
   }
 }
