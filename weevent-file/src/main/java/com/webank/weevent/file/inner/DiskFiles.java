@@ -48,15 +48,16 @@ public class DiskFiles {
         this.path = path;
     }
 
-    public String genLocalFileName(String fileId) {
+    public String genLocalFileName(String fileId) throws BrokerException {
         FileChunksMeta fileChunksMeta = fileIdChunksMeta.get(fileId);
         if (fileChunksMeta == null) {
             log.error("the fileChunksMeta corresponding to fieldId not exist, {}", fileId);
+            throw new BrokerException(ErrorCode.FILE_GEN_LOCAL_FILE_NAME_FAILED);
         }
         return this.path + "/" + fileChunksMeta.getTopic() + "/" + fileChunksMeta.getFileName();
     }
 
-    private String genLocalMetaFileName(String fileId) {
+    private String genLocalMetaFileName(String fileId) throws BrokerException {
         return this.genLocalFileName(fileId) + MetaFileSuffix;
     }
 
@@ -224,7 +225,7 @@ public class DiskFiles {
         }
     }
 
-    public void cleanUp(String fileId) {
+    public void cleanUp(String fileId) throws BrokerException {
         this.deleteFile(this.genLocalFileName(fileId));
         this.deleteFile(this.genLocalMetaFileName(fileId));
     }
