@@ -142,6 +142,7 @@ public enum ErrorCode {
     FILE_EXIST_AND_NOT_ALLOW_OVERWRITE(200512, "The file already exists in the directory, and do not allow overwrite"),
     FILE_GEN_PEM_BC_FAILED(200513,"generate pem file failed due to bouncy castle exception."),
     FILE_PEM_KEY_INVALID(200514, "public or private key pem file invalid."),
+    FILE_GEN_LOCAL_FILE_NAME_FAILED(200515, "fileChunksMeta corresponding to fieldId not exist"),
 
     MQTT_UNKNOWN_COMMAND(200600, "unknown mqtt command"),
     MQTT_ENCODE_FAILED(200601, "encode mqtt message failed"),
