@@ -80,23 +80,19 @@ public class FileChunksTransportTest {
             FileTransportService fileTransportService1 = mock(FileTransportService.class);
 
             FileChunksMeta fileChunksMeta = null;
-            try {
-                String fileMd5 = "b0497e189ea2bb2a06e7ce54ffbf351c";
-                int fileSize = 1087;
-                fileChunksMeta = new FileChunksMeta(WeEventUtils.generateUuid(),
-                        URLDecoder.decode("log4j2.xml", StandardCharsets.UTF_8.toString()),
-                        fileSize,
-                        fileMd5,
-                        this.topicName,
-                        this.groupId, true);
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
-            if (fileChunksMeta != null) {
-                fileChunksMeta.initChunkSize(512);
-                for (int i = 0; i < 3; i++) {
-                    fileChunksMeta.getChunkStatus().set(i);
-                }
+
+            String fileMd5 = "b0497e189ea2bb2a06e7ce54ffbf351c";
+            int fileSize = 1087;
+            fileChunksMeta = new FileChunksMeta(WeEventUtils.generateUuid(),
+                    URLDecoder.decode("log4j2.xml", StandardCharsets.UTF_8.toString()),
+                    fileSize,
+                    fileMd5,
+                    this.topicName,
+                    this.groupId, true);
+
+            fileChunksMeta.initChunkSize(512);
+            for (int i = 0; i < 3; i++) {
+                fileChunksMeta.getChunkStatus().set(i);
             }
 
             when(fileTransportService1.openChannel(Mockito.any())).thenReturn(fileChunksMeta);
