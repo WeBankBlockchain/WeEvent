@@ -11,13 +11,13 @@ while [[ $# -ge 2 ]] ; do
 done
 
 configzookeeper(){
-    sed -i '/nohup/s/\\/"-Dzookeeper.admin.enableServer=false" \\/g' ${out_path}/apache-zookeeper-3.6.0-bin/bin/zkServer.sh
-    chmod +x ${out_path}/apache-zookeeper-3.6.0-bin/bin/zkServer.sh
-    cp ${out_path}/apache-zookeeper-3.6.0-bin/conf/zoo_sample.cfg ${out_path}/apache-zookeeper-3.6.0-bin/conf/zoo.cfg
-    sed -i '/dataDir=/cdataDir='${out_path}/apache-zookeeper-3.6.0-bin/zk_data ${out_path}/apache-zookeeper-3.6.0-bin/conf/zoo.cfg
+    sed -i '/nohup/s/\\/"-Dzookeeper.admin.enableServer=false" \\/g' ${out_path}/apache-zookeeper-3.6.1-bin/bin/zkServer.sh
+    chmod +x ${out_path}/apache-zookeeper-3.6.1-bin/bin/zkServer.sh
+    cp ${out_path}/apache-zookeeper-3.6.1-bin/conf/zoo_sample.cfg ${out_path}/apache-zookeeper-3.6.1-bin/conf/zoo.cfg
+    sed -i '/dataDir=/cdataDir='${out_path}/apache-zookeeper-3.6.1-bin/zk_data ${out_path}/apache-zookeeper-3.6.1-bin/conf/zoo.cfg
     zookeeper_pre="clientPort="
     zookeeper_string=${zookeeper_pre}${zookeeper_port}
-    sed -i 's/^clientPort=.*$/'$(echo ${zookeeper_pre}${zookeeper_port})'/' ${out_path}/apache-zookeeper-3.6.0-bin/conf/zoo.cfg
+    sed -i 's/^clientPort=.*$/'$(echo ${zookeeper_pre}${zookeeper_port})'/' ${out_path}/apache-zookeeper-3.6.1-bin/conf/zoo.cfg
 }
 
 function copy_file(){
