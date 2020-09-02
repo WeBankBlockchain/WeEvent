@@ -2,9 +2,6 @@ apply plugin: "io.spring.dependency-management"
 apply plugin: "signing"
 
 dependencies {
-    // jackson
-    implementation("com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}")
-
     // stomp, see https://github.com/TooTallNate/Java-WebSocket
     implementation("org.java-websocket:Java-WebSocket:${WebSocketVersion}")
     implementation("org.springframework.data:spring-data-commons:${springBootVersion}")
