@@ -7,12 +7,13 @@ import java.util.List;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.file.ftpclient.FtpClientService;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @Slf4j
 public class FtpClientServiceTest {
@@ -41,7 +42,6 @@ public class FtpClientServiceTest {
         }
         Assert.assertTrue(true);
     }
-
 
 
     @Test
