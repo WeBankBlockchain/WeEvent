@@ -19,6 +19,6 @@ do
 done
 
 # finally stop zookeeper
-cd ${current_path}/zookeeper/apache-zookeeper-3.6.0-bin/bin/;
+cd ${current_path}/zookeeper/apache-zookeeper-3.6.1-bin/bin/;
 ./zkServer.sh stop;
 

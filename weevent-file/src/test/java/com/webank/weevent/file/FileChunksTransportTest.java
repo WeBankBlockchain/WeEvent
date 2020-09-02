@@ -15,14 +15,15 @@ import com.webank.weevent.file.inner.FileTransportService;
 import com.webank.weevent.file.service.FileChunksMeta;
 import com.webank.weevent.file.service.FileChunksTransport;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * FileChunks Tester.
