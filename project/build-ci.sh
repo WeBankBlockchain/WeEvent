@@ -40,16 +40,16 @@ function installFisco(){
 function installZookeeper(){
     #unzip file
     cd ${current_path}/weevent-build/modules/zookeeper/
-    tar -zxf apache-zookeeper-3.6.0-bin.tar.gz
+    tar -zxf apache-zookeeper-3.6.1-bin.tar.gz
 
     #modify configuration
-    sed -i '158s#\\#"-Dzookeeper.admin.enableServer=false" \\#' ${current_path}/weevent-build/modules/zookeeper/apache-zookeeper-3.6.0-bin/bin/zkServer.sh
-    cp ${current_path}/weevent-build/modules/zookeeper/apache-zookeeper-3.6.0-bin/conf/zoo_sample.cfg ${current_path}/weevent-build/modules/zookeeper/apache-zookeeper-3.6.0-bin/conf/zoo.cfg
-    sed -i '$a\dataDir=/tmp/zk_data' ${current_path}/weevent-build/modules/zookeeper/apache-zookeeper-3.6.0-bin/conf/zoo.cfg
-    sed -i '$a\dataLogDir=/tmp/zk_logs' ${current_path}/weevent-build/modules/zookeeper/apache-zookeeper-3.6.0-bin/conf/zoo.cfg
+    sed -i '158s#\\#"-Dzookeeper.admin.enableServer=false" \\#' ${current_path}/weevent-build/modules/zookeeper/apache-zookeeper-3.6.1-bin/bin/zkServer.sh
+    cp ${current_path}/weevent-build/modules/zookeeper/apache-zookeeper-3.6.1-bin/conf/zoo_sample.cfg ${current_path}/weevent-build/modules/zookeeper/apache-zookeeper-3.6.1-bin/conf/zoo.cfg
+    sed -i '$a\dataDir=/tmp/zk_data' ${current_path}/weevent-build/modules/zookeeper/apache-zookeeper-3.6.1-bin/conf/zoo.cfg
+    sed -i '$a\dataLogDir=/tmp/zk_logs' ${current_path}/weevent-build/modules/zookeeper/apache-zookeeper-3.6.1-bin/conf/zoo.cfg
 
     #start zookeeper
-    cd ${current_path}/weevent-build/modules/zookeeper/apache-zookeeper-3.6.0-bin/bin/
+    cd ${current_path}/weevent-build/modules/zookeeper/apache-zookeeper-3.6.1-bin/bin/
     bash zkServer.sh start
 }
 
