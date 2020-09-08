@@ -73,7 +73,7 @@ ext {
     // jmeter
     jmeterVersion = "5.0"
     // jackson
-    jacksonVersion = "2.9.10.1"
+    jacksonVersion = "2.11.2"
 
     commonsNetVersion = "3.6"
 
@@ -167,6 +167,7 @@ allprojects {
         resolutionStrategy {
             // fix security bug
             force "com.alibaba:fastjson:${fastjsonVersion}"
+            force "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
             // force use netty
             force "io.netty:netty-all:${nettyVersion}"
             force "org.apache.zookeeper:zookeeper:${zookeeperVersion}"
@@ -181,6 +182,11 @@ allprojects {
         // apache commons
         implementation("org.apache.commons:commons-lang3:${apacheCommonsVersion.lang3}")
         implementation("org.apache.commons:commons-collections4:${apacheCommonsVersion.collections4}")
+
+        // jackson
+        implementation("com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}")
+        implementation("com.fasterxml.jackson.core:jackson-core:${jacksonVersion}")
+        implementation("com.fasterxml.jackson.core:jackson-annotations:${jacksonVersion}")
 
         // slf4j logger
         implementation("org.slf4j:slf4j-api:${slf4jVersion}")

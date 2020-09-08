@@ -8,7 +8,7 @@ if [[ -e ${current_path}/install-all.sh ]];then
 fi
 
 # start zookeeper first
-cd ${current_path}/zookeeper/apache-zookeeper-3.6.0-bin/bin/
+cd ${current_path}/zookeeper/apache-zookeeper-3.6.1-bin/bin/
 ./zkServer.sh start
 cd ${current_path}
 sleep 3
