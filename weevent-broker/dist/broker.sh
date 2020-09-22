@@ -8,7 +8,7 @@ fi
 
 server_name=weevent-broker
 bash_name=$(basename $0)
-APP_PARAMS="-Xbootclasspath/a:./conf -cp ./apps/* -Dloader.path=./lib,../lib org.springframework.boot.loader.PropertiesLauncher"
+APP_PARAMS="-Djdk.tls.namedGroups=\"secp256k1\" -Xbootclasspath/a:./conf -cp ./apps/* -Dloader.path=./lib,../lib org.springframework.boot.loader.PropertiesLauncher"
 
 ###############################################################################
 # The following is common logic for start a java application. DO NOT EDIT IT SOLELY.

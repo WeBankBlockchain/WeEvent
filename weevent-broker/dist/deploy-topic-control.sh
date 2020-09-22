@@ -7,7 +7,7 @@ if [[ -z ${JAVA_HOME} ]];then
    exit 1
 fi
 
-${JAVA_HOME}/bin/java -classpath "./conf:./lib/*:../lib/*" com.webank.weevent.core.fisco.util.Web3sdkUtils
+${JAVA_HOME}/bin/java -Djdk.tls.namedGroups="secp256k1" -classpath "./conf:./lib/*:../lib/*" com.webank.weevent.core.fisco.util.Web3sdkUtils
 if [[ $? -ne 0 ]];then
     echo "deploy topic control failed."
     exit 1
