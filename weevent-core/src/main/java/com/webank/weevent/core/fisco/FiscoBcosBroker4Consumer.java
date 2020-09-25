@@ -13,7 +13,7 @@ import com.webank.weevent.client.WeEvent;
 import com.webank.weevent.core.IConsumer;
 import com.webank.weevent.core.dto.SubscriptionInfo;
 import com.webank.weevent.core.fisco.util.ParamCheckUtils;
-import com.webank.weevent.core.fisco.web3sdk.FiscoBcosDelegate;
+import com.webank.weevent.core.fisco.web3sdk.FiscoBcosDelegateNew;
 import com.webank.weevent.core.task.IBlockChain;
 import com.webank.weevent.core.task.MainEventLoop;
 import com.webank.weevent.core.task.Subscription;
@@ -30,11 +30,11 @@ import org.apache.commons.lang3.StringUtils;
  * @since 2018/11/02
  */
 @Slf4j
-public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements IConsumer, IBlockChain, FiscoBcosDelegate.IBlockEventListener {
+public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements IConsumer, IBlockChain, FiscoBcosDelegateNew.IBlockEventListener {
     /**
      * Group ID <-> Subscription over AMOP
      */
-    private final Map<Long, AMOPSubscription> AMOPSubscriptions;
+    private final Map<Long, AMOPSubscriptionNew> AMOPSubscriptions;
 
     /**
      * Subscription ID <-> Subscription
@@ -61,7 +61,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
      */
     private final int idleTime;
 
-    public FiscoBcosBroker4Consumer(FiscoBcosDelegate fiscoBcosDelegate) {
+    public FiscoBcosBroker4Consumer(FiscoBcosDelegateNew fiscoBcosDelegate) {
         super(fiscoBcosDelegate);
 
         this.AMOPSubscriptions = fiscoBcosDelegate.initAMOP();
@@ -158,7 +158,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
     private String subscribeTopic(String[] topics, Long groupId, String offset, Map<SubscribeExt, String> ext, ConsumerListener listener) throws BrokerException {
         // support Ephemeral
         if (ext.containsKey(SubscribeExt.Ephemeral)) {
-            AMOPSubscription amopSubscription = this.AMOPSubscriptions.get(groupId);
+            AMOPSubscriptionNew amopSubscription = this.AMOPSubscriptions.get(groupId);
             return amopSubscription.addTopic(topics[0], listener);
         }
 
@@ -221,7 +221,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         // support Ephemeral
         String[] tokens = subscriptionId.split(AMOPSubscription.SEPARATE);
         if (tokens.length == 2) {
-            AMOPSubscription amopSubscription = this.AMOPSubscriptions.get(Long.valueOf(tokens[0]));
+            AMOPSubscriptionNew amopSubscription = this.AMOPSubscriptions.get(Long.valueOf(tokens[0]));
             amopSubscription.removeTopic(subscriptionId);
             return true;
         }

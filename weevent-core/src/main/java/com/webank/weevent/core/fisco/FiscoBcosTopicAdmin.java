@@ -16,7 +16,7 @@ import com.webank.weevent.core.dto.TbBlock;
 import com.webank.weevent.core.dto.TbNode;
 import com.webank.weevent.core.dto.TbTransHash;
 import com.webank.weevent.core.fisco.util.ParamCheckUtils;
-import com.webank.weevent.core.fisco.web3sdk.FiscoBcosDelegate;
+import com.webank.weevent.core.fisco.web3sdk.FiscoBcosDelegateNew;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -31,9 +31,9 @@ import org.apache.commons.lang3.StringUtils;
 public class FiscoBcosTopicAdmin implements IEventTopic {
 
     // FISCO-BCOS handler
-    protected FiscoBcosDelegate fiscoBcosDelegate;
+    protected FiscoBcosDelegateNew fiscoBcosDelegate;
 
-    public FiscoBcosTopicAdmin(FiscoBcosDelegate fiscoBcosDelegate) {
+    public FiscoBcosTopicAdmin(FiscoBcosDelegateNew fiscoBcosDelegate) {
         this.fiscoBcosDelegate = fiscoBcosDelegate;
     }
 

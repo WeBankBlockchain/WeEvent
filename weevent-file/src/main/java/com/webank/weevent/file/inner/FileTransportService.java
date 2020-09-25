@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import com.webank.weevent.client.BrokerException;
@@ -22,6 +23,7 @@ import com.webank.weevent.file.service.FileChunksMeta;
 
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.channel.dto.ChannelResponse;
+import org.fisco.bcos.sdk.model.Response;
 
 /**
  * File transport service base on AMOP.
@@ -39,7 +41,7 @@ public class FileTransportService {
     private final DiskFiles diskFiles;
 
     // following ONLY used in sender side
-    private AMOPChannel channel;
+    private AMOPChannelNew channel;
     // fileId <-> FileChunksMeta
     private Map<String, FileChunksMeta> fileTransportContexts = new ConcurrentHashMap<>();
 
@@ -66,11 +68,10 @@ public class FileTransportService {
 
         // init common amop channel
         log.info("init AMOP channel for common transport, groupId: {}", groupId);
-        AMOPChannel channel = new AMOPChannel(this, groupId);
-        this.channel = channel;
+        this.channel = new AMOPChannelNew(this, groupId);
     }
 
-    public AMOPChannel getChannel() {
+    public AMOPChannelNew getChannel() {
         return this.channel;
     }
 
@@ -208,9 +209,8 @@ public class FileTransportService {
 
         // clean up receiver context
         //AMOPChannel channel = this.getChannel(groupId);
-        FileChunksMeta fileChunksMeta = channel.cleanUpReceiverFileContext(topic, fileId);
 
-        return fileChunksMeta;
+        return channel.cleanUpReceiverFileContext(topic, fileId);
     }
 
     public SendResult sendSign(FileChunksMeta fileChunksMeta) throws BrokerException {
@@ -238,15 +238,20 @@ public class FileTransportService {
         fileEvent.setChunkData(data);
 
         //AMOPChannel channel = this.getChannel(groupId);
-        ChannelResponse rsp = channel.sendEvent(topic, fileEvent);
-        if (rsp.getErrorCode() == ErrorCode.SUCCESS.getCode()) {
-            log.info("sender chunk data to remote success");
-            // local cached chunkStatus is not consistency, but show in stats and log only
-            fileChunksMeta.getChunkStatus().set(chunkIndex);
-        } else {
-            BrokerException e = AMOPChannel.toBrokerException(rsp);
-            log.error("sender chunk data to remote failed", e);
-            throw e;
+        try {
+            Response rsp = channel.sendEvent(topic, fileEvent);
+            if (rsp.getErrorCode() == ErrorCode.SUCCESS.getCode()) {
+                log.info("sender chunk data to remote success");
+                // local cached chunkStatus is not consistency, but show in stats and log only
+                fileChunksMeta.getChunkStatus().set(chunkIndex);
+            } else {
+                BrokerException e = AMOPChannelNew.toBrokerException(rsp);
+                log.error("sender chunk data to remote failed", e);
+                throw e;
+            }
+        } catch (InterruptedException | TimeoutException e) {
+            log.error("InterruptedException | TimeoutException while send amop request");
+            throw new BrokerException(ErrorCode.SEND_AMOP_MESSAGE_FAILED);
         }
     }
 

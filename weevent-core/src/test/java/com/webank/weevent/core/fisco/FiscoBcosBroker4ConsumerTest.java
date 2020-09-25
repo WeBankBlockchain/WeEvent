@@ -16,6 +16,7 @@ import com.webank.weevent.core.IProducer;
 import com.webank.weevent.core.JUnitTestBase;
 import com.webank.weevent.core.config.FiscoConfig;
 import com.webank.weevent.core.fisco.web3sdk.FiscoBcosDelegate;
+import com.webank.weevent.core.fisco.web3sdk.FiscoBcosDelegateNew;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -72,7 +73,7 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
 
         FiscoConfig fiscoConfig = new FiscoConfig();
         Assert.assertTrue(fiscoConfig.load(""));
-        FiscoBcosDelegate fiscoBcosDelegate = new FiscoBcosDelegate();
+        FiscoBcosDelegateNew fiscoBcosDelegate = new FiscoBcosDelegateNew();
         fiscoBcosDelegate.initProxy(fiscoConfig);
 
         this.iConsumer = new FiscoBcosBroker4Consumer(fiscoBcosDelegate);

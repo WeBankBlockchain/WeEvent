@@ -20,6 +20,7 @@ import com.webank.weevent.core.dto.TbBlock;
 import com.webank.weevent.core.dto.TbNode;
 import com.webank.weevent.core.dto.TbTransHash;
 import com.webank.weevent.core.fisco.web3sdk.FiscoBcosDelegate;
+import com.webank.weevent.core.fisco.web3sdk.FiscoBcosDelegateNew;
 
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.web3j.crypto.Credentials;
@@ -56,7 +57,7 @@ public class FiscoTopicAdminTest extends JUnitTestBase {
 
         FiscoConfig fiscoConfig = new FiscoConfig();
         Assert.assertTrue(fiscoConfig.load(""));
-        FiscoBcosDelegate fiscoBcosDelegate = new FiscoBcosDelegate();
+        FiscoBcosDelegateNew fiscoBcosDelegate = new FiscoBcosDelegateNew();
         fiscoBcosDelegate.initProxy(fiscoConfig);
         this.iProducer = new FiscoBcosBroker4Producer(fiscoBcosDelegate);
 

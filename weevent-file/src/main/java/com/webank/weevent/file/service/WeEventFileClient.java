@@ -23,6 +23,7 @@ import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.ErrorCode;
 import com.webank.weevent.client.SendResult;
 import com.webank.weevent.core.FiscoBcosInstance;
+import com.webank.weevent.core.FiscoBcosInstanceNew;
 import com.webank.weevent.core.IConsumer;
 import com.webank.weevent.core.IProducer;
 import com.webank.weevent.core.config.FiscoConfig;
@@ -34,6 +35,8 @@ import com.webank.weevent.file.dto.FileTransportStats;
 import com.webank.weevent.file.ftpclient.FtpClientService;
 import com.webank.weevent.file.ftpclient.FtpInfo;
 import com.webank.weevent.file.inner.AMOPChannel;
+import com.webank.weevent.file.inner.AMOPChannelNew;
+import com.webank.weevent.file.inner.AmopResponseCallback;
 import com.webank.weevent.file.inner.DiskFiles;
 import com.webank.weevent.file.inner.FileTransportService;
 import com.webank.weevent.file.inner.PemFile;
@@ -47,6 +50,11 @@ import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
 import org.fisco.bcos.channel.client.Service;
 import org.fisco.bcos.channel.handler.AMOPVerifyKeyInfo;
 import org.fisco.bcos.channel.handler.AMOPVerifyTopicToKeyInfo;
+import org.fisco.bcos.sdk.BcosSDK;
+import org.fisco.bcos.sdk.amop.Amop;
+import org.fisco.bcos.sdk.amop.AmopCallback;
+import org.fisco.bcos.sdk.crypto.keystore.KeyTool;
+import org.fisco.bcos.sdk.crypto.keystore.PEMKeyStore;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 
@@ -89,7 +97,7 @@ public class WeEventFileClient implements IWeEventFileClient {
     public void init() {
         try {
             // create fisco instance
-            FiscoBcosInstance fiscoBcosInstance = new FiscoBcosInstance(this.config);
+            FiscoBcosInstanceNew fiscoBcosInstance = new FiscoBcosInstanceNew(this.config);
 
             // create producer
             IProducer iProducer = fiscoBcosInstance.buildProducer();
@@ -116,6 +124,7 @@ public class WeEventFileClient implements IWeEventFileClient {
 
     public void openTransport4Sender(String topic, InputStream publicPem) throws BrokerException {
         // publicPem is public key
+        String publicKey;
         BufferedInputStream bufferedInputStream = new BufferedInputStream(publicPem);
         try {
             if (publicPem == null) {
@@ -123,7 +132,7 @@ public class WeEventFileClient implements IWeEventFileClient {
                 throw new BrokerException(ErrorCode.PARAM_ISNULL);
             }
             bufferedInputStream.mark(bufferedInputStream.available() + 1);
-            String publicKey = IOUtils.toString(bufferedInputStream, StandardCharsets.UTF_8);
+            publicKey = IOUtils.toString(bufferedInputStream, StandardCharsets.UTF_8);
             if (!publicKey.contains(PUBLIC_KEY_DESC)) {
                 log.error("inputStream is not a public key.");
                 throw new BrokerException(ErrorCode.FILE_PEM_KEY_INVALID);
@@ -135,7 +144,7 @@ public class WeEventFileClient implements IWeEventFileClient {
         }
 
         // get AMOPChannel, fileTransportService and amopChannel is One-to-one correspondence
-        AMOPChannel amopChannel = this.fileTransportService.getChannel();
+        AMOPChannelNew amopChannel = this.fileTransportService.getChannel();
 
         // service is exist
         if (amopChannel.getSenderTopics().contains(topic) || amopChannel.senderVerifyTopics.containsKey(topic)) {
@@ -144,36 +153,43 @@ public class WeEventFileClient implements IWeEventFileClient {
         }
 
         // service not exist, new service
-        Service service = Web3SDKConnector.initService(Long.valueOf(this.groupId), this.fileTransportService.getFiscoConfig());
+        BcosSDK sdk = BcosSDK.build("");
+        Amop amop = sdk.getAmop();
 
-        // construct attribute for service
-        AMOPVerifyTopicToKeyInfo verifyTopicToKeyInfo = new AMOPVerifyTopicToKeyInfo();
-        ConcurrentHashMap<String, AMOPVerifyKeyInfo> topicToKeyInfo = new ConcurrentHashMap<>();
-        AMOPVerifyKeyInfo verifyKeyInfo = new AMOPVerifyKeyInfo();
+        List<KeyTool> keyToolList = new ArrayList<>();
+        keyToolList.add(new PEMKeyStore(publicKey));
 
-        // set private pem for service
-        InputStreamResource inputStreamResource = new InputStreamResource(bufferedInputStream);
-        List<Resource> publicPemList = new ArrayList<>();
-        publicPemList.add(inputStreamResource);
-
-        verifyKeyInfo.setPublicKey(publicPemList);
-        topicToKeyInfo.put(topic, verifyKeyInfo);
-        verifyTopicToKeyInfo.setTopicToKeyInfo(topicToKeyInfo);
-
-        // set service attribute
-        service.setNeedVerifyTopics(topic);
-        service.setTopic2KeyInfo(verifyTopicToKeyInfo);
-
-        // run service
-        try {
-            service.run();
-        } catch (Exception e) {
-            log.error("service run failed", e);
-            throw new BrokerException(ErrorCode.WEB3SDK_INIT_SERVICE_ERROR);
-        }
+        amop.publishPrivateTopic(topic, keyToolList);
+//        Service service = Web3SDKConnector.initService(Long.valueOf(this.groupId), this.fileTransportService.getFiscoConfig());
+//
+//        // construct attribute for service
+//        AMOPVerifyTopicToKeyInfo verifyTopicToKeyInfo = new AMOPVerifyTopicToKeyInfo();
+//        ConcurrentHashMap<String, AMOPVerifyKeyInfo> topicToKeyInfo = new ConcurrentHashMap<>();
+//        AMOPVerifyKeyInfo verifyKeyInfo = new AMOPVerifyKeyInfo();
+//
+//        // set private pem for service
+//        InputStreamResource inputStreamResource = new InputStreamResource(bufferedInputStream);
+//        List<Resource> publicPemList = new ArrayList<>();
+//        publicPemList.add(inputStreamResource);
+//
+//        verifyKeyInfo.setPublicKey(publicPemList);
+//        topicToKeyInfo.put(topic, verifyKeyInfo);
+//        verifyTopicToKeyInfo.setTopicToKeyInfo(topicToKeyInfo);
+//
+//        // set service attribute
+//        service.setNeedVerifyTopics(topic);
+//        service.setTopic2KeyInfo(verifyTopicToKeyInfo);
+//
+//        // run service
+//        try {
+//            service.run();
+//        } catch (Exception e) {
+//            log.error("service run failed", e);
+//            throw new BrokerException(ErrorCode.WEB3SDK_INIT_SERVICE_ERROR);
+//        }
 
         // put <topic-service> to map in AMOPChannel
-        amopChannel.senderVerifyTopics.put(topic, service);
+        amopChannel.senderVerifyTopics.put(topic, amop);
     }
 
     public void openTransport4Sender(String topic, String publicPemPath) throws BrokerException, IOException {
@@ -221,7 +237,7 @@ public class WeEventFileClient implements IWeEventFileClient {
     }
 
     public void openTransport4Receiver(String topic, FileListener fileListener) throws BrokerException {
-        AMOPChannel amopChannel = this.fileTransportService.getChannel();
+        AMOPChannelNew amopChannel = this.fileTransportService.getChannel();
 
         FileEventListener fileEventListener = new FileEventListener(this.localReceivePath, this.ftpInfo, fileListener);
 
@@ -230,11 +246,12 @@ public class WeEventFileClient implements IWeEventFileClient {
 
     public void openTransport4Receiver(String topic, FileListener fileListener, InputStream privatePem) throws BrokerException {
         // privatePem is private  key
+        String privateKey;
         BufferedInputStream bufferedInputStream = new BufferedInputStream(privatePem);
         try {
             bufferedInputStream.mark(bufferedInputStream.available() + 1);
-            String publicKey = IOUtils.toString(bufferedInputStream, StandardCharsets.UTF_8);
-            if (!publicKey.contains(PRIVATE_KEY_DESC)) {
+            privateKey = IOUtils.toString(bufferedInputStream, StandardCharsets.UTF_8);
+            if (!privateKey.contains(PRIVATE_KEY_DESC)) {
                 log.error("inputStream is not a private key.");
                 throw new BrokerException(ErrorCode.FILE_PEM_KEY_INVALID);
             }
@@ -245,11 +262,11 @@ public class WeEventFileClient implements IWeEventFileClient {
         }
 
         // get AMOPChannel, fileTransportService and amopChannel is One-to-one correspondence
-        AMOPChannel amopChannel = this.fileTransportService.getChannel();
+        AMOPChannelNew amopChannel = this.fileTransportService.getChannel();
 
         FileEventListener fileEventListener = new FileEventListener(this.localReceivePath, this.ftpInfo, fileListener);
 
-        amopChannel.subTopic(topic, groupId, bufferedInputStream, fileEventListener);
+        amopChannel.subTopic(topic, groupId, privateKey, fileEventListener);
     }
 
     public void openTransport4Receiver(String topic, FileListener fileListener, String privatePemPath) throws IOException, BrokerException {
@@ -268,7 +285,7 @@ public class WeEventFileClient implements IWeEventFileClient {
     }
 
     public void closeTransport(String topic) {
-        AMOPChannel channel = this.fileTransportService.getChannel();
+        AMOPChannelNew channel = this.fileTransportService.getChannel();
         // unSubscribe topic
         if (!channel.getSubTopics().isEmpty()) {
             channel.unSubTopic(topic);
@@ -290,16 +307,16 @@ public class WeEventFileClient implements IWeEventFileClient {
 
         // sender
         Map<String, List<FileChunksMetaStatus>> senderTopicStatusMap = new HashMap<>();
-        List<FileChunksMetaStatus> senderFileChunksMetaStatusList = new ArrayList<>();
-        senderFileChunksMetaStatusList = fileTransportStats.getSender().get(groupId).get(topicName);
+        List<FileChunksMetaStatus> senderFileChunksMetaStatusList =
+                fileTransportStats.getSender().get(groupId).get(topicName);
         senderTopicStatusMap.put(topicName, senderFileChunksMetaStatusList);
         Map<String, Map<String, List<FileChunksMetaStatus>>> sender = new HashMap<>();
         sender.put(groupId, senderTopicStatusMap);
 
         // receiver
         Map<String, List<FileChunksMetaStatus>> receiverTopicStatusMap = new HashMap<>();
-        List<FileChunksMetaStatus> receiverFileChunksMetaStatusList = new ArrayList<>();
-        receiverFileChunksMetaStatusList = fileTransportStats.getReceiver().get(groupId).get(topicName);
+        List<FileChunksMetaStatus> receiverFileChunksMetaStatusList =
+                fileTransportStats.getReceiver().get(groupId).get(topicName);
         receiverTopicStatusMap.put(topicName, receiverFileChunksMetaStatusList);
         Map<String, Map<String, List<FileChunksMetaStatus>>> receiver = new HashMap<>();
         receiver.put(groupId, receiverTopicStatusMap);

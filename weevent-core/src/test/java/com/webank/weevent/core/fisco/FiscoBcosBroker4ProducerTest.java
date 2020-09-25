@@ -15,6 +15,7 @@ import com.webank.weevent.core.JUnitTestBase;
 import com.webank.weevent.core.config.FiscoConfig;
 import com.webank.weevent.core.dto.ContractContext;
 import com.webank.weevent.core.fisco.web3sdk.FiscoBcosDelegate;
+import com.webank.weevent.core.fisco.web3sdk.FiscoBcosDelegateNew;
 import com.webank.weevent.core.fisco.web3sdk.v2.Web3SDKConnector;
 import com.webank.weevent.core.fisco.web3sdk.v2.solc10.Topic;
 import com.webank.weevent.client.BrokerException;
@@ -53,7 +54,7 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
     private ContractContext contractContext;
     private IProducer iProducer;
     private FiscoConfig fiscoConfig;
-    private FiscoBcosDelegate fiscoBcosDelegate;
+    private FiscoBcosDelegateNew fiscoBcosDelegate;
     private long transactionTimeout = 30000;
 
     @Before
@@ -64,7 +65,7 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
 
         this.fiscoConfig = new FiscoConfig();
         Assert.assertTrue(this.fiscoConfig.load(""));
-        this.fiscoBcosDelegate = new FiscoBcosDelegate();
+        this.fiscoBcosDelegate = new FiscoBcosDelegateNew();
         this.fiscoBcosDelegate.initProxy(this.fiscoConfig);
         this.iProducer = new FiscoBcosBroker4Producer(this.fiscoBcosDelegate);
 

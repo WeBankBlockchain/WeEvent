@@ -13,6 +13,9 @@ dependencies {
         exclude group: "org.ethereum", module: "solcJ-all"
     }
 
+    // implementation ("org.fisco-bcos:java-sdk:1.0.0-SNAPSHOT");
+    compile ('org.fisco-bcos.java-sdk:java-sdk:1.0.0-SNAPSHOT')
+
     // depend project
     api project(":weevent-core")
 
