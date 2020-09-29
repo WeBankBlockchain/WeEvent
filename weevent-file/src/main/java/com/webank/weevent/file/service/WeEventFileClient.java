@@ -17,13 +17,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.ErrorCode;
 import com.webank.weevent.client.SendResult;
 import com.webank.weevent.core.FiscoBcosInstance;
-import com.webank.weevent.core.FiscoBcosInstanceNew;
 import com.webank.weevent.core.IConsumer;
 import com.webank.weevent.core.IProducer;
 import com.webank.weevent.core.config.FiscoConfig;
@@ -35,8 +33,6 @@ import com.webank.weevent.file.dto.FileTransportStats;
 import com.webank.weevent.file.ftpclient.FtpClientService;
 import com.webank.weevent.file.ftpclient.FtpInfo;
 import com.webank.weevent.file.inner.AMOPChannel;
-import com.webank.weevent.file.inner.AMOPChannelNew;
-import com.webank.weevent.file.inner.AmopResponseCallback;
 import com.webank.weevent.file.inner.DiskFiles;
 import com.webank.weevent.file.inner.FileTransportService;
 import com.webank.weevent.file.inner.PemFile;
@@ -47,16 +43,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
-import org.fisco.bcos.channel.client.Service;
-import org.fisco.bcos.channel.handler.AMOPVerifyKeyInfo;
-import org.fisco.bcos.channel.handler.AMOPVerifyTopicToKeyInfo;
 import org.fisco.bcos.sdk.BcosSDK;
 import org.fisco.bcos.sdk.amop.Amop;
-import org.fisco.bcos.sdk.amop.AmopCallback;
 import org.fisco.bcos.sdk.crypto.keystore.KeyTool;
 import org.fisco.bcos.sdk.crypto.keystore.PEMKeyStore;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.core.io.Resource;
 
 @Slf4j
 public class WeEventFileClient implements IWeEventFileClient {
@@ -97,7 +87,7 @@ public class WeEventFileClient implements IWeEventFileClient {
     public void init() {
         try {
             // create fisco instance
-            FiscoBcosInstanceNew fiscoBcosInstance = new FiscoBcosInstanceNew(this.config);
+            FiscoBcosInstance fiscoBcosInstance = new FiscoBcosInstance(this.config);
 
             // create producer
             IProducer iProducer = fiscoBcosInstance.buildProducer();
@@ -144,7 +134,7 @@ public class WeEventFileClient implements IWeEventFileClient {
         }
 
         // get AMOPChannel, fileTransportService and amopChannel is One-to-one correspondence
-        AMOPChannelNew amopChannel = this.fileTransportService.getChannel();
+        AMOPChannel amopChannel = this.fileTransportService.getChannel();
 
         // service is exist
         if (amopChannel.getSenderTopics().contains(topic) || amopChannel.senderVerifyTopics.containsKey(topic)) {
@@ -153,40 +143,11 @@ public class WeEventFileClient implements IWeEventFileClient {
         }
 
         // service not exist, new service
-        BcosSDK sdk = BcosSDK.build("");
-        Amop amop = sdk.getAmop();
+        Amop amop = Web3SDKConnector.buidBcosSDK(this.fileTransportService.getFiscoConfig()).getAmop();
 
         List<KeyTool> keyToolList = new ArrayList<>();
         keyToolList.add(new PEMKeyStore(publicKey));
-
         amop.publishPrivateTopic(topic, keyToolList);
-//        Service service = Web3SDKConnector.initService(Long.valueOf(this.groupId), this.fileTransportService.getFiscoConfig());
-//
-//        // construct attribute for service
-//        AMOPVerifyTopicToKeyInfo verifyTopicToKeyInfo = new AMOPVerifyTopicToKeyInfo();
-//        ConcurrentHashMap<String, AMOPVerifyKeyInfo> topicToKeyInfo = new ConcurrentHashMap<>();
-//        AMOPVerifyKeyInfo verifyKeyInfo = new AMOPVerifyKeyInfo();
-//
-//        // set private pem for service
-//        InputStreamResource inputStreamResource = new InputStreamResource(bufferedInputStream);
-//        List<Resource> publicPemList = new ArrayList<>();
-//        publicPemList.add(inputStreamResource);
-//
-//        verifyKeyInfo.setPublicKey(publicPemList);
-//        topicToKeyInfo.put(topic, verifyKeyInfo);
-//        verifyTopicToKeyInfo.setTopicToKeyInfo(topicToKeyInfo);
-//
-//        // set service attribute
-//        service.setNeedVerifyTopics(topic);
-//        service.setTopic2KeyInfo(verifyTopicToKeyInfo);
-//
-//        // run service
-//        try {
-//            service.run();
-//        } catch (Exception e) {
-//            log.error("service run failed", e);
-//            throw new BrokerException(ErrorCode.WEB3SDK_INIT_SERVICE_ERROR);
-//        }
 
         // put <topic-service> to map in AMOPChannel
         amopChannel.senderVerifyTopics.put(topic, amop);
@@ -209,7 +170,7 @@ public class WeEventFileClient implements IWeEventFileClient {
 
     @Override
     public FileChunksMeta publishFile(String topic, String filePath, boolean overwrite) throws BrokerException, IOException {
-
+        FileChunksMeta fileChunksMeta;
         if (this.ftpInfo == null) {
             // publish local file
             validateLocalFile(filePath);
@@ -222,8 +183,7 @@ public class WeEventFileClient implements IWeEventFileClient {
             }
 
             FileChunksTransport fileChunksTransport = new FileChunksTransport(this.fileTransportService);
-            FileChunksMeta fileChunksMeta = fileChunksTransport.upload(filePath, topic, this.groupId, overwrite);
-            return fileChunksMeta;
+            fileChunksMeta = fileChunksTransport.upload(filePath, topic, this.groupId, overwrite);
         } else {
             // publish ftp file
             FtpClientService ftpClientService = new FtpClientService();
@@ -231,13 +191,13 @@ public class WeEventFileClient implements IWeEventFileClient {
             ftpClientService.downLoadFile(filePath, this.localReceivePath);
 
             FileChunksTransport fileChunksTransport = new FileChunksTransport(this.fileTransportService);
-            FileChunksMeta fileChunksMeta = fileChunksTransport.upload(this.localReceivePath + filePath.substring(filePath.indexOf('/')), topic, this.groupId, overwrite);
-            return fileChunksMeta;
+            fileChunksMeta = fileChunksTransport.upload(this.localReceivePath + filePath.substring(filePath.indexOf('/')), topic, this.groupId, overwrite);
         }
+        return fileChunksMeta;
     }
 
     public void openTransport4Receiver(String topic, FileListener fileListener) throws BrokerException {
-        AMOPChannelNew amopChannel = this.fileTransportService.getChannel();
+        AMOPChannel amopChannel = this.fileTransportService.getChannel();
 
         FileEventListener fileEventListener = new FileEventListener(this.localReceivePath, this.ftpInfo, fileListener);
 
@@ -262,7 +222,7 @@ public class WeEventFileClient implements IWeEventFileClient {
         }
 
         // get AMOPChannel, fileTransportService and amopChannel is One-to-one correspondence
-        AMOPChannelNew amopChannel = this.fileTransportService.getChannel();
+        AMOPChannel amopChannel = this.fileTransportService.getChannel();
 
         FileEventListener fileEventListener = new FileEventListener(this.localReceivePath, this.ftpInfo, fileListener);
 
@@ -285,7 +245,7 @@ public class WeEventFileClient implements IWeEventFileClient {
     }
 
     public void closeTransport(String topic) {
-        AMOPChannelNew channel = this.fileTransportService.getChannel();
+        AMOPChannel channel = this.fileTransportService.getChannel();
         // unSubscribe topic
         if (!channel.getSubTopics().isEmpty()) {
             channel.unSubTopic(topic);

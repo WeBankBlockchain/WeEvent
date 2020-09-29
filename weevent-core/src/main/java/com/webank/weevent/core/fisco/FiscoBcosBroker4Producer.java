@@ -9,14 +9,14 @@ import com.webank.weevent.client.SendResult;
 import com.webank.weevent.client.WeEvent;
 import com.webank.weevent.core.IProducer;
 import com.webank.weevent.core.fisco.util.ParamCheckUtils;
-import com.webank.weevent.core.fisco.web3sdk.FiscoBcosDelegateNew;
+import com.webank.weevent.core.fisco.web3sdk.FiscoBcosDelegate;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class FiscoBcosBroker4Producer extends FiscoBcosTopicAdmin implements IProducer {
 
-    public FiscoBcosBroker4Producer(FiscoBcosDelegateNew fiscoBcosDelegate) {
+    public FiscoBcosBroker4Producer(FiscoBcosDelegate fiscoBcosDelegate) {
         super(fiscoBcosDelegate);
     }
 

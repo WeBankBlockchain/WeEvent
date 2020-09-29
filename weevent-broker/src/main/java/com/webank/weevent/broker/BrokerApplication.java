@@ -21,7 +21,6 @@ import com.webank.weevent.core.fisco.web3sdk.FiscoBcosDelegate;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.googlecode.jsonrpc4j.ErrorResolver;
 import com.googlecode.jsonrpc4j.spring.AutoJsonRpcServiceImplExporter;
-import com.webank.weevent.core.fisco.web3sdk.FiscoBcosDelegateNew;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.http11.Http11NioProtocol;
 import org.springframework.boot.SpringApplication;
@@ -124,9 +123,9 @@ public class BrokerApplication {
     // FiscoBcosDelegate
     @Bean
     @ConditionalOnProperty(prefix = "block.chain", name = "type", havingValue = "fisco")
-    public FiscoBcosDelegateNew fiscoBcosDelegate(FiscoConfig fiscoConfig) throws BrokerException {
+    public FiscoBcosDelegate fiscoBcosDelegate(FiscoConfig fiscoConfig) throws BrokerException {
         log.info("++++++++++ FISCO-BCOS Enter ++++++++++");
-        FiscoBcosDelegateNew fiscoBcosDelegate = new FiscoBcosDelegateNew();
+        FiscoBcosDelegate fiscoBcosDelegate = new FiscoBcosDelegate();
         fiscoBcosDelegate.initProxy(fiscoConfig);
         return fiscoBcosDelegate;
     }
@@ -145,7 +144,7 @@ public class BrokerApplication {
     // FISCO-BCOS IProducer
     @Bean
     @ConditionalOnBean(FiscoBcosDelegate.class)
-    public IProducer fiscoIProducer(FiscoBcosDelegateNew fiscoBcosDelegate) {
+    public IProducer fiscoIProducer(FiscoBcosDelegate fiscoBcosDelegate) {
         FiscoBcosBroker4Producer fiscoBcosBroker4Producer = new FiscoBcosBroker4Producer(fiscoBcosDelegate);
         fiscoBcosBroker4Producer.startProducer();
         return fiscoBcosBroker4Producer;
@@ -154,7 +153,7 @@ public class BrokerApplication {
     // FISCO-BCOS IConsumer
     @Bean
     @ConditionalOnBean(FiscoBcosDelegate.class)
-    public IConsumer fiscoIConsumer(FiscoBcosDelegateNew fiscoBcosDelegate) throws BrokerException {
+    public IConsumer fiscoIConsumer(FiscoBcosDelegate fiscoBcosDelegate) throws BrokerException {
         FiscoBcosBroker4Consumer fiscoBcosBroker4Consumer = new FiscoBcosBroker4Consumer(fiscoBcosDelegate);
         fiscoBcosBroker4Consumer.startConsumer();
         return fiscoBcosBroker4Consumer;

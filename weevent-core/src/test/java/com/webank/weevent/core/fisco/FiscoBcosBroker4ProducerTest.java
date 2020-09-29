@@ -15,7 +15,6 @@ import com.webank.weevent.core.JUnitTestBase;
 import com.webank.weevent.core.config.FiscoConfig;
 import com.webank.weevent.core.dto.ContractContext;
 import com.webank.weevent.core.fisco.web3sdk.FiscoBcosDelegate;
-import com.webank.weevent.core.fisco.web3sdk.FiscoBcosDelegateNew;
 import com.webank.weevent.core.fisco.web3sdk.v2.Web3SDKConnector;
 import com.webank.weevent.core.fisco.web3sdk.v2.solc10.Topic;
 import com.webank.weevent.client.BrokerException;
@@ -25,15 +24,8 @@ import com.webank.weevent.client.SendResult;
 import com.webank.weevent.client.WeEvent;
 
 import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.web3j.abi.FunctionEncoder;
-import org.fisco.bcos.web3j.abi.TypeReference;
-import org.fisco.bcos.web3j.abi.datatypes.Function;
-import org.fisco.bcos.web3j.abi.datatypes.Type;
-import org.fisco.bcos.web3j.crypto.Credentials;
-import org.fisco.bcos.web3j.crypto.ExtendedRawTransaction;
-import org.fisco.bcos.web3j.crypto.ExtendedTransactionEncoder;
-import org.fisco.bcos.web3j.crypto.gm.GenCredential;
-import org.fisco.bcos.web3j.utils.Numeric;
+import org.fisco.bcos.sdk.abi.FunctionEncoder;
+import org.fisco.bcos.sdk.utils.Numeric;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -54,7 +46,7 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
     private ContractContext contractContext;
     private IProducer iProducer;
     private FiscoConfig fiscoConfig;
-    private FiscoBcosDelegateNew fiscoBcosDelegate;
+    private FiscoBcosDelegate fiscoBcosDelegate;
     private long transactionTimeout = 30000;
 
     @Before
@@ -65,7 +57,7 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
 
         this.fiscoConfig = new FiscoConfig();
         Assert.assertTrue(this.fiscoConfig.load(""));
-        this.fiscoBcosDelegate = new FiscoBcosDelegateNew();
+        this.fiscoBcosDelegate = new FiscoBcosDelegate();
         this.fiscoBcosDelegate.initProxy(this.fiscoConfig);
         this.iProducer = new FiscoBcosBroker4Producer(this.fiscoBcosDelegate);
 
@@ -329,124 +321,124 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
         Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
     }
 
-    /**
-     * publish an externally signed event by fixed account.
-     */
-    @Test
-    public void testPublishByFixedAccount() throws Exception {
-        Map<String, String> ext = new HashMap<>();
-        ext.put(WeEvent.WeEvent_SIGN, "true");
-        WeEvent event = new WeEvent(this.topicName, "this is a signed message".getBytes(), ext);
-        ContractContext contractContext = this.fiscoBcosDelegate.getContractContext(Long.parseLong(this.groupId));
-
-        String rawData = buildWeEvent(event);
-        ExtendedRawTransaction rawTransaction = getRawTransaction(this.groupId, rawData, contractContext);
-
-
-        String signData = signData(rawTransaction, Web3SDKConnector.getCredentials(this.fiscoConfig));
-        SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, signData.getBytes(), ext), this.groupId).get(transactionTimeout, TimeUnit.MILLISECONDS);
-
-        Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
-    }
-
-    /**
-     * publish an externally signed event by external account.
-     */
-    @Test
-    public void testPublishByExternalAccount() throws Exception {
-        Credentials externallyCredentials = getExternalAccountCredentials();
-        String operatorAddress = externallyCredentials.getAddress();
-
-        // add operatorAddress for topic
-        boolean result = this.iProducer.addOperator(this.groupId, this.topicName, operatorAddress);
-        Assert.assertTrue(result);
-
-        // publish event with the above generated externally account
-        Map<String, String> ext = new HashMap<>();
-        ext.put(WeEvent.WeEvent_SIGN, "true");
-        WeEvent event = new WeEvent(this.topicName, "this is a signed message".getBytes(), ext);
-
-        String rawData = buildWeEvent(event);
-        ExtendedRawTransaction rawTransaction = getRawTransaction(this.groupId, rawData, this.contractContext);
-
-        String signData = signData(rawTransaction, externallyCredentials);
-
-        SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, signData.getBytes(), ext), this.groupId).get(transactionTimeout, TimeUnit.MILLISECONDS);
-
-        Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
-    }
-
-    /**
-     * publish an externally signed event by external account.
-     */
-    @Test
-    public void testPublishByExternalAccountNoPermission() throws Exception {
-        Map<String, String> ext = new HashMap<>();
-        ext.put(WeEvent.WeEvent_SIGN, "true");
-        WeEvent event = new WeEvent(this.topicName, "this is a signed message".getBytes(), ext);
-
-        String rawData = buildWeEvent(event);
-        ExtendedRawTransaction rawTransaction = getRawTransaction(this.groupId, rawData, this.contractContext);
-
-        Credentials credentials = getExternalAccountCredentials();
-
-        String signData = signData(rawTransaction, credentials);
-        SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, signData.getBytes(), ext), this.groupId).get(transactionTimeout, TimeUnit.MILLISECONDS);
-
-        Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.NO_PERMISSION);
-    }
-
-    /**
-     * publish event,transactionHex illegal.
-     */
-    @Test
-    public void testPublishTransactionHexIllegal() throws Exception {
-        Map<String, String> ext = new HashMap<>();
-        ext.put(WeEvent.WeEvent_SIGN, "true");
-
-        String signData = "asd";
-        try {
-            this.iProducer.publish(new WeEvent(this.topicName, signData.getBytes(), ext), this.groupId).get(transactionTimeout, TimeUnit.MILLISECONDS);
-        } catch (BrokerException e) {
-            Assert.assertEquals(ErrorCode.TRANSACTIONHEX_ILLEGAL.getCode(), e.getCode());
-        }
-    }
-
-    private String buildWeEvent(WeEvent event) throws BrokerException {
-        final Function function = new Function(
-                Topic.FUNC_PUBLISHWEEVENT,
-                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.Utf8String(event.getTopic()),
-                        new org.fisco.bcos.web3j.abi.datatypes.Utf8String(new String(event.getContent(), StandardCharsets.UTF_8)),
-                        new org.fisco.bcos.web3j.abi.datatypes.Utf8String(JsonHelper.object2Json(event.getExtensions()))),
-                Collections.<TypeReference<?>>emptyList());
-        return FunctionEncoder.encode(function);
-    }
-
-    private ExtendedRawTransaction getRawTransaction(String groupId, String data, ContractContext contractContext) {
-        Random r = new SecureRandom();
-        BigInteger randomid = new BigInteger(250, r);
-        ExtendedRawTransaction rawTransaction =
-                ExtendedRawTransaction.createTransaction(
-                        randomid,
-                        BigInteger.valueOf(contractContext.getGasPrice()),
-                        BigInteger.valueOf(contractContext.getGasLimit()),
-                        BigInteger.valueOf(contractContext.getBlockLimit()),
-                        contractContext.getTopicAddress(),
-                        BigInteger.ZERO,
-                        data,
-                        new BigInteger(contractContext.getChainId()),
-                        new BigInteger(groupId),
-                        null);
-        return rawTransaction;
-    }
-
-    private String signData(ExtendedRawTransaction rawTransaction, Credentials credentials) {
-        byte[] signedMessage = ExtendedTransactionEncoder.signMessage(rawTransaction, credentials);
-        return Numeric.toHexString(signedMessage);
-    }
-
-    private Credentials getExternalAccountCredentials() {
-        return GenCredential.create();
-    }
+//    /**
+//     * publish an externally signed event by fixed account.
+//     */
+//    @Test
+//    public void testPublishByFixedAccount() throws Exception {
+//        Map<String, String> ext = new HashMap<>();
+//        ext.put(WeEvent.WeEvent_SIGN, "true");
+//        WeEvent event = new WeEvent(this.topicName, "this is a signed message".getBytes(), ext);
+//        ContractContext contractContext = this.fiscoBcosDelegate.getContractContext(Long.parseLong(this.groupId));
+//
+//        String rawData = buildWeEvent(event);
+//        ExtendedRawTransaction rawTransaction = getRawTransaction(this.groupId, rawData, contractContext);
+//
+//
+//        String signData = signData(rawTransaction, Web3SDKConnector.getCredentials(this.fiscoConfig));
+//        SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, signData.getBytes(), ext), this.groupId).get(transactionTimeout, TimeUnit.MILLISECONDS);
+//
+//        Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
+//    }
+//
+//    /**
+//     * publish an externally signed event by external account.
+//     */
+//    @Test
+//    public void testPublishByExternalAccount() throws Exception {
+//        Credentials externallyCredentials = getExternalAccountCredentials();
+//        String operatorAddress = externallyCredentials.getAddress();
+//
+//        // add operatorAddress for topic
+//        boolean result = this.iProducer.addOperator(this.groupId, this.topicName, operatorAddress);
+//        Assert.assertTrue(result);
+//
+//        // publish event with the above generated externally account
+//        Map<String, String> ext = new HashMap<>();
+//        ext.put(WeEvent.WeEvent_SIGN, "true");
+//        WeEvent event = new WeEvent(this.topicName, "this is a signed message".getBytes(), ext);
+//
+//        String rawData = buildWeEvent(event);
+//        ExtendedRawTransaction rawTransaction = getRawTransaction(this.groupId, rawData, this.contractContext);
+//
+//        String signData = signData(rawTransaction, externallyCredentials);
+//
+//        SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, signData.getBytes(), ext), this.groupId).get(transactionTimeout, TimeUnit.MILLISECONDS);
+//
+//        Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
+//    }
+//
+//    /**
+//     * publish an externally signed event by external account.
+//     */
+//    @Test
+//    public void testPublishByExternalAccountNoPermission() throws Exception {
+//        Map<String, String> ext = new HashMap<>();
+//        ext.put(WeEvent.WeEvent_SIGN, "true");
+//        WeEvent event = new WeEvent(this.topicName, "this is a signed message".getBytes(), ext);
+//
+//        String rawData = buildWeEvent(event);
+//        ExtendedRawTransaction rawTransaction = getRawTransaction(this.groupId, rawData, this.contractContext);
+//
+//        Credentials credentials = getExternalAccountCredentials();
+//
+//        String signData = signData(rawTransaction, credentials);
+//        SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, signData.getBytes(), ext), this.groupId).get(transactionTimeout, TimeUnit.MILLISECONDS);
+//
+//        Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.NO_PERMISSION);
+//    }
+//
+//    /**
+//     * publish event,transactionHex illegal.
+//     */
+//    @Test
+//    public void testPublishTransactionHexIllegal() throws Exception {
+//        Map<String, String> ext = new HashMap<>();
+//        ext.put(WeEvent.WeEvent_SIGN, "true");
+//
+//        String signData = "asd";
+//        try {
+//            this.iProducer.publish(new WeEvent(this.topicName, signData.getBytes(), ext), this.groupId).get(transactionTimeout, TimeUnit.MILLISECONDS);
+//        } catch (BrokerException e) {
+//            Assert.assertEquals(ErrorCode.TRANSACTIONHEX_ILLEGAL.getCode(), e.getCode());
+//        }
+//    }
+//
+//    private String buildWeEvent(WeEvent event) throws BrokerException {
+//        final Function function = new Function(
+//                Topic.FUNC_PUBLISHWEEVENT,
+//                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.Utf8String(event.getTopic()),
+//                        new org.fisco.bcos.web3j.abi.datatypes.Utf8String(new String(event.getContent(), StandardCharsets.UTF_8)),
+//                        new org.fisco.bcos.web3j.abi.datatypes.Utf8String(JsonHelper.object2Json(event.getExtensions()))),
+//                Collections.<TypeReference<?>>emptyList());
+//        return FunctionEncoder.encode(function);
+//    }
+//
+//    private ExtendedRawTransaction getRawTransaction(String groupId, String data, ContractContext contractContext) {
+//        Random r = new SecureRandom();
+//        BigInteger randomid = new BigInteger(250, r);
+//        ExtendedRawTransaction rawTransaction =
+//                ExtendedRawTransaction.createTransaction(
+//                        randomid,
+//                        BigInteger.valueOf(contractContext.getGasPrice()),
+//                        BigInteger.valueOf(contractContext.getGasLimit()),
+//                        BigInteger.valueOf(contractContext.getBlockLimit()),
+//                        contractContext.getTopicAddress(),
+//                        BigInteger.ZERO,
+//                        data,
+//                        new BigInteger(contractContext.getChainId()),
+//                        new BigInteger(groupId),
+//                        null);
+//        return rawTransaction;
+//    }
+//
+//    private String signData(ExtendedRawTransaction rawTransaction, Credentials credentials) {
+//        byte[] signedMessage = ExtendedTransactionEncoder.signMessage(rawTransaction, credentials);
+//        return Numeric.toHexString(signedMessage);
+//    }
+//
+//    private Credentials getExternalAccountCredentials() {
+//        return GenCredential.create();
+//    }
 
 }

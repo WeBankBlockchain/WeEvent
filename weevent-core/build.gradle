@@ -3,15 +3,15 @@ apply plugin: "signing"
 
 dependencies {
     // web3sdk for FISCO-BCOS 2.0
-    implementation("org.fisco-bcos:web3sdk:${web3sdkVersion.fisco}") {
+    implementation("org.fisco-bcos.java-sdk:java-sdk:${web3sdkVersion.fisco}") {
         // io.netty:netty-tcnative-boringssl-static:2.0.20.Final crash
         exclude group: "io.netty"
         // compile solidity
         exclude group: "org.ethereum", module: "solcJ-all"
     }
-    
-    compile ('org.fisco-bcos.java-sdk:java-sdk:1.0.0-SNAPSHOT')
-    // implementation("org.fisco-bcos:java-sdk:1.0.0-SNAPSHOT")
+
+    implementation("org.springframework:spring-beans:${springVersion}")
+    implementation("org.springframework:spring-context:${springVersion}")
 
     // fabric 1.4.4
     implementation("org.hyperledger.fabric-sdk-java:fabric-sdk-java:${fabricVersion}")

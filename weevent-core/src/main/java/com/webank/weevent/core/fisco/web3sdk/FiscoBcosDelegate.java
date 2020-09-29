@@ -29,7 +29,6 @@ import com.webank.weevent.core.fisco.web3sdk.v2.Web3SDKConnector;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.utils.Async;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /**
@@ -45,7 +44,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 @Slf4j
 public class FiscoBcosDelegate {
     // access to version 2.x
-    private final Map<Long, FiscoBcos2> fiscoBcos2Map = new ConcurrentHashMap<>();
+    private final Map<Integer, FiscoBcos2> fiscoBcos2Map = new ConcurrentHashMap<>();
 
     // AMOP subscription
     //private final Map<Long, AMOPSubscription> AMOPSubscriptions = new ConcurrentHashMap<>();
@@ -59,7 +58,7 @@ public class FiscoBcosDelegate {
     // fiscoConfig
     private FiscoConfig fiscoConfig;
 
-    private Async asyncHelper;
+//    private Async asyncHelper;
 
     /**
      * notify from web3sdk2.x when new block mined
@@ -90,11 +89,11 @@ public class FiscoBcosDelegate {
         if (config.getVersion().startsWith(WeEventConstants.FISCO_BCOS_2_X_VERSION_PREFIX)) {
             log.info("Notice: FISCO-BCOS's version is 2.x");
 
-            // set web3sdk.Async thread pool, special thread for sendAsync
-            this.asyncHelper = new Async(threadPool);
+//            // set web3sdk.Async thread pool, special thread for sendAsync
+//            this.asyncHelper = new Async(threadPool);
 
             // 1 is always exist
-            Long defaultGId = Long.valueOf(WeEvent.DEFAULT_GROUP_ID);
+            Integer defaultGId = Integer.parseInt(WeEvent.DEFAULT_GROUP_ID);
             FiscoBcos2 defaultFiscoBcos2 = new FiscoBcos2(config);
             defaultFiscoBcos2.init(defaultGId);
             this.fiscoBcos2Map.put(defaultGId, defaultFiscoBcos2);
@@ -104,7 +103,7 @@ public class FiscoBcosDelegate {
             // init all group in nodes except default one
             groups.remove(WeEvent.DEFAULT_GROUP_ID);
             for (String groupId : groups) {
-                Long gid = Long.valueOf(groupId);
+                Integer gid = Integer.parseInt(groupId);
                 FiscoBcos2 fiscoBcos2 = new FiscoBcos2(config);
                 fiscoBcos2.init(gid);
                 this.fiscoBcos2Map.put(gid, fiscoBcos2);
@@ -134,7 +133,7 @@ public class FiscoBcosDelegate {
     public void setListener(@NonNull IBlockEventListener listener) {
         log.info("set IBlockEventListener for every group for FISCO-BCOS 2.x");
 
-        for (Map.Entry<Long, FiscoBcos2> entry : fiscoBcos2Map.entrySet()) {
+        for (Map.Entry<Integer, FiscoBcos2> entry : fiscoBcos2Map.entrySet()) {
             entry.getValue().setListener(listener);
         }
     }
@@ -205,7 +204,7 @@ public class FiscoBcosDelegate {
         }
 
         // from block chain
-        events = this.fiscoBcos2Map.get(groupId).loop(blockNum);
+        events = this.fiscoBcos2Map.get(groupId).loop(BigInteger.valueOf(blockNum));
 
         return events;
     }
@@ -254,13 +253,13 @@ public class FiscoBcosDelegate {
         return this.fiscoBcos2Map.get(groupId).sendAMOP(topicName, content);
     }
 
-    public Map<Long, AMOPSubscription> initAMOP() {
-        Map<Long, AMOPSubscription> AMOPSubscriptions = new ConcurrentHashMap<>();
+    public Map<Integer, AMOPSubscription> initAMOP() {
+        Map<Integer, AMOPSubscription> AMOPSubscriptions = new ConcurrentHashMap<>();
 
-        for (Map.Entry<Long, FiscoBcos2> entry : this.fiscoBcos2Map.entrySet()) {
+        for (Map.Entry<Integer, FiscoBcos2> entry : this.fiscoBcos2Map.entrySet()) {
             log.info("init AMOP for group: {}", entry.getKey());
 
-            AMOPSubscription amopSubscription = new AMOPSubscription(String.valueOf(entry.getKey()), entry.getValue().getService());
+            AMOPSubscription amopSubscription = new AMOPSubscription(String.valueOf(entry.getKey()), entry.getValue().getAmop());
             AMOPSubscriptions.put(entry.getKey(), amopSubscription);
         }
 

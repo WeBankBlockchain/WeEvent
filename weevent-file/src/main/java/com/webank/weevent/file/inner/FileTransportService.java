@@ -22,7 +22,6 @@ import com.webank.weevent.file.dto.FileTransportStats;
 import com.webank.weevent.file.service.FileChunksMeta;
 
 import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.channel.dto.ChannelResponse;
 import org.fisco.bcos.sdk.model.Response;
 
 /**
@@ -41,7 +40,7 @@ public class FileTransportService {
     private final DiskFiles diskFiles;
 
     // following ONLY used in sender side
-    private AMOPChannelNew channel;
+    private AMOPChannel channel;
     // fileId <-> FileChunksMeta
     private Map<String, FileChunksMeta> fileTransportContexts = new ConcurrentHashMap<>();
 
@@ -68,10 +67,10 @@ public class FileTransportService {
 
         // init common amop channel
         log.info("init AMOP channel for common transport, groupId: {}", groupId);
-        this.channel = new AMOPChannelNew(this, groupId);
+        this.channel = new AMOPChannel(this, groupId);
     }
 
-    public AMOPChannelNew getChannel() {
+    public AMOPChannel getChannel() {
         return this.channel;
     }
 
@@ -245,7 +244,7 @@ public class FileTransportService {
                 // local cached chunkStatus is not consistency, but show in stats and log only
                 fileChunksMeta.getChunkStatus().set(chunkIndex);
             } else {
-                BrokerException e = AMOPChannelNew.toBrokerException(rsp);
+                BrokerException e = AMOPChannel.toBrokerException(rsp);
                 log.error("sender chunk data to remote failed", e);
                 throw e;
             }
