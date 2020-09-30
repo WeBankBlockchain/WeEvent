@@ -2,6 +2,7 @@ package com.webank.weevent.core.fisco.web3sdk;
 
 
 import java.math.BigInteger;
+import java.security.KeyPair;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -106,7 +107,8 @@ public class FiscoBcos2 {
 
     public void init(Integer groupId) throws BrokerException {
         log.info("WeEvent support solidity version, now: {} support: {}", SupportedVersion.nowVersion, SupportedVersion.history);
-        this.client = Web3SDKConnector.initClient(this.sdk, groupId);
+        this.client = Web3SDKConnector.initClient(this.sdk, groupId, this.fiscoConfig);
+
         if (this.topicController == null) {
             this.timeout = this.fiscoConfig.getWeb3sdkTimeout();
 
@@ -297,7 +299,7 @@ public class FiscoBcos2 {
                         sendResult.setStatus(SendResult.SendResultStatus.NO_PERMISSION);
                     } else {
                         sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
-                        sendResult.setEventId(DataTypeUtils.encodeEventId(topicName, Integer.parseInt(receipt.getBlockNumber()), sequence));
+                        sendResult.setEventId(DataTypeUtils.encodeEventId(topicName, Numeric.decodeQuantity(receipt.getBlockNumber()).intValue(), sequence));
                     }
                 } else { // error
                     try {
@@ -310,8 +312,8 @@ public class FiscoBcos2 {
                             sendResult.setStatus(SendResult.SendResultStatus.ERROR);
                         }
                     } catch (ContractException exception) {
-                        exception.printStackTrace();
                         log.error("publish event failed due to transaction execution error. {}, {}", exception.getErrorCode(), exception.getMessage());
+                        sendResult.setStatus(SendResult.SendResultStatus.ERROR);
                     }
                 }
 
@@ -446,8 +448,6 @@ public class FiscoBcos2 {
         contractContext.setGasLimit(Web3SDK2Wrapper.gasProvider.getGasLimit().longValue());
         contractContext.setGasPrice(Web3SDK2Wrapper.gasProvider.getGasPrice().longValue());
         contractContext.setTopicAddress(this.topic.getContractAddress());
-//        contractContext.setBlockNumber(this.client.getBlockNumberCache().longValue() - BlockLimit.blockLimit);
-//        contractContext.setBlockLimit(this.client.getBlockNumberCache().longValue());
         contractContext.setBlockNumber(client.getBlockLimit().subtract(GroupManagerService.BLOCK_LIMIT).longValue());
         contractContext.setBlockLimit(client.getBlockLimit().longValue());
         contractContext.setChainId(Web3SDKConnector.chainID);

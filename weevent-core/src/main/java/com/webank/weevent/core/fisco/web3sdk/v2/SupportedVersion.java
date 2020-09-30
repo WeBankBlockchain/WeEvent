@@ -52,15 +52,14 @@ public class SupportedVersion {
                 TopicController topicController = (TopicController) Web3SDK2Wrapper.loadContract(controlAddress, client, TopicController.class);
                 String address = "";
                 try {
-                    address = topicController.getContractAddress();
-                } catch (NullPointerException e) {
+                    address = topicController.getTopicAddress();
+                } catch (NullPointerException | ContractException e) {
                     log.error("getTopicAddress failed due to transaction execution error. ", e);
                     throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
                 }
                 Topic topic = (Topic) Web3SDK2Wrapper.loadContract(address, client, Topic.class);
 
                 return new ImmutablePair<>(topicController, topic);
-
             default:
                 log.error("unknown solidity version: {}", version);
                 throw new BrokerException(ErrorCode.UNKNOWN_SOLIDITY_VERSION);

@@ -39,6 +39,7 @@ import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
 import org.fisco.bcos.sdk.client.protocol.response.BlockNumber;
 import org.fisco.bcos.sdk.client.protocol.response.TotalTransactionCount;
 import org.fisco.bcos.sdk.contract.Contract;
+import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
 import org.fisco.bcos.sdk.transaction.model.gas.ContractGasProvider;
@@ -97,11 +98,13 @@ public class Web3SDK2Wrapper {
             // load contract
             Method method = cls.getMethod("load",
                     String.class,
-                    Client.class);
+                    Client.class,
+                    CryptoKeyPair.class);
 
             Object contract = method.invoke(null,
                     contractAddress,
-                    client);
+                    client,
+                    client.getCryptoSuite().getCryptoKeyPair());
 
             if (contract != null) {
                 log.info("load contract success, {}", cls.getSimpleName());

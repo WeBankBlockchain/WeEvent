@@ -88,14 +88,14 @@ public class Web3sdkUtils {
 
         // 1 is always exist
         Integer defaultGroup = Integer.parseInt(WeEvent.DEFAULT_GROUP_ID);
-        Client defaultClient = Web3SDKConnector.initClient(sdk, defaultGroup);
+        Client defaultClient = Web3SDKConnector.initClient(sdk, defaultGroup, fiscoConfig);
         groups.put(defaultGroup, defaultClient);
 
         List<String> groupIds = Web3SDKConnector.listGroupId(defaultClient);
         groupIds.remove(WeEvent.DEFAULT_GROUP_ID);
         for (String groupId : groupIds) {
             Integer gid = Integer.parseInt(groupId);
-            Client client = Web3SDKConnector.initClient(sdk, Integer.parseInt(groupId));
+            Client client = Web3SDKConnector.initClient(sdk, Integer.parseInt(groupId), fiscoConfig);
             groups.put(gid, client);
         }
         log.info("all group in nodes: {}", groups.keySet());

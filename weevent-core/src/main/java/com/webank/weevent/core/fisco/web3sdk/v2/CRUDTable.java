@@ -1,7 +1,9 @@
 package com.webank.weevent.core.fisco.web3sdk.v2;
 
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -34,17 +36,16 @@ public class CRUDTable {
 
     protected Client client;
     protected TableCRUDService crud;
-    //    protected List<Map<String, String>> table = new ArrayList<>();
+    protected List<Map<String, String>> table = new ArrayList<>();
     protected String tableName;
 
 
     public CRUDTable(Client client, String tableName) throws BrokerException {
         this.client = client;
-        this.crud = new TableCRUDService(client, client.getCryptoSuite().createKeyPair());
+        this.crud = new TableCRUDService(client, client.getCryptoSuite().getCryptoKeyPair());
         this.tableName = tableName;
 
         log.info("table's groupId: {}", client.getGroupId());
-
         ensureTable();
     }
 
@@ -58,13 +59,16 @@ public class CRUDTable {
             List<Map<String, String>> tableDesc = this.crud.desc(this.tableName);
             if (tableDesc.size() == 0
                     || StringUtils.isBlank(tableDesc.get(0).get(PrecompiledConstant.KEY_FIELD_NAME))) {
-                throw new BrokerException(ErrorCode.UNKNOWN_SOLIDITY_VERSION);
+
+                log.info("not exist table in CRUD, create it: {}", this.tableName);
+                createTable();
+                return;
             }
             if (tableDesc.get(0).get(PrecompiledConstant.KEY_FIELD_NAME).equals(TableKey)) {
                 // get field
                 List<String> fields = Arrays.asList(tableDesc.get(0).get(PrecompiledConstant.VALUE_FIELD_NAME).split(","));
                 if (fields.size() == 2 && fields.contains(TableValue) && fields.contains(TableVersion)) {
-//                    this.table = tableDesc;
+                    this.table = tableDesc;
                     return;
                 }
             }
@@ -72,9 +76,8 @@ public class CRUDTable {
             throw new BrokerException(ErrorCode.UNKNOWN_SOLIDITY_VERSION);
         } catch (ContractException e) {
             log.error("detect ContractException in web3sdk", e);
-            log.info("not exist table in CRUD, create it: {}", this.tableName);
 
-            createTable();
+
         }
     }
 
@@ -85,10 +88,10 @@ public class CRUDTable {
             RetCode retCode = this.crud.createTable(this.tableName, TableKey, keyFiledName);
             if (retCode.getCode() == PrecompiledRetCode.CODE_SUCCESS.getCode()) {
                 log.info("create table in CRUD success, {}", this.tableName);
-//                Map<String, String> tableDesc = new HashMap<>();
-//                tableDesc.put(PrecompiledConstant.KEY_FIELD_NAME, TableKey);
-//                tableDesc.put(PrecompiledConstant.VALUE_FIELD_NAME, TableValue + ", " + TableVersion);
-//                this.table.add(tableDesc);
+                Map<String, String> tableDesc = new HashMap<>();
+                tableDesc.put(PrecompiledConstant.KEY_FIELD_NAME, TableKey);
+                tableDesc.put(PrecompiledConstant.VALUE_FIELD_NAME, TableValue + ", " + TableVersion);
+                this.table.add(tableDesc);
                 return;
             }
             log.error("create table in CRUD failed, " + this.tableName);

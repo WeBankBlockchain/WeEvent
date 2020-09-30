@@ -19,6 +19,7 @@ import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.config.ConfigOption;
 import org.fisco.bcos.sdk.config.exceptions.ConfigException;
 import org.fisco.bcos.sdk.config.model.ConfigProperty;
+import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.fisco.bcos.sdk.model.CryptoType;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -73,8 +74,12 @@ public class Web3SDKConnector {
             }
             Map<String, Object> network = new HashMap<>();
             network.put("peers", Arrays.asList(fiscoConfig.getNodes().split(";")));
+
             Map<String, Object> account = new HashMap<>();
-            account.put("accountAddress", fiscoConfig.getAccount());
+//            if (fiscoConfig.getWeb3sdkEncryptType().equals("SM2_TYPE")) {
+//                account.put("accountAddress",
+//                        resolver.getResource("classpath:" + fiscoConfig.getPemKeyPath()).getFile().getPath());
+//            }
             Map<String, Object> threadPool = new HashMap<>();
             threadPool.put("maxBlockingQueueSize", String.valueOf(fiscoConfig.getMaxBlockingQueueSize()));
 
@@ -107,13 +112,21 @@ public class Web3SDKConnector {
      * @param groupId groupId
      * @return Client
      */
-    public static Client initClient(BcosSDK sdk, Integer groupId) throws BrokerException {
+    public static Client initClient(BcosSDK sdk, Integer groupId, FiscoConfig fiscoConfig) throws BrokerException {
         // init client with given group id
         try {
             log.info("begin to initialize web3sdk's BcosSDK, group id: {}", groupId);
             StopWatch sw = StopWatch.createStarted();
 
             Client client = sdk.getClient(groupId);
+            if (fiscoConfig.getWeb3sdkEncryptType().equals("ECDSA_TYPE")) {
+                CryptoKeyPair keyPair = client.getCryptoSuite().getKeyPairFactory().createKeyPair(fiscoConfig.getAccount());
+                client.getCryptoSuite().setCryptoKeyPair(keyPair);
+            }
+
+            String address = client.getCryptoSuite().getCryptoKeyPair().getAddress();
+            String hexPrivateKey = client.getCryptoSuite().getCryptoKeyPair().getHexPrivateKey();
+            System.out.println(client);
 
             // check connect with getNodeVersion command
             org.fisco.bcos.sdk.model.NodeVersion version = client.getNodeVersion();
@@ -230,7 +243,7 @@ public class Web3SDKConnector {
 //        return credentials;
 //    }
 
-    public static List<String> listGroupId(Client clint) {
-        return clint.getGroupList().getGroupList();
+    public static List<String> listGroupId(Client client) {
+        return client.getGroupList().getGroupList();
     }
 }
