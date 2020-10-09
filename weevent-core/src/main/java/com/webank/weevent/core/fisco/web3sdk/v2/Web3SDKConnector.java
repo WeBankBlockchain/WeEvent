@@ -76,10 +76,10 @@ public class Web3SDKConnector {
             network.put("peers", Arrays.asList(fiscoConfig.getNodes().split(";")));
 
             Map<String, Object> account = new HashMap<>();
-//            if (fiscoConfig.getWeb3sdkEncryptType().equals("SM2_TYPE")) {
-//                account.put("accountAddress",
-//                        resolver.getResource("classpath:" + fiscoConfig.getPemKeyPath()).getFile().getPath());
-//            }
+            if (fiscoConfig.getWeb3sdkEncryptType().equals("SM2_TYPE")) {
+                account.put("accountAddress",
+                        resolver.getResource("classpath:" + fiscoConfig.getPemKeyPath()).getFile().getPath());
+            }
             Map<String, Object> threadPool = new HashMap<>();
             threadPool.put("maxBlockingQueueSize", String.valueOf(fiscoConfig.getMaxBlockingQueueSize()));
 
@@ -123,10 +123,6 @@ public class Web3SDKConnector {
                 CryptoKeyPair keyPair = client.getCryptoSuite().getKeyPairFactory().createKeyPair(fiscoConfig.getAccount());
                 client.getCryptoSuite().setCryptoKeyPair(keyPair);
             }
-
-            String address = client.getCryptoSuite().getCryptoKeyPair().getAddress();
-            String hexPrivateKey = client.getCryptoSuite().getCryptoKeyPair().getHexPrivateKey();
-            System.out.println(client);
 
             // check connect with getNodeVersion command
             org.fisco.bcos.sdk.model.NodeVersion version = client.getNodeVersion();

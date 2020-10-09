@@ -1,5 +1,6 @@
 package com.webank.weevent.file.inner;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -124,14 +125,21 @@ public class AMOPChannel extends AmopCallback {
     }
 
     // Receiver call subscribe verify topic
-    public void subTopic(String topic, String groupId, String privateKey, WeEventFileClient.EventListener eventListener) throws BrokerException {
+    public void subTopic(String topic, String groupId, InputStream privatePem, WeEventFileClient.EventListener eventListener) throws BrokerException {
         if (this.senderTopics.contains(topic) || senderVerifyTopics.containsKey(topic)) {
             log.error("this is already sender side for topic: {}", topic);
             throw new BrokerException(ErrorCode.FILE_SENDER_RECEIVER_CONFLICT);
         }
 
         Amop amop = Web3SDKConnector.buidBcosSDK(this.fileTransportService.getFiscoConfig()).getAmop();
-        KeyTool kt = new PEMKeyStore(privateKey);
+
+        KeyTool kt;
+        try {
+            kt = new PEMKeyStore(privatePem);
+        } catch (Exception e) {
+            log.error("load private key in pem format failed.", e);
+            throw new BrokerException(ErrorCode.FILE_PEM_KEY_INVALID);
+        }
 
         amop.subscribePrivateTopics(topic, kt, this);
         log.info("subscribe verify topic on AMOP channel, {}", topic);
@@ -360,7 +368,7 @@ public class AMOPChannel extends AmopCallback {
                     return DataTypeUtils.toChannelResponse(ErrorCode.SUCCESS);
                 } catch (BrokerException e) {
                     log.error("write chunk data in local file failed", e);
-//                    channelResponse = AMOPChannel.toChannelResponse(e);
+                    channelResponseDate = DataTypeUtils.toChannelResponse(e);
                 }
             }
             break;

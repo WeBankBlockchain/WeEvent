@@ -37,6 +37,7 @@ import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
 import org.fisco.bcos.sdk.client.protocol.response.BlockNumber;
+import org.fisco.bcos.sdk.client.protocol.response.ConsensusStatus;
 import org.fisco.bcos.sdk.client.protocol.response.TotalTransactionCount;
 import org.fisco.bcos.sdk.contract.Contract;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
@@ -205,8 +206,8 @@ public class Web3SDK2Wrapper {
             log.debug("fetch block, blockNum: {}", blockNum);
 
             // "false" to load only tx hash.
-            org.fisco.bcos.sdk.client.protocol.response.BcosBlock bcosBlock = client.getBlockByNumber(blockNum, false);
-            BigInteger timestamp = new BigInteger(bcosBlock.getBlock().getTimestamp(), 16);
+            BcosBlock bcosBlock = client.getBlockByNumber(blockNum, false);
+            BigInteger timestamp = Numeric.decodeQuantity(bcosBlock.getBlock().getTimestamp());
             List<String> transactionHashList = bcosBlock.getBlock().getTransactions().stream()
                     .map(transactionResult -> (String) transactionResult.get()).collect(Collectors.toList());
             if (transactionHashList.isEmpty()) {
@@ -215,7 +216,7 @@ public class Web3SDK2Wrapper {
             log.debug("tx in block: {}", transactionHashList.size());
 
             for (String transactionHash : transactionHashList) {
-                Optional<org.fisco.bcos.sdk.model.TransactionReceipt> transactionReceipt = client.getTransactionReceipt(transactionHash)
+                Optional<TransactionReceipt> transactionReceipt = client.getTransactionReceipt(transactionHash)
                         .getTransactionReceipt();
                 if (!transactionReceipt.isPresent()) {
                     log.error(String.format("loop block empty tx receipt, blockNum: %s tx hash: %s", blockNum, transactionHash));
@@ -441,7 +442,11 @@ public class Web3SDK2Wrapper {
     // *******************************************
     // web3j.getConsensusStatus().sendForReturnString()
     private static Map<String, Map<String, String>> getNodeViews(Client client) throws IOException {
-        JsonNode jsonNode = JsonHelper.getObjectMapper().readTree(client.getConsensusStatus().toString());
+//        String s = client.getConsensusStatus().getResult().toString();
+        ConsensusStatus.ConsensusInfo result = client.getConsensusStatus().getResult();
+        ConsensusStatus.BasicConsensusInfo baseConsensusInfo = client.getConsensusStatus().getResult().getBaseConsensusInfo();
+        List<ConsensusStatus.ViewInfo> viewInfos = client.getConsensusStatus().getResult().getViewInfos();
+        JsonNode jsonNode = JsonHelper.getObjectMapper().readTree(client.getConsensusStatus().getResult().toString());
         Map<String, Map<String, String>> nodeViews = new HashMap<>();
         for (JsonNode node : jsonNode) {
             if (node.isArray()) {

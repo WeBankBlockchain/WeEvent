@@ -29,6 +29,7 @@ import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.contract.Contract;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
+import org.fisco.bcos.sdk.utils.Numeric;
 
 
 /**
@@ -208,11 +209,11 @@ public class SupportedVersion {
                     if (extensions == null) {
                         extensions = new HashMap<>();
                     }
-                    WeEventPlus weEventPlus = new WeEventPlus(timestamp.longValue(), Long.getLong(receipt.getBlockNumber()), receipt.getTransactionHash(), receipt.getFrom());
+                    WeEventPlus weEventPlus = new WeEventPlus(timestamp.longValue(), Numeric.decodeQuantity(receipt.getBlockNumber()).longValue(), receipt.getTransactionHash(), receipt.getFrom());
                     extensions.put(WeEvent.WeEvent_PLUS, JsonHelper.object2Json(weEventPlus));
 
                     WeEvent event = new WeEvent(topicName, input.getValue2().getBytes(StandardCharsets.UTF_8), extensions);
-                    event.setEventId(DataTypeUtils.encodeEventId(topicName, Integer.parseInt(receipt.getBlockNumber()), seq));
+                    event.setEventId(DataTypeUtils.encodeEventId(topicName, Numeric.decodeQuantity(receipt.getBlockNumber()).intValue(), seq));
                     return event;
 
                 default:

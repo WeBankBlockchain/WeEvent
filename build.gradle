@@ -34,7 +34,7 @@ ext {
     // org.fisco-bcos.web3sdk
     web3sdkVersion = [
             // fisco: "2.6.1.09271-rc1-SNAPSHOT"
-            fisco: "2.6.1.09271-rc1-20200930.024942-7"
+            fisco: "2.6.1-SNAPSHOT"
     ]
     // fabric
     fabricVersion = "1.4.4"
@@ -52,7 +52,7 @@ ext {
     // JMS
     jmsVersion = "1.1"
     // Jmock
-    jmockVersion = "1.9"
+    jmockVersion = "1.9.0"
     // mybatis-spring-boot-starter
     mybatisVersion = "1.3.2"
     //h2

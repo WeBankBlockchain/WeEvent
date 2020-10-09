@@ -402,7 +402,7 @@ public class WeEventClientGroupIdTest {
     @Test
     public void testPublishRepeat() throws Exception {
         // test publish
-        WeEvent weEvent = new WeEvent("repeatTestTopic", "hello world".getBytes(StandardCharsets.UTF_8), this.extensions);
+        WeEvent weEvent = new WeEvent(this.topicName, "hello world".getBytes(StandardCharsets.UTF_8), this.extensions);
 
         for (int i = 0; i <5 ; i++) {
             SendResult sendResult = this.weEventClient.publish(weEvent);
