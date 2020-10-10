@@ -197,13 +197,6 @@ public class FiscoBcos2 {
         }
 
         return true;
-//        } catch (InterruptedException | ExecutionException e) {
-//            log.error("addTopicInfo failed due to transaction execution error. ", e);
-//            throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
-//        } catch (TimeoutException e) {
-//            log.error("addTopicInfo failed due to transaction timeout. ", e);
-//            throw new BrokerException(ErrorCode.TRANSACTION_TIMEOUT);
-//        }
     }
 
     public ListPage<String> listTopicName(Integer pageIndex, Integer pageSize) throws BrokerException {
@@ -325,7 +318,6 @@ public class FiscoBcos2 {
     }
 
     public CompletableFuture<SendResult> sendRawTransaction(String topicName, String transactionHex) {
-//        return web3j.sendRawTransaction(transactionHex).sendAsync().thenApplyAsync(ethSendTransaction -> {
         return CompletableFuture.supplyAsync(() -> {
             SendTransaction sendTransaction = this.client.sendRawTransaction(transactionHex);
 
@@ -356,31 +348,6 @@ public class FiscoBcos2 {
 
             return sendResult;
         });
-
-//            Optional<TransactionReceipt> receiptOptional = getTransactionReceiptRequest(ethSendTransaction.getTransactionHash());
-//            if (receiptOptional.isPresent()) {
-//                List<TypeReference<?>> referencesList = Collections.singletonList(new TypeReference<Uint256>() {
-//                });
-//                List<Type> returnList = FunctionReturnDecoder.decode(
-//                        String.valueOf(receiptOptional.get().getOutput()),
-//                        Utils.convert(referencesList));
-//
-//                int sequence = ((BigInteger) returnList.get(0).getValue()).intValue();
-//                if (sequence == 0) {
-//                    log.error("this FISCO-BCOS account has no permission to publish event");
-//                    sendResult.setStatus(SendResult.SendResultStatus.NO_PERMISSION);
-//                } else {
-//                    sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
-//                    sendResult.setEventId(DataTypeUtils.encodeEventId(topicName,
-//                            receiptOptional.get().getBlockNumber().intValue(),
-//                            sequence));
-//                }
-//            } else {
-//                sendResult.setStatus(SendResult.SendResultStatus.ERROR);
-//            }
-//
-//            return sendResult;
-//        });
     }
 
     /**
@@ -554,38 +521,9 @@ public class FiscoBcos2 {
     }
 
     public CompletableFuture<SendResult> sendAMOP(String topicName, String content) {
-//        ChannelRequest channelRequest = new ChannelRequest();
-//        channelRequest.setToTopic(topicName);
-//        channelRequest.setMessageID(this.service.newSeq());
-//        channelRequest.setTimeout(this.service.getConnectSeconds() * 1000);
-//        channelRequest.setContent(content);
-//
-//        log.info("send amop request, topic: {} content length: {} id: {}", topicName, content.length(), channelRequest.getMessageID());
-//
-//        StopWatch sw = StopWatch.createStarted();
-//        CompletableFuture<SendResult> future = new CompletableFuture<>();
-//        this.service.asyncSendChannelMessage2(channelRequest, new ChannelResponseCallback2() {
-//            @Override
-//            public void onResponseMessage(ChannelResponse response) {
-//                sw.stop();
-//                log.info("receive amop response, id: {} result: {}-{} cost: {}", response.getMessageID(), response.getErrorCode(), response.getErrorMessage(), sw.getTime());
-//
-//                SendResult sendResult = new SendResult();
-//                sendResult.setTopic(topicName);
-//                sendResult.setEventId(response.getMessageID());
-//
-//                if (response.getErrorCode() == 0) {
-//                    sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
-//                } else {
-//                    sendResult.setStatus(SendResult.SendResultStatus.ERROR);
-//                }
-//                future.complete(sendResult);
-//            }
-//        });
-//        return future;
         AmopMsgOut out = new AmopMsgOut();
         out.setTopic(topicName);
-        out.setTimeout(10000);
+        out.setTimeout(6000L);
         out.setContent(content.getBytes());
 
         StopWatch sw = StopWatch.createStarted();

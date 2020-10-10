@@ -15,6 +15,7 @@ import com.webank.weevent.client.WeEvent;
 import com.webank.weevent.client.WeEventPlus;
 import com.webank.weevent.core.IProducer;
 import com.webank.weevent.core.config.FiscoConfig;
+import com.webank.weevent.core.dto.AmopMsgResponse;
 import com.webank.weevent.file.dto.FileChunksMetaPlus;
 import com.webank.weevent.file.dto.FileChunksMetaStatus;
 import com.webank.weevent.file.dto.FileEvent;
@@ -190,7 +191,6 @@ public class FileTransportService {
     // get remote chunk meta from receiver
     public FileChunksMeta getReceiverFileChunksMeta(String topic, String groupId, String fileId) throws BrokerException {
         // get remote chunk meta from receiver
-        //AMOPChannel channel = this.getChannel(groupId);
         FileChunksMeta remoteFileChunksMeta = channel.getReceiverFileContext(topic, fileId);
         if (remoteFileChunksMeta == null) {
             log.error("not exist receive file context");
@@ -207,8 +207,6 @@ public class FileTransportService {
         this.fileTransportContexts.remove(fileId);
 
         // clean up receiver context
-        //AMOPChannel channel = this.getChannel(groupId);
-
         return channel.cleanUpReceiverFileContext(topic, fileId);
     }
 
@@ -236,18 +234,24 @@ public class FileTransportService {
         fileEvent.setChunkIndex(chunkIndex);
         fileEvent.setChunkData(data);
 
-        //AMOPChannel channel = this.getChannel(groupId);
         try {
             Response rsp = channel.sendEvent(topic, fileEvent);
-            if (rsp.getErrorCode() == ErrorCode.SUCCESS.getCode()) {
-                log.info("sender chunk data to remote success");
-                // local cached chunkStatus is not consistency, but show in stats and log only
-                fileChunksMeta.getChunkStatus().set(chunkIndex);
-            } else {
-                BrokerException e = AMOPChannel.toBrokerException(rsp);
-                log.error("sender chunk data to remote failed", e);
-                throw e;
+            if (rsp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+                log.error("receive sender chunk data to remote failed, rsp:{}", rsp.getErrorMessage());
+                throw AMOPChannel.toBrokerException(rsp);
             }
+
+            // substring the prefix topic of rsp.content
+            String responseContent = rsp.getContent().substring(rsp.getContent().indexOf("{"));
+            AmopMsgResponse amopMsgResponse = JsonHelper.json2Object(responseContent, AmopMsgResponse.class);
+            if (amopMsgResponse.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+                log.error("sender chunk data to remote failed, rsp:{}", amopMsgResponse.getErrorMessage());
+                throw AMOPChannel.toBrokerException(amopMsgResponse);
+            }
+
+            log.info("sender chunk data to remote success");
+            // local cached chunkStatus is not consistency, but show in stats and log only
+            fileChunksMeta.getChunkStatus().set(chunkIndex);
         } catch (InterruptedException | TimeoutException e) {
             log.error("InterruptedException | TimeoutException while send amop request");
             throw new BrokerException(ErrorCode.SEND_AMOP_MESSAGE_FAILED);

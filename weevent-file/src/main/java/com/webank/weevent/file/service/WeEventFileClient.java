@@ -108,24 +108,6 @@ public class WeEventFileClient implements IWeEventFileClient {
 
     public void openTransport4Sender(String topic, InputStream publicPem) throws BrokerException {
         // publicPem is public key
-//        BufferedInputStream bufferedInputStream = new BufferedInputStream(publicPem);
-//        try {
-//            if (publicPem == null) {
-//                log.error("public key pem inputstream is null.");
-//                throw new BrokerException(ErrorCode.PARAM_ISNULL);
-//            }
-//            bufferedInputStream.mark(bufferedInputStream.available() + 1);
-//            String publicKey = IOUtils.toString(bufferedInputStream, StandardCharsets.UTF_8);
-//            if (!publicKey.contains(PUBLIC_KEY_DESC)) {
-//                log.error("inputStream is not a public key.");
-//                throw new BrokerException(ErrorCode.FILE_PEM_KEY_INVALID);
-//            }
-//            bufferedInputStream.reset();
-//        } catch (IOException e) {
-//            log.error("public key inputStream is invalid.");
-//            throw new BrokerException(ErrorCode.FILE_PEM_KEY_INVALID);
-//        }
-
         // get AMOPChannel, fileTransportService and amopChannel is One-to-one correspondence
         AMOPChannel amopChannel = this.fileTransportService.getChannel();
 
