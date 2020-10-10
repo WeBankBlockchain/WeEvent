@@ -1,11 +1,9 @@
 package com.webank.weevent.file.service;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -38,7 +36,6 @@ import com.webank.weevent.file.inner.FileTransportService;
 import com.webank.weevent.file.inner.PemFile;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -207,27 +204,12 @@ public class WeEventFileClient implements IWeEventFileClient {
     }
 
     public void openTransport4Receiver(String topic, FileListener fileListener, InputStream privatePem) throws BrokerException {
-        // privatePem is private key
-//        BufferedInputStream bufferedInputStream = new BufferedInputStream(privatePem);
-//        try {
-//            bufferedInputStream.mark(bufferedInputStream.available() + 1);
-//            String privateKey = IOUtils.toString(bufferedInputStream, StandardCharsets.UTF_8);
-//            if (!privateKey.contains(PRIVATE_KEY_DESC)) {
-//                log.error("inputStream is not a private key.");
-//                throw new BrokerException(ErrorCode.FILE_PEM_KEY_INVALID);
-//            }
-//            bufferedInputStream.reset();
-//        } catch (IOException e) {
-//            log.error("private key inputStream is invalid.");
-//            throw new BrokerException(ErrorCode.FILE_PEM_KEY_INVALID);
-//        }
-
         // get AMOPChannel, fileTransportService and amopChannel is One-to-one correspondence
         AMOPChannel amopChannel = this.fileTransportService.getChannel();
 
         FileEventListener fileEventListener = new FileEventListener(this.localReceivePath, this.ftpInfo, fileListener);
 
-        amopChannel.subTopic(topic, groupId, privatePem, fileEventListener);
+        amopChannel.subTopic(topic, privatePem, fileEventListener);
     }
 
     public void openTransport4Receiver(String topic, FileListener fileListener, String privatePemPath) throws IOException, BrokerException {

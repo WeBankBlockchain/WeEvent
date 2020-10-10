@@ -19,9 +19,6 @@ dependencies {
     // avoid "Log4j appears to be running in a Servlet environment, but there's no log4j-web module available."
     implementation("org.apache.logging.log4j:log4j-web:${log4jVersion}")
 
-    // implementation("org.springframework:spring-beans:${springVersion}")
-    // implementation("org.springframework:spring-content:${springVersion}")
-
     // restful and json rpc support http base authorization
     implementation("org.springframework.boot:spring-boot-starter-security")
 
@@ -35,14 +32,6 @@ dependencies {
     implementation("org.springframework.cloud:spring-cloud-starter-zookeeper-discovery") {
         exclude group: "commons-logging", module: "commons-logging"
     }
-
-    // web3sdk for FISCO-BCOS 2.0
-//    implementation("org.fisco-bcos.java-sdk:java-sdk:${web3sdkVersion.fisco}") {
-//        // io.netty:netty-tcnative-boringssl-static:2.0.20.Final crash
-//        exclude group: "io.netty", module: "netty-tcnative-boringssl-static"
-//        // compile solidity
-//        exclude group: "org.ethereum", module: "solcJ-all"
-//    }
 
     // depend project
     api project(":weevent-core")

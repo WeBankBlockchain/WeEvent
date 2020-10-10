@@ -37,7 +37,6 @@ import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
 import org.fisco.bcos.sdk.client.protocol.response.BlockNumber;
-import org.fisco.bcos.sdk.client.protocol.response.ConsensusStatus;
 import org.fisco.bcos.sdk.client.protocol.response.TotalTransactionCount;
 import org.fisco.bcos.sdk.contract.Contract;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
@@ -75,10 +74,6 @@ public class Web3SDK2Wrapper {
     };
 
     public static void setBlockNotifyCallBack(BcosSDK sdk, FiscoBcosDelegate.IBlockEventListener listener) {
-//        Web3jService web3jService = ((JsonRpc2_0Web3j) web3j).web3jService();
-//        ((ChannelEthereumService) web3jService).getChannelService().setBlockNotifyCallBack(
-//                (int groupID, BigInteger blockNumber) -> listener.onEvent((long) groupID, blockNumber.longValue())
-//        );
         sdk.getGroupManagerService().registerBlockNotifyCallback((s, blockNumberNotification) -> listener.onEvent(
                 Long.parseLong(blockNumberNotification.getGroupId()),
                 Long.parseLong(blockNumberNotification.getBlockNumber())));
@@ -381,10 +376,7 @@ public class Web3SDK2Wrapper {
             throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
         }
 
-        // **************************************
-        // 调试 block.getTimestamp() 的值是否为 yyyy-MM-dd HH:mm:ss 类型
         String blockTimestamp = DataTypeUtils.getTimestamp(Long.getLong(block.getTimestamp()));
-
         int transactions = 0;
         if (!block.getTransactions().isEmpty()) {
             transactions = block.getTransactions().size();
@@ -438,14 +430,7 @@ public class Web3SDK2Wrapper {
         }
     }
 
-
-    // *******************************************
-    // web3j.getConsensusStatus().sendForReturnString()
     private static Map<String, Map<String, String>> getNodeViews(Client client) throws IOException {
-//        String s = client.getConsensusStatus().getResult().toString();
-        ConsensusStatus.ConsensusInfo result = client.getConsensusStatus().getResult();
-        ConsensusStatus.BasicConsensusInfo baseConsensusInfo = client.getConsensusStatus().getResult().getBaseConsensusInfo();
-        List<ConsensusStatus.ViewInfo> viewInfos = client.getConsensusStatus().getResult().getViewInfos();
         JsonNode jsonNode = JsonHelper.getObjectMapper().readTree(client.getConsensusStatus().getResult().toString());
         Map<String, Map<String, String>> nodeViews = new HashMap<>();
         for (JsonNode node : jsonNode) {

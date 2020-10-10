@@ -192,7 +192,7 @@ public final class DataTypeUtils {
         return toChannelResponse(errorCode, null);
     }
 
-    public static byte[] toChannelResponse(ErrorCode errorCode, Object content) {
+    public static byte[] toChannelResponse(ErrorCode errorCode, byte[] content) {
         AmopMsgResponse response = new AmopMsgResponse();
         response.setErrorCode(errorCode.getCode());
         response.setErrorMessage(errorCode.getCodeDesc());
@@ -203,7 +203,7 @@ public final class DataTypeUtils {
         try {
             return JsonHelper.object2JsonBytes(response);
         } catch (BrokerException e) {
-            log.error("convert AmopMsgResponse to json error. e:{}", e.getMessage());
+            log.error("convert amopMsgResponse to json error. e:{}", e.getMessage());
         }
         return new byte[0];
     }
@@ -211,12 +211,12 @@ public final class DataTypeUtils {
     public static byte[] toChannelResponse(BrokerException e) {
         AmopMsgResponse response = new AmopMsgResponse();
         response.setErrorCode(e.getCode());
-        response.setContent(e.getMessage());
+        response.setErrorMessage(e.getMessage());
 
         try {
             return JsonHelper.object2JsonBytes(response);
         } catch (BrokerException ex) {
-            log.error("convert AmopMsgResponse to json error. e:{}", ex.getMessage());
+            log.error("convert amopMsgResponse to json error. e:{}", ex.getMessage());
         }
         return new byte[0];
     }

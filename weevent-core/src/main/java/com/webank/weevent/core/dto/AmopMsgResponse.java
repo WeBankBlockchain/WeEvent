@@ -18,5 +18,5 @@ public class AmopMsgResponse {
     private Integer errorCode;
     private String errorMessage;
     // message body
-    private Object content;
+    private byte[] content;
 }

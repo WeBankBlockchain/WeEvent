@@ -58,8 +58,6 @@ public class FiscoBcosDelegate {
     // fiscoConfig
     private FiscoConfig fiscoConfig;
 
-//    private Async asyncHelper;
-
     /**
      * notify from web3sdk2.x when new block mined
      */
@@ -88,9 +86,6 @@ public class FiscoBcosDelegate {
 
         if (config.getVersion().startsWith(WeEventConstants.FISCO_BCOS_2_X_VERSION_PREFIX)) {
             log.info("Notice: FISCO-BCOS's version is 2.x");
-
-//            // set web3sdk.Async thread pool, special thread for sendAsync
-//            this.asyncHelper = new Async(threadPool);
 
             // 1 is always exist
             Integer defaultGId = Integer.parseInt(WeEvent.DEFAULT_GROUP_ID);

@@ -2,7 +2,6 @@ package com.webank.weevent.core.fisco.web3sdk;
 
 
 import java.math.BigInteger;
-import java.security.KeyPair;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;

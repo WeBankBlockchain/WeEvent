@@ -9,12 +9,10 @@ import com.webank.weevent.client.ErrorCode;
 import com.webank.weevent.client.JsonHelper;
 import com.webank.weevent.client.WeEvent;
 import com.webank.weevent.core.IConsumer;
-import com.webank.weevent.core.dto.AmopMsgResponse;
 import com.webank.weevent.core.fisco.util.DataTypeUtils;
 
 import lombok.Getter;
 import lombok.Setter;
-import lombok.SneakyThrows;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.sdk.amop.Amop;
