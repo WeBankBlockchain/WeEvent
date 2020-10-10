@@ -8,7 +8,7 @@ import javax.validation.Valid;
 
 import com.webank.weevent.governance.common.ErrorCode;
 import com.webank.weevent.governance.common.GovernanceException;
-import com.webank.weevent.governance.common.GovernanceResult;
+import com.webank.weevent.governance.common.GovernanceResponse;
 import com.webank.weevent.governance.entity.BrokerEntity;
 import com.webank.weevent.governance.service.BrokerService;
 import com.webank.weevent.governance.utils.JwtUtils;
@@ -35,45 +35,46 @@ public class BrokerController {
 
     // get all broker service
     @GetMapping("/list")
-    public List<BrokerEntity> getAllBrokers(HttpServletRequest request) {
+    public GovernanceResponse<List<BrokerEntity>> getAllBrokers(HttpServletRequest request) {
         log.info("get all brokers ");
         String accountId = JwtUtils.getAccountId(request);
-        return brokerService.getBrokers(request, accountId);
+        return new GovernanceResponse<>(brokerService.getBrokers(request, accountId));
     }
 
     // get broker service by id
     @GetMapping("/{id}")
-    public BrokerEntity getBroker(@PathVariable("id") Integer id) {
+    public GovernanceResponse<BrokerEntity> getBroker(@PathVariable("id") Integer id) {
         log.info("get  broker service by id :{}", id);
-        return brokerService.getBroker(id);
+        return new GovernanceResponse<>(brokerService.getBroker(id));
     }
 
     // get brokerEntity service by id
     @PostMapping("/add")
-    public GovernanceResult addBroker(@Valid @RequestBody BrokerEntity brokerEntity, HttpServletRequest request,
-                                      HttpServletResponse response) throws GovernanceException {
-        log.info("add  brokerEntity service into db brokerEntity :{} ", brokerEntity);
-        brokerEntity.setUserId(1);
-        return brokerService.addBroker(brokerEntity, request, response);
-    }
+	public GovernanceResponse<Integer> addBroker(@Valid @RequestBody BrokerEntity brokerEntity,
+			HttpServletRequest request, HttpServletResponse response) throws GovernanceException {
+		log.info("add  brokerEntity service into db brokerEntity :{} ", brokerEntity);
+		brokerEntity.setUserId(1);
+		return brokerService.addBroker(brokerEntity, request, response);
+	}
 
     @PostMapping("/update")
-    public GovernanceResult updateBroker(@RequestBody BrokerEntity brokerEntity, HttpServletRequest request,
-                                         HttpServletResponse response) throws GovernanceException {
-        log.info("update  brokerEntity service ,brokerEntity:{} ", brokerEntity);
-        brokerEntity.setUserId(Integer.valueOf(JwtUtils.getAccountId(request)));
-        return brokerService.updateBroker(brokerEntity, request, response);
-    }
+	public GovernanceResponse<Object> updateBroker(@RequestBody BrokerEntity brokerEntity, HttpServletRequest request,
+			HttpServletResponse response) throws GovernanceException {
+		log.info("update  brokerEntity service ,brokerEntity:{} ", brokerEntity);
+		brokerEntity.setUserId(Integer.valueOf(JwtUtils.getAccountId(request)));
+		return brokerService.updateBroker(brokerEntity, request, response);
+	}
 
     @PostMapping("/delete")
-    public GovernanceResult deleteBroker(@RequestBody BrokerEntity brokerEntity, HttpServletRequest request) throws GovernanceException {
+    public GovernanceResponse<Boolean> deleteBroker(@RequestBody BrokerEntity brokerEntity, HttpServletRequest request) throws GovernanceException {
         log.info("delete  brokerEntity service ,id: {}", brokerEntity.getId());
         return brokerService.deleteBroker(brokerEntity, request);
     }
 
     @PostMapping("/checkServer")
-    public ErrorCode checkServerByUrl(@RequestBody BrokerEntity brokerEntity, HttpServletRequest request) throws GovernanceException {
-        log.info("checkServer  brokerEntity, id: {}", brokerEntity.getId());
-        return brokerService.checkServerByUrl(brokerEntity, request);
-    }
+	public GovernanceResponse<ErrorCode> checkServerByUrl(@RequestBody BrokerEntity brokerEntity,
+			HttpServletRequest request) throws GovernanceException {
+		log.info("checkServer  brokerEntity, id: {}", brokerEntity.getId());
+		return new GovernanceResponse<>(brokerService.checkServerByUrl(brokerEntity, request));
+	}
 }

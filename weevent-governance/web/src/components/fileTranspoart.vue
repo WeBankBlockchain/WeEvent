@@ -238,7 +238,7 @@ export default {
       setTimeout(fun => {
         const url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId')
         API.listTransport(url).then(res => {
-          if (res.data.status === 200) {
+          if (res.data.code === 0) {
             vm.tableData = [].concat(res.data.data)
             const det = []
             vm.tableData.forEach(item => {
@@ -286,7 +286,7 @@ export default {
             })
           }
           API.openTransport(data).then(res => {
-            if (res.data.status === 200) {
+            if (res.data.code === 0) {
               vm.$message({
                 type: 'success',
                 message: this.$t('common.addSuccess')
@@ -395,7 +395,7 @@ export default {
       const vm = this
       const url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topicName=' + e.topicName
       API.uploadStatus(url).then(res => {
-        if (res.data.status === 200) {
+        if (res.data.code === 0) {
           if (res.data.data && res.data.data.length > 0) {
             const list = res.data.data
             const newList = []
@@ -521,7 +521,7 @@ export default {
         // download file
         const url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topicName=' + e.topicName
         API.listFile(url).then(res => {
-          if (res.data.status === 200) {
+          if (res.data.code === 0) {
             this.downLoadList = [].concat(res.data.data)
           } else {
             this.$store.commit('set_Msg', this.$message({
@@ -556,11 +556,11 @@ export default {
       }
       API.topicList(data).then(res => {
         if (res.status === 200) {
-          if (res.data.total) {
-            vm.total = res.data.total
+          if (res.data.data.total) {
+            vm.total = res.data.data.total
           }
-          if (res.data.topicInfoList) {
-            vm.listTopic = [].concat(res.data.topicInfoList)
+          if (res.data.data.topicInfoList) {
+            vm.listTopic = [].concat(res.data.data.topicInfoList)
           }
         }
       })

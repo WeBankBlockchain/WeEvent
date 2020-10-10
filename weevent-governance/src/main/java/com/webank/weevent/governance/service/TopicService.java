@@ -17,7 +17,7 @@ import com.webank.weevent.client.JsonHelper;
 import com.webank.weevent.governance.common.ConstantProperties;
 import com.webank.weevent.governance.common.ErrorCode;
 import com.webank.weevent.governance.common.GovernanceException;
-import com.webank.weevent.governance.common.GovernanceResult;
+import com.webank.weevent.governance.common.GovernanceResponse;
 import com.webank.weevent.governance.entity.BrokerEntity;
 import com.webank.weevent.governance.entity.TopicEntity;
 import com.webank.weevent.governance.entity.TopicPage;
@@ -167,7 +167,7 @@ public class TopicService {
     }
 
     @Transactional(rollbackFor = Throwable.class)
-    public GovernanceResult open(Integer brokerId, String topic, String creater, String groupId, HttpServletRequest request,
+    public GovernanceResponse<Object> open(Integer brokerId, String topic, String creater, String groupId, HttpServletRequest request,
                                  HttpServletResponse response) throws GovernanceException {
         BrokerEntity brokerEntity = brokerService.getBroker(brokerId);
         if (brokerEntity == null) {
@@ -178,7 +178,7 @@ public class TopicService {
             boolean exist = exist(topic, brokerEntity.getBrokerUrl(), groupId, request);
             if (exist) {
                 log.info("topic already exists,topic{}", topic);
-                return new GovernanceResult(ErrorCode.TOPIC_EXISTS);
+                return new GovernanceResponse<>(ErrorCode.TOPIC_EXISTS);
             }
             TopicEntity topicEntity = new TopicEntity();
             topicEntity.setBrokerId(brokerId);
@@ -199,7 +199,7 @@ public class TopicService {
         }
         log.info("url: {}", url);
 
-        return new GovernanceResult(invokeBrokerCGI(request, url, new TypeReference<BaseResponse<Boolean>>() {
+        return new GovernanceResponse<>(invokeBrokerCGI(request, url, new TypeReference<BaseResponse<Boolean>>() {
         }).getData());
 
     }

@@ -2,7 +2,7 @@ package com.webank.weevent.governance.controller;
 
 import java.util.List;
 
-import com.webank.weevent.governance.common.GovernanceResult;
+import com.webank.weevent.governance.common.GovernanceResponse;
 import com.webank.weevent.governance.entity.AccountEntity;
 import com.webank.weevent.governance.entity.PermissionEntity;
 import com.webank.weevent.governance.service.PermissionService;
@@ -26,8 +26,8 @@ public class PermissionController {
      *
      */
     @PostMapping("/permissionList")
-    public GovernanceResult permissionList(@RequestBody AccountEntity accountEntity) {
+    public  GovernanceResponse<List<PermissionEntity>> permissionList(@RequestBody AccountEntity accountEntity) {
         List<PermissionEntity> accountEntities = permissionService.permissionList(accountEntity);
-        return new GovernanceResult(accountEntities);
+        return new GovernanceResponse<>(accountEntities);
     }
 }

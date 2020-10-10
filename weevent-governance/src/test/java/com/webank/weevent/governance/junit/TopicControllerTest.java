@@ -6,7 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.webank.weevent.client.JsonHelper;
 import com.webank.weevent.governance.JUnitTestBase;
-import com.webank.weevent.governance.common.GovernanceResult;
+import com.webank.weevent.governance.common.GovernanceResponse;
 import com.webank.weevent.governance.entity.TopicEntity;
 import com.webank.weevent.governance.entity.TopicPage;
 import com.webank.weevent.governance.utils.JwtUtils;
@@ -62,9 +62,9 @@ public class TopicControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/add").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        GovernanceResult governanceResult = JsonHelper.json2Object(response.getContentAsString(), GovernanceResult.class);
-        brokerIdMap.put("brokerId", (Integer) governanceResult.getData());
-        Assert.assertEquals(governanceResult.getStatus().toString(), "200");
+        GovernanceResponse<?> governanceResponse = JsonHelper.json2Object(response.getContentAsString(), GovernanceResponse.class);
+        brokerIdMap.put("brokerId", (Integer) governanceResponse.getData());
+        Assert.assertEquals(governanceResponse.getCode().toString(), "200");
     }
 
 
@@ -81,8 +81,8 @@ public class TopicControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/topic/openTopic").contentType(MediaType.APPLICATION_JSON_UTF8).content(content).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        GovernanceResult governanceResult = JsonHelper.json2Object(response.getContentAsString(), GovernanceResult.class);
-        Assert.assertEquals(governanceResult.getStatus().toString(), "100109");
+        GovernanceResponse<?> governanceResponse = JsonHelper.json2Object(response.getContentAsString(), GovernanceResponse.class);
+        Assert.assertEquals(governanceResponse.getCode().toString(), "100109");
     }
 
     @Test
