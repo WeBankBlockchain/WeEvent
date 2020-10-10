@@ -104,7 +104,7 @@ public class Web3sdkUtils {
         Map<Integer, List<EchoAddress>> echoAddresses = new HashMap<>();
         for (Map.Entry<Integer, Client> e : groups.entrySet()) {
             List<EchoAddress> groupAddress = new ArrayList<>();
-            if (!dealOneGroup(e.getKey(), e.getValue(), groupAddress, fiscoConfig.getWeb3sdkTimeout())) {
+            if (!dealOneGroup(e.getKey(), e.getValue(), groupAddress)) {
                 return false;
             }
             echoAddresses.put(e.getKey(), groupAddress);
@@ -123,8 +123,7 @@ public class Web3sdkUtils {
 
     private static boolean dealOneGroup(Integer groupId,
                                         Client client,
-                                        List<EchoAddress> groupAddress,
-                                        int timeout) throws BrokerException {
+                                        List<EchoAddress> groupAddress) throws BrokerException {
         CRUDAddress crudAddress = new CRUDAddress(client);
         Map<Long, String> original = crudAddress.listAddress();
         log.info("address list in CRUD groupId: {}, {}", groupId, original);
@@ -156,13 +155,13 @@ public class Web3sdkUtils {
         }
 
         // deploy topic control
-        String topicControlAddress = Web3SDK2Wrapper.deployTopicControl(client, timeout);
+        String topicControlAddress = Web3SDK2Wrapper.deployTopicControl(client);
         log.info("deploy topic control success, group: {} version: {} address: {}", groupId, SupportedVersion.nowVersion, topicControlAddress);
 
         // flush topic info from low into new version
         if (highestVersion > 0L && highestVersion < SupportedVersion.nowVersion) {
             System.out.println(String.format("flush topic info from low version, %d -> %d", highestVersion, SupportedVersion.nowVersion));
-            boolean result = SupportedVersion.flushData(client, original, highestVersion, SupportedVersion.nowVersion, timeout);
+            boolean result = SupportedVersion.flushData(client, original, highestVersion, SupportedVersion.nowVersion);
             if (!result) {
                 log.error("flush topic info data failed, {} -> {}", highestVersion, SupportedVersion.nowVersion);
                 return false;

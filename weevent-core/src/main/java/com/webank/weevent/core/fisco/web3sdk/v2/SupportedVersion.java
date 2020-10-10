@@ -67,7 +67,7 @@ public class SupportedVersion {
         }
     }
 
-    private static List<List<TopicInfo>> loadTopicData(Client client, String address, Long version, int timeout) throws BrokerException {
+    private static List<List<TopicInfo>> loadTopicData(Client client, String address, Long version) throws BrokerException {
         List<List<TopicInfo>> topicInfos = new ArrayList<>();
         int total;
         switch (version.intValue()) {
@@ -181,9 +181,9 @@ public class SupportedVersion {
      * @param high high version
      * @return true if success
      */
-    public static boolean flushData(Client client, Map<Long, String> versions, Long low, Long high, int timeout) throws BrokerException {
+    public static boolean flushData(Client client, Map<Long, String> versions, Long low, Long high) throws BrokerException {
         // load data from low version
-        List<List<TopicInfo>> topicInfos = loadTopicData(client, versions.get(low), low, timeout);
+        List<List<TopicInfo>> topicInfos = loadTopicData(client, versions.get(low), low);
         saveTopicData(client, topicInfos, versions.get(high), high);
         return true;
     }

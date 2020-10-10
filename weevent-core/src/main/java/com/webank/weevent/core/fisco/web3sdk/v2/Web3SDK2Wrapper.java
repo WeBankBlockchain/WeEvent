@@ -124,7 +124,7 @@ public class Web3SDK2Wrapper {
      * @return contract address
      * @throws BrokerException BrokerException
      */
-    public static String deployTopicControl(Client client, int timeout) throws BrokerException {
+    public static String deployTopicControl(Client client) throws BrokerException {
         log.info("begin deploy topic control");
 
         try {

@@ -68,7 +68,7 @@ public class FileTransportService {
 
         // init common amop channel
         log.info("init AMOP channel for common transport, groupId: {}", groupId);
-        this.channel = new AMOPChannel(this, groupId);
+        this.channel = new AMOPChannel(this);
     }
 
     public AMOPChannel getChannel() {

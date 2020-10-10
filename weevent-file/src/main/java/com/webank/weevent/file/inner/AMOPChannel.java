@@ -66,10 +66,9 @@ public class AMOPChannel extends AmopCallback {
      * Create a AMOP channel on service for subscribe topic
      *
      * @param fileTransportService component class
-     * @param groupId group id
      * @throws BrokerException exception
      */
-    public AMOPChannel(FileTransportService fileTransportService, String groupId) throws BrokerException {
+    public AMOPChannel(FileTransportService fileTransportService) throws BrokerException {
         this.fileTransportService = fileTransportService;
         this.threadPool = this.initThreadPool(1, 10);
 
