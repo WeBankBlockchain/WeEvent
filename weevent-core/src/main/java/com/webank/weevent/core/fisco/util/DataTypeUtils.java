@@ -7,11 +7,13 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.ErrorCode;
 import com.webank.weevent.client.JsonHelper;
+import com.webank.weevent.core.dto.AmopMsgResponse;
 import com.webank.weevent.core.dto.ListPage;
 import com.webank.weevent.core.fisco.constant.WeEventConstants;
 
@@ -184,6 +186,39 @@ public final class DataTypeUtils {
             log.error("convert jsonString to object failed ", e);
             throw new BrokerException(ErrorCode.JSON_DECODE_EXCEPTION);
         }
+    }
+
+    public static byte[] toChannelResponse(ErrorCode errorCode) {
+        return toChannelResponse(errorCode, null);
+    }
+
+    public static byte[] toChannelResponse(ErrorCode errorCode, byte[] content) {
+        AmopMsgResponse response = new AmopMsgResponse();
+        response.setErrorCode(errorCode.getCode());
+        response.setErrorMessage(errorCode.getCodeDesc());
+        if (Objects.nonNull(content)) {
+            response.setContent(content);
+        }
+
+        try {
+            return JsonHelper.object2JsonBytes(response);
+        } catch (BrokerException e) {
+            log.error("convert amopMsgResponse to json error. e:{}", e.getMessage());
+        }
+        return new byte[0];
+    }
+
+    public static byte[] toChannelResponse(BrokerException e) {
+        AmopMsgResponse response = new AmopMsgResponse();
+        response.setErrorCode(e.getCode());
+        response.setErrorMessage(e.getMessage());
+
+        try {
+            return JsonHelper.object2JsonBytes(response);
+        } catch (BrokerException ex) {
+            log.error("convert amopMsgResponse to json error. e:{}", ex.getMessage());
+        }
+        return new byte[0];
     }
 }
 

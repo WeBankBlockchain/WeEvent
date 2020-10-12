@@ -41,15 +41,15 @@ public class FiscoBcosBroker4Producer extends FiscoBcosTopicAdmin implements IPr
         // publishEvent support async operator in callback
         if (event.getExtensions().containsKey(WeEvent.WeEvent_SIGN)) {
             return fiscoBcosDelegate.sendRawTransaction(event.getTopic(),
-                    Long.parseLong(groupId),
+                    Integer.parseInt(groupId),
                     new String(event.getContent(), StandardCharsets.UTF_8));
         } else {
             if (event.getExtensions().containsKey(WeEvent.WeEvent_EPHEMERAL)) {
                 log.info("ephemeral event");
-                return fiscoBcosDelegate.sendAMOP(event.getTopic(), Long.parseLong(groupId), JsonHelper.object2Json(event));
+                return fiscoBcosDelegate.sendAMOP(event.getTopic(), Integer.parseInt(groupId), JsonHelper.object2Json(event));
             } else {
                 return fiscoBcosDelegate.publishEvent(event.getTopic(),
-                        Long.parseLong(groupId),
+                        Integer.parseInt(groupId),
                         new String(event.getContent(), StandardCharsets.UTF_8),
                         JsonHelper.object2Json(event.getExtensions()));
             }

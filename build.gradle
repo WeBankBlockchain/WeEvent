@@ -33,7 +33,8 @@ ext {
 
     // org.fisco-bcos.web3sdk
     web3sdkVersion = [
-            fisco: "2.2.5"
+            // fisco: "2.6.1.09271-rc1-SNAPSHOT"
+            fisco: "2.6.1-SNAPSHOT"
     ]
     // fabric
     fabricVersion = "1.4.4"
@@ -51,7 +52,7 @@ ext {
     // JMS
     jmsVersion = "1.1"
     // Jmock
-    jmockVersion = "1.9"
+    jmockVersion = "1.9.0"
     // mybatis-spring-boot-starter
     mybatisVersion = "1.3.2"
     //h2
@@ -127,7 +128,7 @@ allprojects {
         maven { url "http://maven.aliyun.com/nexus/content/groups/public/" }
         // "org.ethereum.solcJ-all-0.4.25"
         // maven { url "https://dl.bintray.com/ethereum/maven/" }
-        //maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+        maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
         mavenCentral()
         jcenter()
     }
@@ -167,7 +168,7 @@ allprojects {
         resolutionStrategy {
             // fix security bug
             force "com.alibaba:fastjson:${fastjsonVersion}"
-            force "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
+            // force "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
             // force use netty
             force "io.netty:netty-all:${nettyVersion}"
             force "org.apache.zookeeper:zookeeper:${zookeeperVersion}"
