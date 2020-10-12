@@ -7,6 +7,9 @@ dependencies {
     implementation("org.springframework.data:spring-data-commons:${springBootVersion}")
     implementation("org.springframework:spring-messaging:${springVersion}")
 
+//    implementation("org.springframework:spring-beans:${springVersion}")
+//    implementation("org.springframework:spring-context:${springVersion}")
+
     // httpclient
     implementation("org.apache.httpcomponents:httpclient:${httpclientVersion}")
 
