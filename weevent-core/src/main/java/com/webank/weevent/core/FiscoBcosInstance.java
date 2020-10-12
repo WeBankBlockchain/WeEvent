@@ -9,7 +9,6 @@ import com.webank.weevent.core.fisco.web3sdk.FiscoBcosDelegate;
 
 /**
  * FISCO-BCOS instance.
- *
  * <p>
  * It is a sample of subscribe event:
  * //@formatter:off
@@ -19,18 +18,15 @@ import com.webank.weevent.core.fisco.web3sdk.FiscoBcosDelegate;
  * import com.webank.weevent.core.IProducer;
  * import com.webank.weevent.sdk.BrokerException;
  * import com.webank.weevent.sdk.WeEvent;
- *
  * try {
  *     // new FiscoBcos instance
  *     FiscoBcosInstance fiscoBcos = new FiscoBcosInstance(new FiscoConfig();
- *
  *     // new IProducer handler
  *     IProducer producer = fiscoBcos.buildProducer();
  *     producer.startProducer();
  *     producer.open("com.weevent.test");
  *     SendResult sendResult = producer.publish(new WeEvent("com.weevent.test", "hello weevent".getBytes()), "1");
  *     System.out.println(sendResult);
- *
  *     // new IConsumer handler
  *     IConsumer consumer = fiscoBcos.buildConsumer();
  *     // make sure topic exist
