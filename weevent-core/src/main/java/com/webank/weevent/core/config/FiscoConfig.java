@@ -60,6 +60,12 @@ public class FiscoConfig {
     @Value("${sdk-key-path:sdk.key}")
     private String SdkKeyPath;
 
+    @Value("${sdk-gm-crt-path:gmensdk.crt}")
+    private String SdkGmCrtPath;
+
+    @Value("${sdk-gm-key-path:gmensdk.key}")
+    private String SdkGmKeyPath;
+
     @Value("${pem-key-path:privateKey.pem}")
     private String PemKeyPath;
 
@@ -68,6 +74,9 @@ public class FiscoConfig {
 
     @Value("${consumer.history_merge_block:8}")
     private Integer consumerHistoryMergeBlock;
+
+    @Value("${bcosSDK.max_blocking_queue_size:102400}")
+    private Integer maxBlockingQueueSize;
 
     /**
      * load configuration without spring
