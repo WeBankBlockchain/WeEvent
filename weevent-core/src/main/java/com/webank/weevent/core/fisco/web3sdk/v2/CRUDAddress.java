@@ -9,10 +9,9 @@ import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.ErrorCode;
 
 import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.web3j.crypto.Credentials;
-import org.fisco.bcos.web3j.precompile.crud.Condition;
-import org.fisco.bcos.web3j.precompile.crud.Entry;
-import org.fisco.bcos.web3j.protocol.Web3j;
+import org.fisco.bcos.sdk.client.Client;
+import org.fisco.bcos.sdk.model.RetCode;
+import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
 
 /**
  * Contract address in CRUD table.
@@ -27,8 +26,8 @@ public class CRUDAddress extends CRUDTable {
     // only one record in table
     public final static String ContractAddress = "topic_control_address";
 
-    public CRUDAddress(Web3j web3j, Credentials credentials) throws BrokerException {
-        super(web3j, credentials, TableName);
+    public CRUDAddress(Client client) throws BrokerException {
+        super(client, TableName);
     }
 
     /*
@@ -37,15 +36,13 @@ public class CRUDAddress extends CRUDTable {
      * @return address list
      */
     public Map<Long, String> listAddress() throws BrokerException {
-        log.info("associated groupId: {}", this.groupId);
+        log.info("associated groupId: {}", this.client.getGroupId());
 
         List<Map<String, String>> records;
         try {
-            this.table.setKey(ContractAddress);
-            Condition condition = this.table.getCondition();
-            records = this.crud.select(this.table, condition);
+            records = this.crud.select(TableName, ContractAddress, null);
             log.info("records in CRUD, {}", records);
-        } catch (Exception e) {
+        } catch (ContractException e) {
             log.error("select from CRUD table failed", e);
             throw new BrokerException(ErrorCode.UNKNOWN_SOLIDITY_VERSION);
         }
@@ -58,7 +55,7 @@ public class CRUDAddress extends CRUDTable {
     }
 
     public boolean addAddress(Long version, String address) throws BrokerException {
-        log.info("associated groupId: {}", this.groupId);
+        log.info("associated groupId: {}", this.client.getGroupId());
 
         // check exist manually to avoid duplicate record
         Map<Long, String> topicControlAddresses = listAddress();
@@ -67,21 +64,23 @@ public class CRUDAddress extends CRUDTable {
             return false;
         }
 
+
+        Map<String, String> fieldNameToValue = new HashMap<>();
+        fieldNameToValue.put(TableValue, address);
+        fieldNameToValue.put(TableVersion, String.valueOf(version));
+        org.fisco.bcos.sdk.contract.precompiled.crud.common.Entry fieldNameToValueEntry = new org.fisco.bcos.sdk.contract.precompiled.crud.common.Entry(fieldNameToValue);
+        fieldNameToValueEntry.setFieldNameToValue(fieldNameToValue);
         try {
-            this.table.setKey(ContractAddress);
-            Entry record = this.table.getEntry();
-            record.put(TableValue, address);
-            record.put(TableVersion, String.valueOf(version));
             // notice: record's key can be duplicate in CRUD
-            int result = this.crud.insert(this.table, record);
-            if (result == 1) {
+            RetCode retCode = this.crud.insert(TableName, ContractAddress, fieldNameToValueEntry);
+            if (retCode.getCode() == 1) {
                 log.info("add contract address into CRUD success");
                 return true;
             }
 
-            log.error("add contract address into CRUD failed, {}", result);
+            log.error("add contract address into CRUD failed, {}", retCode.toString());
             return false;
-        } catch (Exception e) {
+        } catch (ContractException e) {
             log.error("add contract address into CRUD failed", e);
             return false;
         }

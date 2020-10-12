@@ -29,7 +29,6 @@ import com.webank.weevent.core.fisco.web3sdk.v2.Web3SDKConnector;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.utils.Async;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /**
@@ -45,7 +44,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 @Slf4j
 public class FiscoBcosDelegate {
     // access to version 2.x
-    private final Map<Long, FiscoBcos2> fiscoBcos2Map = new ConcurrentHashMap<>();
+    private final Map<Integer, FiscoBcos2> fiscoBcos2Map = new ConcurrentHashMap<>();
 
     // AMOP subscription
     //private final Map<Long, AMOPSubscription> AMOPSubscriptions = new ConcurrentHashMap<>();
@@ -58,8 +57,6 @@ public class FiscoBcosDelegate {
 
     // fiscoConfig
     private FiscoConfig fiscoConfig;
-
-    private Async asyncHelper;
 
     /**
      * notify from web3sdk2.x when new block mined
@@ -90,11 +87,8 @@ public class FiscoBcosDelegate {
         if (config.getVersion().startsWith(WeEventConstants.FISCO_BCOS_2_X_VERSION_PREFIX)) {
             log.info("Notice: FISCO-BCOS's version is 2.x");
 
-            // set web3sdk.Async thread pool, special thread for sendAsync
-            this.asyncHelper = new Async(threadPool);
-
             // 1 is always exist
-            Long defaultGId = Long.valueOf(WeEvent.DEFAULT_GROUP_ID);
+            Integer defaultGId = Integer.parseInt(WeEvent.DEFAULT_GROUP_ID);
             FiscoBcos2 defaultFiscoBcos2 = new FiscoBcos2(config);
             defaultFiscoBcos2.init(defaultGId);
             this.fiscoBcos2Map.put(defaultGId, defaultFiscoBcos2);
@@ -104,7 +98,7 @@ public class FiscoBcosDelegate {
             // init all group in nodes except default one
             groups.remove(WeEvent.DEFAULT_GROUP_ID);
             for (String groupId : groups) {
-                Long gid = Long.valueOf(groupId);
+                Integer gid = Integer.parseInt(groupId);
                 FiscoBcos2 fiscoBcos2 = new FiscoBcos2(config);
                 fiscoBcos2.init(gid);
                 this.fiscoBcos2Map.put(gid, fiscoBcos2);
@@ -134,7 +128,7 @@ public class FiscoBcosDelegate {
     public void setListener(@NonNull IBlockEventListener listener) {
         log.info("set IBlockEventListener for every group for FISCO-BCOS 2.x");
 
-        for (Map.Entry<Long, FiscoBcos2> entry : fiscoBcos2Map.entrySet()) {
+        for (Map.Entry<Integer, FiscoBcos2> entry : fiscoBcos2Map.entrySet()) {
             entry.getValue().setListener(listener);
         }
     }
@@ -147,24 +141,24 @@ public class FiscoBcosDelegate {
     public List<String> listGroupId() throws BrokerException {
         if (this.groupIdList.isEmpty()) {
             // group 1 is always exist
-            this.groupIdList = this.fiscoBcos2Map.get(Long.valueOf(WeEvent.DEFAULT_GROUP_ID)).listGroupId();
+            this.groupIdList = this.fiscoBcos2Map.get(Integer.parseInt(WeEvent.DEFAULT_GROUP_ID)).listGroupId();
         }
         return new ArrayList<>(this.groupIdList);
     }
 
-    public boolean createTopic(String topicName, Long groupId) throws BrokerException {
+    public boolean createTopic(String topicName, Integer groupId) throws BrokerException {
         return this.fiscoBcos2Map.get(groupId).createTopic(topicName);
     }
 
-    public boolean isTopicExist(String topicName, Long groupId) throws BrokerException {
+    public boolean isTopicExist(String topicName, Integer groupId) throws BrokerException {
         return this.fiscoBcos2Map.get(groupId).isTopicExist(topicName);
     }
 
-    public ListPage<String> listTopicName(Integer pageIndex, Integer pageSize, Long groupId) throws BrokerException {
+    public ListPage<String> listTopicName(Integer pageIndex, Integer pageSize, Integer groupId) throws BrokerException {
         return this.fiscoBcos2Map.get(groupId).listTopicName(pageIndex, pageSize);
     }
 
-    public TopicInfo getTopicInfo(String topicName, Long groupId, boolean skipCache) throws BrokerException {
+    public TopicInfo getTopicInfo(String topicName, Integer groupId, boolean skipCache) throws BrokerException {
         Optional<TopicInfo> topicInfo = this.fiscoBcos2Map.get(groupId).getTopicInfo(topicName, skipCache);
         if (!topicInfo.isPresent()) {
             throw new BrokerException(ErrorCode.TOPIC_NOT_EXIST);
@@ -172,21 +166,21 @@ public class FiscoBcosDelegate {
         return topicInfo.get();
     }
 
-    public WeEvent getEvent(String eventId, Long groupId) throws BrokerException {
+    public WeEvent getEvent(String eventId, Integer groupId) throws BrokerException {
         return this.fiscoBcos2Map.get(groupId).getEvent(eventId);
     }
 
-    public CompletableFuture<SendResult> publishEvent(String topicName, Long groupId, String eventContent, String extensions) throws BrokerException {
+    public CompletableFuture<SendResult> publishEvent(String topicName, Integer groupId, String eventContent, String extensions) throws BrokerException {
         return this.fiscoBcos2Map.get(groupId).publishEvent(topicName, eventContent, extensions);
     }
 
-    public CompletableFuture<SendResult> sendRawTransaction(String topicName, Long groupId, String transactionHex) throws BrokerException {
+    public CompletableFuture<SendResult> sendRawTransaction(String topicName, Integer groupId, String transactionHex) throws BrokerException {
         ParamCheckUtils.validateTransactionHex(transactionHex);
 
         return this.fiscoBcos2Map.get(groupId).sendRawTransaction(topicName, transactionHex);
     }
 
-    public Long getBlockHeight(Long groupId) throws BrokerException {
+    public Long getBlockHeight(Integer groupId) throws BrokerException {
         return this.fiscoBcos2Map.get(groupId).getBlockHeight();
     }
 
@@ -198,31 +192,31 @@ public class FiscoBcosDelegate {
      * @return list of WeEvent
      * @throws BrokerException BrokerException
      */
-    public List<WeEvent> loop(Long blockNum, Long groupId) throws BrokerException {
+    public List<WeEvent> loop(Long blockNum, Integer groupId) throws BrokerException {
         List<WeEvent> events = new ArrayList<>();
         if (blockNum <= 0) {
             return events;
         }
 
         // from block chain
-        events = this.fiscoBcos2Map.get(groupId).loop(blockNum);
+        events = this.fiscoBcos2Map.get(groupId).loop(BigInteger.valueOf(blockNum));
 
         return events;
     }
 
-    public GroupGeneral getGroupGeneral(Long groupId) throws BrokerException {
+    public GroupGeneral getGroupGeneral(Integer groupId) throws BrokerException {
         return this.fiscoBcos2Map.get(groupId).getGroupGeneral();
     }
 
-    public ListPage<TbTransHash> queryTransList(Long groupId, String transHash, BigInteger blockNumber, Integer pageIndex, Integer pageSize) throws BrokerException {
+    public ListPage<TbTransHash> queryTransList(Integer groupId, String transHash, BigInteger blockNumber, Integer pageIndex, Integer pageSize) throws BrokerException {
         return this.fiscoBcos2Map.get(groupId).queryTransList(transHash, blockNumber, pageIndex, pageSize);
     }
 
-    public ListPage<TbBlock> queryBlockList(Long groupId, String transHash, BigInteger blockNumber, Integer pageIndex, Integer pageSize) throws BrokerException {
+    public ListPage<TbBlock> queryBlockList(Integer groupId, String transHash, BigInteger blockNumber, Integer pageIndex, Integer pageSize) throws BrokerException {
         return this.fiscoBcos2Map.get(groupId).queryBlockList(transHash, blockNumber, pageIndex, pageSize);
     }
 
-    public ListPage<TbNode> queryNodeList(Long groupId) throws BrokerException {
+    public ListPage<TbNode> queryNodeList(Integer groupId) throws BrokerException {
         return this.fiscoBcos2Map.get(groupId).queryNodeList();
     }
 
@@ -230,37 +224,37 @@ public class FiscoBcosDelegate {
         return this.fiscoConfig;
     }
 
-    public ContractContext getContractContext(Long groupId) throws BrokerException {
+    public ContractContext getContractContext(Integer groupId) throws BrokerException {
         return this.fiscoBcos2Map.get(groupId).getContractContext();
     }
 
-    public boolean addOperator(Long groupId, String topicName, String operatorAddress) throws BrokerException {
+    public boolean addOperator(Integer groupId, String topicName, String operatorAddress) throws BrokerException {
         ParamCheckUtils.validateAddress(operatorAddress);
 
         return this.fiscoBcos2Map.get(groupId).addOperator(topicName, operatorAddress);
     }
 
-    public boolean delOperator(Long groupId, String topicName, String operatorAddress) throws BrokerException {
+    public boolean delOperator(Integer groupId, String topicName, String operatorAddress) throws BrokerException {
         ParamCheckUtils.validateAddress(operatorAddress);
 
         return this.fiscoBcos2Map.get(groupId).delOperator(topicName, operatorAddress);
     }
 
-    public List<String> listOperator(Long groupId, String topicName) throws BrokerException {
+    public List<String> listOperator(Integer groupId, String topicName) throws BrokerException {
         return this.fiscoBcos2Map.get(groupId).listOperator(topicName);
     }
 
-    public CompletableFuture<SendResult> sendAMOP(String topicName, Long groupId, String content) {
+    public CompletableFuture<SendResult> sendAMOP(String topicName, Integer groupId, String content) {
         return this.fiscoBcos2Map.get(groupId).sendAMOP(topicName, content);
     }
 
-    public Map<Long, AMOPSubscription> initAMOP() {
-        Map<Long, AMOPSubscription> AMOPSubscriptions = new ConcurrentHashMap<>();
+    public Map<Integer, AMOPSubscription> initAMOP() {
+        Map<Integer, AMOPSubscription> AMOPSubscriptions = new ConcurrentHashMap<>();
 
-        for (Map.Entry<Long, FiscoBcos2> entry : this.fiscoBcos2Map.entrySet()) {
+        for (Map.Entry<Integer, FiscoBcos2> entry : this.fiscoBcos2Map.entrySet()) {
             log.info("init AMOP for group: {}", entry.getKey());
 
-            AMOPSubscription amopSubscription = new AMOPSubscription(String.valueOf(entry.getKey()), entry.getValue().getService());
+            AMOPSubscription amopSubscription = new AMOPSubscription(String.valueOf(entry.getKey()), entry.getValue().getAmop());
             AMOPSubscriptions.put(entry.getKey(), amopSubscription);
         }
 
