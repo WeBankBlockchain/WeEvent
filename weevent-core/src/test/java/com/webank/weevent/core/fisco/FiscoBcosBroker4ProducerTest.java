@@ -10,6 +10,11 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.ErrorCode;
+import com.webank.weevent.client.JsonHelper;
+import com.webank.weevent.client.SendResult;
+import com.webank.weevent.client.WeEvent;
 import com.webank.weevent.core.IProducer;
 import com.webank.weevent.core.JUnitTestBase;
 import com.webank.weevent.core.config.FiscoConfig;
@@ -17,22 +22,19 @@ import com.webank.weevent.core.dto.ContractContext;
 import com.webank.weevent.core.fisco.web3sdk.FiscoBcosDelegate;
 import com.webank.weevent.core.fisco.web3sdk.v2.Web3SDKConnector;
 import com.webank.weevent.core.fisco.web3sdk.v2.solc10.Topic;
-import com.webank.weevent.client.BrokerException;
-import com.webank.weevent.client.ErrorCode;
-import com.webank.weevent.client.JsonHelper;
-import com.webank.weevent.client.SendResult;
-import com.webank.weevent.client.WeEvent;
 
 import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.web3j.abi.FunctionEncoder;
-import org.fisco.bcos.web3j.abi.TypeReference;
-import org.fisco.bcos.web3j.abi.datatypes.Function;
-import org.fisco.bcos.web3j.abi.datatypes.Type;
-import org.fisco.bcos.web3j.crypto.Credentials;
-import org.fisco.bcos.web3j.crypto.ExtendedRawTransaction;
-import org.fisco.bcos.web3j.crypto.ExtendedTransactionEncoder;
-import org.fisco.bcos.web3j.crypto.gm.GenCredential;
-import org.fisco.bcos.web3j.utils.Numeric;
+import org.fisco.bcos.sdk.BcosSDK;
+import org.fisco.bcos.sdk.abi.FunctionEncoder;
+import org.fisco.bcos.sdk.abi.TypeReference;
+import org.fisco.bcos.sdk.abi.datatypes.Function;
+import org.fisco.bcos.sdk.abi.datatypes.Type;
+import org.fisco.bcos.sdk.client.Client;
+import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
+import org.fisco.bcos.sdk.crypto.keypair.ECDSAKeyPair;
+import org.fisco.bcos.sdk.crypto.keypair.SM2KeyPair;
+import org.fisco.bcos.sdk.transaction.codec.encode.TransactionEncoderService;
+import org.fisco.bcos.sdk.transaction.model.po.RawTransaction;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -69,7 +71,7 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
         this.iProducer = new FiscoBcosBroker4Producer(this.fiscoBcosDelegate);
 
         Assert.assertTrue(this.iProducer.startProducer());
-        this.contractContext = this.fiscoBcosDelegate.getContractContext(Long.parseLong(this.groupId));
+        this.contractContext = this.fiscoBcosDelegate.getContractContext(Integer.parseInt(this.groupId));
         Assert.assertNotNull(this.iProducer);
         Assert.assertTrue(this.iProducer.open(this.topicName, this.groupId));
     }
@@ -333,16 +335,18 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
      */
     @Test
     public void testPublishByFixedAccount() throws Exception {
+        BcosSDK sdk = Web3SDKConnector.buidBcosSDK(fiscoConfig);
+        Client client = Web3SDKConnector.initClient(sdk, Integer.parseInt(this.groupId), this.fiscoConfig);
+
         Map<String, String> ext = new HashMap<>();
         ext.put(WeEvent.WeEvent_SIGN, "true");
         WeEvent event = new WeEvent(this.topicName, "this is a signed message".getBytes(), ext);
-        ContractContext contractContext = this.fiscoBcosDelegate.getContractContext(Long.parseLong(this.groupId));
+        ContractContext contractContext = this.fiscoBcosDelegate.getContractContext(Integer.parseInt(this.groupId));
 
-        String rawData = buildWeEvent(event);
-        ExtendedRawTransaction rawTransaction = getRawTransaction(this.groupId, rawData, contractContext);
+        String rawData = buildWeEvent(new FunctionEncoder(client.getCryptoSuite()), event);
+        RawTransaction rawTransaction = getRawTransaction(this.groupId, rawData, contractContext);
 
-
-        String signData = signData(rawTransaction, Web3SDKConnector.getCredentials(this.fiscoConfig));
+        String signData = signData(client, client.getCryptoSuite().getCryptoKeyPair(), rawTransaction);
         SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, signData.getBytes(), ext), this.groupId).get(transactionTimeout, TimeUnit.MILLISECONDS);
 
         Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.SUCCESS);
@@ -353,8 +357,11 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
      */
     @Test
     public void testPublishByExternalAccount() throws Exception {
-        Credentials externallyCredentials = getExternalAccountCredentials();
-        String operatorAddress = externallyCredentials.getAddress();
+        BcosSDK sdk = Web3SDKConnector.buidBcosSDK(fiscoConfig);
+        Client client = Web3SDKConnector.initClient(sdk, Integer.parseInt(this.groupId), this.fiscoConfig);
+
+        CryptoKeyPair externalAccountCryptoKeyPair = getExternalAccountCryptoKeyPair();
+        String operatorAddress = externalAccountCryptoKeyPair.getAddress();
 
         // add operatorAddress for topic
         boolean result = this.iProducer.addOperator(this.groupId, this.topicName, operatorAddress);
@@ -365,10 +372,10 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
         ext.put(WeEvent.WeEvent_SIGN, "true");
         WeEvent event = new WeEvent(this.topicName, "this is a signed message".getBytes(), ext);
 
-        String rawData = buildWeEvent(event);
-        ExtendedRawTransaction rawTransaction = getRawTransaction(this.groupId, rawData, this.contractContext);
+        String rawData = buildWeEvent(new FunctionEncoder(client.getCryptoSuite()), event);
+        RawTransaction rawTransaction = getRawTransaction(this.groupId, rawData, this.contractContext);
 
-        String signData = signData(rawTransaction, externallyCredentials);
+        String signData = signData(client, externalAccountCryptoKeyPair, rawTransaction);
 
         SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, signData.getBytes(), ext), this.groupId).get(transactionTimeout, TimeUnit.MILLISECONDS);
 
@@ -380,16 +387,19 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
      */
     @Test
     public void testPublishByExternalAccountNoPermission() throws Exception {
+        BcosSDK sdk = Web3SDKConnector.buidBcosSDK(fiscoConfig);
+        Client client = Web3SDKConnector.initClient(sdk, Integer.parseInt(this.groupId), this.fiscoConfig);
+
         Map<String, String> ext = new HashMap<>();
         ext.put(WeEvent.WeEvent_SIGN, "true");
         WeEvent event = new WeEvent(this.topicName, "this is a signed message".getBytes(), ext);
 
-        String rawData = buildWeEvent(event);
-        ExtendedRawTransaction rawTransaction = getRawTransaction(this.groupId, rawData, this.contractContext);
+        String rawData = buildWeEvent(new FunctionEncoder(client.getCryptoSuite()), event);
+        RawTransaction rawTransaction = getRawTransaction(this.groupId, rawData, this.contractContext);
 
-        Credentials credentials = getExternalAccountCredentials();
+        CryptoKeyPair externalAccountCryptoKeyPair = getExternalAccountCryptoKeyPair();
 
-        String signData = signData(rawTransaction, credentials);
+        String signData = signData(client, externalAccountCryptoKeyPair, rawTransaction);
         SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, signData.getBytes(), ext), this.groupId).get(transactionTimeout, TimeUnit.MILLISECONDS);
 
         Assert.assertEquals(sendResult.getStatus(), SendResult.SendResultStatus.NO_PERMISSION);
@@ -411,21 +421,21 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
         }
     }
 
-    private String buildWeEvent(WeEvent event) throws BrokerException {
+    private String buildWeEvent(FunctionEncoder functionEncoder, WeEvent event) throws BrokerException {
         final Function function = new Function(
                 Topic.FUNC_PUBLISHWEEVENT,
-                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.Utf8String(event.getTopic()),
-                        new org.fisco.bcos.web3j.abi.datatypes.Utf8String(new String(event.getContent(), StandardCharsets.UTF_8)),
-                        new org.fisco.bcos.web3j.abi.datatypes.Utf8String(JsonHelper.object2Json(event.getExtensions()))),
+                Arrays.<Type>asList(new org.fisco.bcos.sdk.abi.datatypes.Utf8String(event.getTopic()),
+                        new org.fisco.bcos.sdk.abi.datatypes.Utf8String(new String(event.getContent(), StandardCharsets.UTF_8)),
+                        new org.fisco.bcos.sdk.abi.datatypes.Utf8String(JsonHelper.object2Json(event.getExtensions()))),
                 Collections.<TypeReference<?>>emptyList());
-        return FunctionEncoder.encode(function);
+        return functionEncoder.encode(function);
     }
 
-    private ExtendedRawTransaction getRawTransaction(String groupId, String data, ContractContext contractContext) {
+    private RawTransaction getRawTransaction(String groupId, String data, ContractContext contractContext) {
         Random r = new SecureRandom();
         BigInteger randomid = new BigInteger(250, r);
-        ExtendedRawTransaction rawTransaction =
-                ExtendedRawTransaction.createTransaction(
+        RawTransaction rawTransaction =
+                RawTransaction.createTransaction(
                         randomid,
                         BigInteger.valueOf(contractContext.getGasPrice()),
                         BigInteger.valueOf(contractContext.getGasLimit()),
@@ -436,16 +446,21 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
                         new BigInteger(contractContext.getChainId()),
                         new BigInteger(groupId),
                         null);
+
         return rawTransaction;
     }
 
-    private String signData(ExtendedRawTransaction rawTransaction, Credentials credentials) {
-        byte[] signedMessage = ExtendedTransactionEncoder.signMessage(rawTransaction, credentials);
-        return Numeric.toHexString(signedMessage);
+    private String signData(Client client, CryptoKeyPair cryptoKeyPair, RawTransaction rawTransaction) {
+        TransactionEncoderService transactionEncoderService = new TransactionEncoderService(client.getCryptoSuite());
+        return transactionEncoderService.encodeAndSign(rawTransaction, cryptoKeyPair);
     }
 
-    private Credentials getExternalAccountCredentials() {
-        return GenCredential.create();
+    private CryptoKeyPair getExternalAccountCryptoKeyPair() {
+        if (fiscoConfig.getWeb3sdkEncryptType().equals("ECDSA_TYPE")) {
+            return (new ECDSAKeyPair()).generateKeyPair();
+        } else {
+            return (new SM2KeyPair()).generateKeyPair();
+        }
     }
 
 }
