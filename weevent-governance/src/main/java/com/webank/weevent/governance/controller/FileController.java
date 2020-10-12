@@ -1,13 +1,16 @@
 package com.webank.weevent.governance.controller;
 
 import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -164,9 +167,55 @@ public class FileController {
     @RequestMapping(path = "/genPemFile")
     public void genPemFile(@RequestParam(name = "groupId") String groupId,
                            @RequestParam(name = "brokerId") Integer brokerId,
-                           @RequestParam(name = "filePath") String filePath) throws GovernanceException {
-        log.info("download file, groupId:{}, brokerId:{}, filePath:{}.", groupId, brokerId, filePath);
-        this.fileService.genPemFile(groupId, brokerId, filePath);
+                           @RequestParam(name = "filePath") String filePath,
+                           HttpServletResponse response) throws GovernanceException {
+    	log.info("download file, groupId:{}, brokerId:{}", groupId, brokerId);
+		response.setHeader("content-type", "application/octet-stream");
+		response.setContentType("application/octet-stream; charset=UTF-8");
+		Map<String, String> map = this.fileService.genPemFile(groupId, brokerId, filePath);
+		
+		String fileName = "公私钥文件.txt";
+		String downloadFile = filePath+ "/" + fileName;
+		FileWriter fwriter = null;
+		try {
+			// true表示不覆盖原来的内容，而是加到文件的后面。若要覆盖原来的内容，直接省略这个参数就好
+			fwriter = new FileWriter(downloadFile, true);
+			for(Map.Entry<String, String> entry : map.entrySet()){
+			    String fileContent = entry.getValue();
+			    fwriter.write(fileContent);
+			}
+		} catch (IOException ex) {
+			ex.printStackTrace();
+		} finally {
+			try {
+				fwriter.flush();
+				fwriter.close();
+			} catch (IOException ex) {
+				ex.printStackTrace();
+			}
+		}
+
+		try {
+			response.setHeader("filename", URLEncoder.encode(fileName, StandardCharsets.UTF_8.toString()));
+		} catch (UnsupportedEncodingException e) {
+			log.error("encode fileName error, fileName:{}", fileName, e);
+		}
+
+		byte[] buffer = new byte[1024];
+		try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(downloadFile));
+				OutputStream os = response.getOutputStream()) {
+			int i = bis.read(buffer);
+			while (i != -1) {
+				os.write(buffer, 0, i);
+				os.flush();
+				i = bis.read(buffer);
+			}
+			log.info("download file success, brokerId:{}, fileName:{}", brokerId, fileName);
+		} catch (IOException e) {
+			log.error("download file error, brokerId:{} fileName:{}", brokerId, fileName, e);
+			throw new GovernanceException("download file error", e);
+		}
+		new File(downloadFile).delete();
     }
 
     @RequestMapping(path = "/checkUploaded")

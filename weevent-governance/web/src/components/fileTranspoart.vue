@@ -2,6 +2,7 @@
 <div class='event-table topic fileTranspoart'>
   <div class='refresh top_part'>
     <el-button type='primary' size='small' icon='el-icon-plus' @click='addNewOne'>{{$t('common.add')}}</el-button>
+    <el-button type='primary' @click='generatePPK()'>{{$t('file.generatePPK')}}</el-button>
   </div>
   <el-table
     :data="tableData"
@@ -567,6 +568,33 @@ export default {
     },
     dFile (e) {
       const url = con.ROOT + 'file/download?topic=' + e.topic + '&fileName=' + e.fileName
+      var xhr = new XMLHttpRequest()
+      var formData = new FormData()
+      xhr.open('get', url)
+      xhr.setRequestHeader('Authorization', localStorage.getItem('token'))
+      xhr.responseType = 'blob'
+      xhr.onload = function (e) {
+        if (this.status === 200) {
+          const blob = this.response
+          const f = this.getResponseHeader('filename')
+          const filename = decodeURI(f)
+          if (window.navigator.msSaveOrOpenBlob) {
+            navigator.msSaveBlob(blob, filename)
+          } else {
+            var a = document.createElement('a')
+            var url = window.URL.createObjectURL(blob)
+            a.href = url
+            a.download = filename
+            document.body.appendChild(a)
+            a.click()
+            window.URL.revokeObjectURL(url)
+          }
+        }
+      }
+      xhr.send(formData)
+    },
+    generatePPK (e) {
+      const url = con.ROOT + 'file/genPemFile?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&filePath=' + "./logs"
       var xhr = new XMLHttpRequest()
       var formData = new FormData()
       xhr.open('get', url)
