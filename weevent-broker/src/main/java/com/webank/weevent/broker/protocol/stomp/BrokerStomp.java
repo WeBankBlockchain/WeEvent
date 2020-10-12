@@ -315,8 +315,7 @@ public class BrokerStomp extends TextWebSocketHandler {
             return true;
         }
 
-        if (stompHeaderAccessor.getUser() != null
-                && this.authAccount.equals(stompHeaderAccessor.getLogin())
+        if (this.authAccount.equals(stompHeaderAccessor.getLogin())
                 && this.authPassword.equals(stompHeaderAccessor.getPasscode())) {
             log.error("authorize success");
             return true;
