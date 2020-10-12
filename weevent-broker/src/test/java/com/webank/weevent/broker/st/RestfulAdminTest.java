@@ -12,6 +12,7 @@ import com.webank.weevent.core.dto.SubscriptionInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
@@ -102,6 +103,7 @@ public class RestfulAdminTest extends JUnitTestBase {
     }
 
     @Test
+    @Ignore
     public void testQueryTransList() {
         ResponseEntity<BaseResponse> rsp = admin.getForEntity(url + "transaction/transList?pageNumber={pageNumber}&pageSize={pageSize}", BaseResponse.class, 1, 10);
         log.info("get transaction list, status: " + rsp.getStatusCode() + " body: " + rsp.getBody());
@@ -113,6 +115,7 @@ public class RestfulAdminTest extends JUnitTestBase {
     }
 
     @Test
+    @Ignore
     public void testQueryBlockList() {
         ResponseEntity<BaseResponse> rsp = admin.getForEntity(url + "block/blockList?pageNumber={pageNumber}&pageSize={pageSize}", BaseResponse.class, 1, 10);
         log.info("get blockList list, status: " + rsp.getStatusCode() + " body: " + rsp.getBody());
@@ -124,6 +127,7 @@ public class RestfulAdminTest extends JUnitTestBase {
     }
 
     @Test
+    @Ignore
     public void testQueryNodeList() {
         ResponseEntity<BaseResponse> rsp = admin.getForEntity(url + "node/nodeList?pageNumber={pageNumber}&pageSize={pageSize}", BaseResponse.class, 1, 10);
         log.info("get node list, status: " + rsp.getStatusCode() + " body: " + rsp.getBody());
