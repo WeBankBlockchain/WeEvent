@@ -1,7 +1,6 @@
 package com.webank.weevent.core.fisco.web3sdk;
 
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.util.Collections;
 import java.util.List;
@@ -9,9 +8,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.ErrorCode;
@@ -39,27 +35,32 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.fisco.bcos.channel.client.ChannelResponseCallback2;
-import org.fisco.bcos.channel.client.Service;
-import org.fisco.bcos.channel.client.TransactionSucCallback;
-import org.fisco.bcos.channel.dto.ChannelRequest;
-import org.fisco.bcos.channel.dto.ChannelResponse;
-import org.fisco.bcos.web3j.abi.FunctionReturnDecoder;
-import org.fisco.bcos.web3j.abi.TypeReference;
-import org.fisco.bcos.web3j.abi.Utils;
-import org.fisco.bcos.web3j.abi.datatypes.Type;
-import org.fisco.bcos.web3j.abi.datatypes.generated.Uint256;
-import org.fisco.bcos.web3j.abi.datatypes.generated.Uint32;
-import org.fisco.bcos.web3j.crypto.Credentials;
-import org.fisco.bcos.web3j.protocol.Web3j;
-import org.fisco.bcos.web3j.protocol.channel.StatusCode;
-import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.fisco.bcos.web3j.tuples.generated.Tuple1;
-import org.fisco.bcos.web3j.tuples.generated.Tuple2;
-import org.fisco.bcos.web3j.tuples.generated.Tuple3;
-import org.fisco.bcos.web3j.tuples.generated.Tuple8;
-import org.fisco.bcos.web3j.tx.Contract;
-import org.fisco.bcos.web3j.utils.BlockLimit;
+import org.fisco.bcos.sdk.BcosSDK;
+import org.fisco.bcos.sdk.abi.FunctionReturnDecoder;
+import org.fisco.bcos.sdk.abi.TypeReference;
+import org.fisco.bcos.sdk.abi.Utils;
+import org.fisco.bcos.sdk.abi.datatypes.Type;
+import org.fisco.bcos.sdk.abi.datatypes.generated.Uint256;
+import org.fisco.bcos.sdk.abi.datatypes.generated.Uint32;
+import org.fisco.bcos.sdk.abi.datatypes.generated.tuples.generated.Tuple1;
+import org.fisco.bcos.sdk.abi.datatypes.generated.tuples.generated.Tuple2;
+import org.fisco.bcos.sdk.abi.datatypes.generated.tuples.generated.Tuple3;
+import org.fisco.bcos.sdk.abi.datatypes.generated.tuples.generated.Tuple8;
+import org.fisco.bcos.sdk.amop.Amop;
+import org.fisco.bcos.sdk.amop.AmopMsgOut;
+import org.fisco.bcos.sdk.channel.ResponseCallback;
+import org.fisco.bcos.sdk.client.Client;
+import org.fisco.bcos.sdk.client.protocol.response.SendTransaction;
+import org.fisco.bcos.sdk.contract.Contract;
+import org.fisco.bcos.sdk.model.Response;
+import org.fisco.bcos.sdk.model.RetCode;
+import org.fisco.bcos.sdk.model.TransactionReceipt;
+import org.fisco.bcos.sdk.model.TransactionReceiptStatus;
+import org.fisco.bcos.sdk.model.callback.TransactionCallback;
+import org.fisco.bcos.sdk.service.GroupManagerService;
+import org.fisco.bcos.sdk.transaction.codec.decode.ReceiptParser;
+import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
+import org.fisco.bcos.sdk.utils.Numeric;
 
 
 /**
@@ -73,12 +74,9 @@ public class FiscoBcos2 {
     // config
     private final FiscoConfig fiscoConfig;
 
-    // tx account
-    private Credentials credentials;
-
-    // real handler
-    private Service service;
-    private Web3j web3j;
+    private BcosSDK sdk;
+    private Client client;
+    private Amop amop;
     private int timeout;
 
     // topic control contract in nowSupport
@@ -96,24 +94,24 @@ public class FiscoBcos2 {
     // history topic, (address <-> version)
     private final Map<String, Long> historyTopicVersion = new ConcurrentHashMap<>();
 
-    public FiscoBcos2(FiscoConfig fiscoConfig) {
+    public FiscoBcos2(FiscoConfig fiscoConfig) throws BrokerException {
         this.fiscoConfig = fiscoConfig;
+        this.sdk = Web3SDKConnector.buidBcosSDK(fiscoConfig);
+        this.amop = this.sdk.getAmop();
     }
 
-    public Service getService() {
-        return this.service;
+    public Amop getAmop() {
+        return this.amop;
     }
 
-    public void init(Long groupId) throws BrokerException {
+    public void init(Integer groupId) throws BrokerException {
         log.info("WeEvent support solidity version, now: {} support: {}", SupportedVersion.nowVersion, SupportedVersion.history);
+        this.client = Web3SDKConnector.initClient(this.sdk, groupId, this.fiscoConfig);
 
         if (this.topicController == null) {
-            this.credentials = Web3SDKConnector.getCredentials(this.fiscoConfig);
-            this.service = Web3SDKConnector.initService(groupId, this.fiscoConfig);
-            this.web3j = Web3SDKConnector.initWeb3j(this.service);
             this.timeout = this.fiscoConfig.getWeb3sdkTimeout();
 
-            CRUDAddress crudAddress = new CRUDAddress(this.web3j, this.credentials);
+            CRUDAddress crudAddress = new CRUDAddress(this.client);
             Map<Long, String> addresses = crudAddress.listAddress();
             log.info("address list in CRUD: {}", addresses);
 
@@ -126,7 +124,7 @@ public class FiscoBcos2 {
                 log.info("init topic control {} -> {}", controlAddress.getKey(), controlAddress.getValue());
 
                 ImmutablePair<Contract, Contract> contracts = SupportedVersion.loadTopicControlContract(
-                        this.web3j, this.credentials, controlAddress.getValue(), controlAddress.getKey().intValue(), this.timeout);
+                        this.client, controlAddress.getValue(), controlAddress.getKey().intValue(), this.timeout);
                 this.historyTopicContract.put(contracts.right.getContractAddress(), contracts.right);
                 this.historyTopicVersion.put(contracts.right.getContractAddress(), controlAddress.getKey());
 
@@ -144,11 +142,11 @@ public class FiscoBcos2 {
     }
 
     public void setListener(FiscoBcosDelegate.IBlockEventListener listener) {
-        Web3SDK2Wrapper.setBlockNotifyCallBack(this.web3j, listener);
+        Web3SDK2Wrapper.setBlockNotifyCallBack(this.sdk, listener);
     }
 
-    public List<String> listGroupId() throws BrokerException {
-        return Web3SDKConnector.listGroupId(this.web3j, this.timeout);
+    public List<String> listGroupId() {
+        return Web3SDKConnector.listGroupId(this.client);
     }
 
     /*
@@ -159,7 +157,7 @@ public class FiscoBcos2 {
      * @return the contract service
      */
     protected Contract getContractService(String contractAddress, Class<?> cls) throws BrokerException {
-        if (this.web3j == null || this.credentials == null) {
+        if (this.sdk == null || this.client == null) {
             log.error("init web3sdk failed");
             throw new BrokerException(ErrorCode.WEB3SDK_INIT_ERROR);
         }
@@ -170,7 +168,7 @@ public class FiscoBcos2 {
             throw new BrokerException(ErrorCode.LOAD_CONTRACT_ERROR);
         }
 
-        return Web3SDK2Wrapper.loadContract(contractAddress, this.web3j, this.credentials, cls);
+        return Web3SDK2Wrapper.loadContract(contractAddress, this.client, cls);
     }
 
     public boolean isTopicExist(String topicName) throws BrokerException {
@@ -179,41 +177,33 @@ public class FiscoBcos2 {
     }
 
     public boolean createTopic(String topicName) throws BrokerException {
-        try {
-            // check if topic contract exist
-            if (isTopicExist(topicName)) {
-                log.info("topic name already exist, {}", topicName);
-                throw new BrokerException(ErrorCode.TOPIC_ALREADY_EXIST);
-            }
-
-            TransactionReceipt transactionReceipt = this.topicController.addTopicInfo(topicName)
-                    .sendAsync().get(this.timeout, TimeUnit.MILLISECONDS);
-            if (!transactionReceipt.isStatusOK()) {
-                log.error("addTopicInfo failed due to transaction execution error");
-                throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
-            }
-
-            Boolean result = this.topicController.getAddTopicInfoOutput(transactionReceipt).getValue1();
-            if (!result) {
-                log.info("topic name already exist, {}", topicName);
-                throw new BrokerException(ErrorCode.TOPIC_ALREADY_EXIST);
-            }
-
-            return true;
-        } catch (InterruptedException | ExecutionException e) {
-            log.error("addTopicInfo failed due to transaction execution error. ", e);
-            throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
-        } catch (TimeoutException e) {
-            log.error("addTopicInfo failed due to transaction timeout. ", e);
-            throw new BrokerException(ErrorCode.TRANSACTION_TIMEOUT);
+//        try {
+        // check if topic contract exist
+        if (isTopicExist(topicName)) {
+            log.info("topic name already exist, {}", topicName);
+            throw new BrokerException(ErrorCode.TOPIC_ALREADY_EXIST);
         }
+
+        TransactionReceipt transactionReceipt = this.topicController.addTopicInfo(topicName);
+        if (!transactionReceipt.isStatusOK()) {
+            log.error("addTopicInfo failed due to transaction execution error");
+            throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
+        }
+
+        Boolean result = this.topicController.getAddTopicInfoOutput(transactionReceipt).getValue1();
+        if (!result) {
+            log.info("topic name already exist, {}", topicName);
+            throw new BrokerException(ErrorCode.TOPIC_ALREADY_EXIST);
+        }
+
+        return true;
     }
 
     public ListPage<String> listTopicName(Integer pageIndex, Integer pageSize) throws BrokerException {
         try {
             ListPage<String> listPage = new ListPage<>();
             Tuple3<BigInteger, BigInteger, List<String>> result = this.topicController.listTopicName(BigInteger.valueOf(pageIndex),
-                    BigInteger.valueOf(pageSize)).sendAsync().get(this.timeout, TimeUnit.MILLISECONDS);
+                    BigInteger.valueOf(pageSize));
             if (result == null) {
                 log.error("TopicController.listTopicName result is empty");
                 throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
@@ -223,12 +213,9 @@ public class FiscoBcos2 {
             listPage.setPageSize(result.getValue2().intValue());
             listPage.setPageData(result.getValue3());
             return listPage;
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (ContractException e) {
             log.error("listTopicName failed due to web3sdk rpc error.", e);
             throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
-        } catch (TimeoutException e) {
-            log.error("listTopicName failed due to web3sdk rpc timeout. ", e);
-            throw new BrokerException(ErrorCode.TRANSACTION_TIMEOUT);
         }
     }
 
@@ -239,7 +226,7 @@ public class FiscoBcos2 {
 
         try {
             Tuple8<Boolean, String, BigInteger, BigInteger, BigInteger, BigInteger, BigInteger, String> topic =
-                    this.topicController.getTopicInfo(topicName).sendAsync().get(this.timeout, TimeUnit.MILLISECONDS);
+                    this.topicController.getTopicInfo(topicName);
             if (topic == null) {
                 log.error("TopicController.getTopicInfo result is empty");
                 throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
@@ -260,12 +247,9 @@ public class FiscoBcos2 {
 
             this.topicInfo.put(topicName, topicInfo);
             return Optional.of(topicInfo);
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (ContractException e) {
             log.error("getTopicInfo failed due to web3sdk rpc error.", e);
             throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
-        } catch (TimeoutException e) {
-            log.error("getTopicInfo failed due to web3sdk rpc timeout.", e);
-            throw new BrokerException(ErrorCode.TRANSACTION_TIMEOUT);
         }
     }
 
@@ -273,7 +257,7 @@ public class FiscoBcos2 {
         ParamCheckUtils.validateEventId("", eventId, getBlockHeight());
 
         Long blockNum = DataTypeUtils.decodeBlockNumber(eventId);
-        List<WeEvent> events = this.loop(blockNum);
+        List<WeEvent> events = this.loop(BigInteger.valueOf(blockNum));
         for (WeEvent event : events) {
             if (eventId.equals(event.getEventId())) {
                 log.info("event:{}", event);
@@ -292,7 +276,7 @@ public class FiscoBcos2 {
         log.info("publish async ...");
         StopWatch sw = StopWatch.createStarted();
         CompletableFuture<SendResult> future = new CompletableFuture<>();
-        this.topic.publishWeEvent(topicName, eventContent, extensions, new TransactionSucCallback() {
+        this.topic.publishWeEvent(topicName, eventContent, extensions, new TransactionCallback() {
             @Override
             public void onResponse(TransactionReceipt receipt) {
                 SendResult sendResult = new SendResult();
@@ -307,15 +291,20 @@ public class FiscoBcos2 {
                         sendResult.setStatus(SendResult.SendResultStatus.NO_PERMISSION);
                     } else {
                         sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
-                        sendResult.setEventId(DataTypeUtils.encodeEventId(topicName, receipt.getBlockNumber().intValue(), sequence));
+                        sendResult.setEventId(DataTypeUtils.encodeEventId(topicName, Numeric.decodeQuantity(receipt.getBlockNumber()).intValue(), sequence));
                     }
                 } else { // error
-                    String detail = StatusCode.getStatusMessage(receipt.getStatus(), receipt.getMessage());
-                    if ("Transaction receipt timeout.".equals(receipt.getStatus())) {
-                        log.error("publish event failed due to transaction execution timeout. {}", detail);
-                        sendResult.setStatus(SendResult.SendResultStatus.TIMEOUT);
-                    } else {
-                        log.error("publish event failed due to transaction execution error. {}", detail);
+                    try {
+                        RetCode retCode = ReceiptParser.parseTransactionReceipt(receipt);
+                        if (retCode.getCode() == TransactionReceiptStatus.TimeOut.getCode()) {
+                            log.error("publish event failed due to transaction execution timeout. {}", retCode.toString());
+                            sendResult.setStatus(SendResult.SendResultStatus.TIMEOUT);
+                        } else {
+                            log.error("publish event failed due to transaction execution error. {}", retCode.toString());
+                            sendResult.setStatus(SendResult.SendResultStatus.ERROR);
+                        }
+                    } catch (ContractException exception) {
+                        log.error("publish event failed due to transaction execution error. {}, {}", exception.getErrorCode(), exception.getMessage());
                         sendResult.setStatus(SendResult.SendResultStatus.ERROR);
                     }
                 }
@@ -329,11 +318,13 @@ public class FiscoBcos2 {
     }
 
     public CompletableFuture<SendResult> sendRawTransaction(String topicName, String transactionHex) {
-        return web3j.sendRawTransaction(transactionHex).sendAsync().thenApplyAsync(ethSendTransaction -> {
+        return CompletableFuture.supplyAsync(() -> {
+            SendTransaction sendTransaction = this.client.sendRawTransaction(transactionHex);
+
             SendResult sendResult = new SendResult();
             sendResult.setTopic(topicName);
 
-            Optional<TransactionReceipt> receiptOptional = getTransactionReceiptRequest(ethSendTransaction.getTransactionHash());
+            Optional<TransactionReceipt> receiptOptional = getTransactionReceiptRequest(sendTransaction.getTransactionHash());
             if (receiptOptional.isPresent()) {
                 List<TypeReference<?>> referencesList = Collections.singletonList(new TypeReference<Uint256>() {
                 });
@@ -348,7 +339,7 @@ public class FiscoBcos2 {
                 } else {
                     sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
                     sendResult.setEventId(DataTypeUtils.encodeEventId(topicName,
-                            receiptOptional.get().getBlockNumber().intValue(),
+                            Numeric.decodeQuantity(receiptOptional.get().getBlockNumber()).intValue(),
                             sequence));
                 }
             } else {
@@ -370,14 +361,14 @@ public class FiscoBcos2 {
 
         try {
             for (int i = 0; i < WeEventConstants.POLL_TRANSACTION_ATTEMPTS; i++) {
-                receiptOptional = web3j.getTransactionReceipt(transactionHash).send().getTransactionReceipt();
+                receiptOptional = this.client.getTransactionReceipt(transactionHash).getTransactionReceipt();
                 if (!receiptOptional.isPresent()) {
                     Thread.sleep(this.fiscoConfig.getConsumerIdleTime());
                 } else {
                     return receiptOptional;
                 }
             }
-        } catch (IOException | InterruptedException e) {
+        } catch (InterruptedException e) {
             log.error("get transactionReceipt failed.", e);
         }
         return receiptOptional;
@@ -389,7 +380,7 @@ public class FiscoBcos2 {
      * @return 0L if net error
      */
     public Long getBlockHeight() throws BrokerException {
-        return Web3SDK2Wrapper.getBlockHeight(this.web3j, this.timeout);
+        return Web3SDK2Wrapper.getBlockHeight(this.client);
     }
 
     /*
@@ -398,33 +389,33 @@ public class FiscoBcos2 {
      * @param blockNum the blockNum
      * @return java.lang.Integer null if net error
      */
-    public List<WeEvent> loop(Long blockNum) throws BrokerException {
-        return Web3SDK2Wrapper.loop(this.web3j, blockNum, this.historyTopicVersion, this.historyTopicContract, this.timeout);
+    public List<WeEvent> loop(BigInteger blockNum) throws BrokerException {
+        return Web3SDK2Wrapper.loop(this.client, blockNum, this.historyTopicVersion, this.historyTopicContract, this.timeout);
     }
 
     public GroupGeneral getGroupGeneral() throws BrokerException {
-        return Web3SDK2Wrapper.getGroupGeneral(this.web3j, this.timeout);
+        return Web3SDK2Wrapper.getGroupGeneral(this.client, this.timeout);
     }
 
     public ListPage<TbTransHash> queryTransList(String transHash, BigInteger blockNumber, Integer pageIndex, Integer pageSize) throws BrokerException {
-        return Web3SDK2Wrapper.queryTransList(this.web3j, transHash, blockNumber, pageIndex, pageSize, this.timeout);
+        return Web3SDK2Wrapper.queryTransList(this.client, transHash, blockNumber, pageIndex, pageSize, this.timeout);
     }
 
     public ListPage<TbBlock> queryBlockList(String transHash, BigInteger blockNumber, Integer pageIndex, Integer pageSize) throws BrokerException {
-        return Web3SDK2Wrapper.queryBlockList(this.web3j, transHash, blockNumber, pageIndex, pageSize, this.timeout);
+        return Web3SDK2Wrapper.queryBlockList(this.client, transHash, blockNumber, pageIndex, pageSize, this.timeout);
     }
 
     public ListPage<TbNode> queryNodeList() throws BrokerException {
-        return Web3SDK2Wrapper.queryNodeList(this.web3j, this.timeout);
+        return Web3SDK2Wrapper.queryNodeList(this.client);
     }
 
     public ContractContext getContractContext() {
         ContractContext contractContext = new ContractContext();
-        contractContext.setGasLimit(Web3SDK2Wrapper.gasProvider.getGasLimit("").longValue());
-        contractContext.setGasPrice(Web3SDK2Wrapper.gasProvider.getGasPrice("").longValue());
+        contractContext.setGasLimit(Web3SDK2Wrapper.gasProvider.getGasLimit().longValue());
+        contractContext.setGasPrice(Web3SDK2Wrapper.gasProvider.getGasPrice().longValue());
         contractContext.setTopicAddress(this.topic.getContractAddress());
-        contractContext.setBlockNumber(web3j.getBlockNumberCache().longValue() - BlockLimit.blockLimit);
-        contractContext.setBlockLimit(web3j.getBlockNumberCache().longValue());
+        contractContext.setBlockNumber(client.getBlockLimit().subtract(GroupManagerService.BLOCK_LIMIT).longValue());
+        contractContext.setBlockLimit(client.getBlockLimit().longValue());
         contractContext.setChainId(Web3SDKConnector.chainID);
 
         return contractContext;
@@ -437,11 +428,8 @@ public class FiscoBcos2 {
 
         TransactionReceipt transactionReceipt;
         try {
-            transactionReceipt = this.topic.addOperator(topicName, operatorAddress).sendAsync().get(this.timeout, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException | ExecutionException e) {
-            log.error("addOperator failed due to web3sdk rpc error.", e);
-            throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
-        } catch (TimeoutException e) {
+            transactionReceipt = this.topic.addOperator(topicName, operatorAddress);
+        } catch (Exception e) {
             log.error("addOperator failed due to web3sdk rpc timeout.", e);
             throw new BrokerException(ErrorCode.TRANSACTION_TIMEOUT);
         }
@@ -476,11 +464,8 @@ public class FiscoBcos2 {
 
         TransactionReceipt transactionReceipt;
         try {
-            transactionReceipt = this.topic.delOperator(topicName, operatorAddress).sendAsync().get(this.timeout, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException | ExecutionException e) {
-            log.error("delOperator failed due to web3sdk rpc error.", e);
-            throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
-        } catch (TimeoutException e) {
+            transactionReceipt = this.topic.delOperator(topicName, operatorAddress);
+        } catch (Exception e) {
             log.error("delOperator failed due to web3sdk rpc timeout.", e);
             throw new BrokerException(ErrorCode.TRANSACTION_TIMEOUT);
         }
@@ -515,13 +500,10 @@ public class FiscoBcos2 {
 
         Tuple2<BigInteger, List<String>> tuple2;
         try {
-            tuple2 = this.topic.listOperator(topicName).sendAsync().get(this.timeout, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException | ExecutionException e) {
+            tuple2 = this.topic.listOperator(topicName);
+        } catch (ContractException e) {
             log.error("query operator list failed due to web3sdk rpc error.", e);
             throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
-        } catch (TimeoutException e) {
-            log.error("query operator list failed due to web3sdk rpc timeout.", e);
-            throw new BrokerException(ErrorCode.TRANSACTION_TIMEOUT);
         }
 
         if (tuple2 == null) {
@@ -539,22 +521,18 @@ public class FiscoBcos2 {
     }
 
     public CompletableFuture<SendResult> sendAMOP(String topicName, String content) {
-        ChannelRequest channelRequest = new ChannelRequest();
-        channelRequest.setToTopic(topicName);
-        channelRequest.setMessageID(this.service.newSeq());
-        channelRequest.setTimeout(this.service.getConnectSeconds() * 1000);
-        channelRequest.setContent(content);
-
-        log.info("send amop request, topic: {} content length: {} id: {}", topicName, content.length(), channelRequest.getMessageID());
+        AmopMsgOut out = new AmopMsgOut();
+        out.setTopic(topicName);
+        out.setTimeout(6000L);
+        out.setContent(content.getBytes());
 
         StopWatch sw = StopWatch.createStarted();
         CompletableFuture<SendResult> future = new CompletableFuture<>();
-        this.service.asyncSendChannelMessage2(channelRequest, new ChannelResponseCallback2() {
+        ResponseCallback callback = new ResponseCallback() {
             @Override
-            public void onResponseMessage(ChannelResponse response) {
+            public void onResponse(Response response) {
                 sw.stop();
                 log.info("receive amop response, id: {} result: {}-{} cost: {}", response.getMessageID(), response.getErrorCode(), response.getErrorMessage(), sw.getTime());
-
                 SendResult sendResult = new SendResult();
                 sendResult.setTopic(topicName);
                 sendResult.setEventId(response.getMessageID());
@@ -566,7 +544,8 @@ public class FiscoBcos2 {
                 }
                 future.complete(sendResult);
             }
-        });
+        };
+        this.amop.sendAmopMsg(out, callback);
         return future;
     }
 }

@@ -3,15 +3,22 @@ apply plugin: "signing"
 
 dependencies {
     // web3sdk for FISCO-BCOS 2.0
-    implementation("org.fisco-bcos:web3sdk:${web3sdkVersion.fisco}") {
+    implementation("org.fisco-bcos.java-sdk:java-sdk:${web3sdkVersion.fisco}") {
         // io.netty:netty-tcnative-boringssl-static:2.0.20.Final crash
-        exclude group: "io.netty"
+        // exclude group: "io.netty"
+        exclude group: "io.netty", module: "netty-tcnative-boringssl-static"
         // compile solidity
         exclude group: "org.ethereum", module: "solcJ-all"
+        exclude group: "org.slf4j", module: "slf4j-log4j12"
     }
 
+    implementation("org.springframework:spring-beans:${springVersion}")
+    implementation("org.springframework:spring-context:${springVersion}")
+
     // fabric 1.4.4
-    implementation("org.hyperledger.fabric-sdk-java:fabric-sdk-java:${fabricVersion}")
+    implementation("org.hyperledger.fabric-sdk-java:fabric-sdk-java:${fabricVersion}") {
+        exclude group: "io.netty", module: "netty-tcnative-boringssl-static"
+    }
 
     // depend project
     api project(":weevent-client")
