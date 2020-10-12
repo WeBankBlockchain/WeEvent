@@ -34,7 +34,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
     /**
      * Group ID <-> Subscription over AMOP
      */
-    private final Map<Long, AMOPSubscription> AMOPSubscriptions;
+    private final Map<Integer, AMOPSubscription> AMOPSubscriptions;
 
     /**
      * Subscription ID <-> Subscription
@@ -83,7 +83,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         this.validateGroupId(groupId);
         ParamCheckUtils.validateOffset(offset);
 
-        Long currentBlock = fiscoBcosDelegate.getBlockHeight(Long.parseLong(groupId));
+        Long currentBlock = fiscoBcosDelegate.getBlockHeight(Integer.parseInt(groupId));
         // topic pattern
         if (Subscription.isTopicPattern(topic)) {
             Subscription.validateTopicPattern(topic);
@@ -125,7 +125,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
         this.validateGroupId(groupId);
         ParamCheckUtils.validateOffset(offset);
 
-        Long currentBlock = fiscoBcosDelegate.getBlockHeight(Long.parseLong(groupId));
+        Long currentBlock = fiscoBcosDelegate.getBlockHeight(Integer.parseInt(groupId));
         if (StringUtils.isNumeric(offset)) {
             ParamCheckUtils.validateBlockHeight(offset, currentBlock);
         } else if (isEventId(offset)) {
@@ -309,7 +309,7 @@ public class FiscoBcosBroker4Consumer extends FiscoBcosTopicAdmin implements ICo
 
     @Override
     public List<WeEvent> loop(Long blockNum, String groupId) throws BrokerException {
-        return fiscoBcosDelegate.loop(blockNum, Long.valueOf(groupId));
+        return fiscoBcosDelegate.loop(blockNum, Integer.parseInt(groupId));
     }
 
     // method from FiscoBcosDelegate.IBlockEventListener

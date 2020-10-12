@@ -101,7 +101,7 @@ public enum ErrorCode {
     PRODUCER_SEND_CALLBACK_IS_NULL(200103, "producer send callback is null"),
     CONSUMER_LISTENER_IS_NULL(200104, "consumer listener is null"),
 
-    WEB3SDK_INIT_SERVICE_ERROR(200200, "init web3sdk's service failed"),
+    BCOS_SDK_BUILD_ERROR(200200, "build BcosSDK failed"),
     TRANSACTION_TIMEOUT(200201, "the transaction is timeout."),
     TRANSACTION_EXECUTE_ERROR(200202, "the transaction does not correctly executed."),
     EVENT_COMPRESS_ERROR(200204, "event compress error"),
@@ -164,7 +164,10 @@ public enum ErrorCode {
     FTP_RETRIEVE_FILE_FAILED(200710, "remote path invalid"),
     FTP_UNKNOWN_REMOTE_FILE(200711, "unknown remote file"),
     FTP_NOT_FILE(200712, "it's not a file"),
-    FTP_LIST_FILE_FAILED(20013, "list file error"),
+    FTP_LIST_FILE_FAILED(200713, "list file error"),
+
+    SEND_AMOP_MESSAGE_FAILED(200800, "send amop msg failed."),
+    UNKNOWN_AMOP_SUB_TOPIC(200801, "unknown amop subscribe topic")
     ;
 
     /**
