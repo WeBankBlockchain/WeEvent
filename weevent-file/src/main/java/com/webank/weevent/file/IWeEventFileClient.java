@@ -3,6 +3,7 @@ package com.webank.weevent.file;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.SendResult;
@@ -169,7 +170,7 @@ public interface IWeEventFileClient {
      * @param filePath output pem file path
      * @throws BrokerException BrokerException
      */
-    void genPemFile(String filePath) throws BrokerException;
+    Map<String, String> genPemFile(String filePath) throws BrokerException;
 
     /**
      * Check if the receiver end has a file.

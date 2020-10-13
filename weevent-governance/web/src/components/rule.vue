@@ -231,10 +231,10 @@ export default {
         pageSize: 10
       }
       API.ruleList(data).then(res => {
-        if (res.data.status === 200) {
+        if (res.data.code === 0) {
           if (res.data.data) {
-            this.ruleList = [].concat(res.data.data)
-            this.total = res.data.totalCount
+            this.ruleList = [].concat(res.data.data.ruleEngines)
+            this.total = res.data.data.totalCount
           } else {
             this.ruleList = []
             this.total = 0

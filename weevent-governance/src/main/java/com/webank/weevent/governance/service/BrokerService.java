@@ -1,13 +1,13 @@
 package com.webank.weevent.governance.service;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import com.webank.weevent.client.JsonHelper;
 import com.webank.weevent.governance.common.ConstantProperties;
@@ -107,7 +107,7 @@ public class BrokerService {
     }
 
     @Transactional(rollbackFor = Throwable.class)
-    public GovernanceResult addBroker(BrokerEntity brokerEntity, HttpServletRequest request, HttpServletResponse response)
+    public GovernanceResult<Integer> addBroker(BrokerEntity brokerEntity, HttpServletRequest request, HttpServletResponse response)
             throws GovernanceException {
         //check  broker serverUrl
         ErrorCode errorCode = checkServerByBrokerEntity(brokerEntity, request);
@@ -117,7 +117,7 @@ public class BrokerService {
         //checkBrokerUrlRepeat
         boolean repeat = checkBrokerUrlRepeat(brokerEntity);
         if (!repeat) {
-            return new GovernanceResult(ErrorCode.BROKER_REPEAT);
+            return new GovernanceResult<>(ErrorCode.BROKER_REPEAT);
         }
 
         try {
@@ -174,7 +174,7 @@ public class BrokerService {
     }
 
     @Transactional(rollbackFor = Throwable.class)
-    public GovernanceResult deleteBroker(BrokerEntity brokerEntity, HttpServletRequest request) throws GovernanceException {
+    public GovernanceResult<Boolean> deleteBroker(BrokerEntity brokerEntity, HttpServletRequest request) throws GovernanceException {
         try {
 
             deleteOldData(brokerEntity, request);
@@ -188,7 +188,7 @@ public class BrokerService {
     }
 
     @Transactional(rollbackFor = Throwable.class)
-    public GovernanceResult updateBroker(BrokerEntity brokerEntity, HttpServletRequest request, HttpServletResponse response)
+    public GovernanceResult<Object> updateBroker(BrokerEntity brokerEntity, HttpServletRequest request, HttpServletResponse response)
             throws GovernanceException {
         //check  broker  serverUrl
         ErrorCode errorCode = checkServerByBrokerEntity(brokerEntity, request);
@@ -198,7 +198,7 @@ public class BrokerService {
         //checkBrokerUrlRepeat
         boolean repeat = checkBrokerUrlRepeat(brokerEntity);
         if (!repeat) {
-            return new GovernanceResult(ErrorCode.BROKER_REPEAT);
+            return new GovernanceResult<>(ErrorCode.BROKER_REPEAT);
         }
         brokerEntity.setLastUpdate(new Date());
         /**
