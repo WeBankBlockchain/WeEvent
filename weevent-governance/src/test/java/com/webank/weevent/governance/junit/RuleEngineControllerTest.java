@@ -4,13 +4,6 @@ package com.webank.weevent.governance.junit;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.webank.weevent.client.JsonHelper;
-import com.webank.weevent.governance.JUnitTestBase;
-import com.webank.weevent.governance.common.GovernanceResult;
-import com.webank.weevent.governance.entity.RuleEngineEntity;
-import com.webank.weevent.governance.utils.JwtUtils;
-
-import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
 import org.junit.After;
 import org.junit.Assert;
@@ -24,6 +17,14 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+
+import com.webank.weevent.client.JsonHelper;
+import com.webank.weevent.governance.JUnitTestBase;
+import com.webank.weevent.governance.common.GovernanceResult;
+import com.webank.weevent.governance.entity.RuleEngineEntity;
+import com.webank.weevent.governance.utils.JwtUtils;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class RuleEngineControllerTest extends JUnitTestBase {
@@ -59,8 +60,8 @@ public class RuleEngineControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/add").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        GovernanceResult governanceResult = JsonHelper.json2Object(response.getContentAsString(), GovernanceResult.class);
-        ruleMap.put("brokerId", (Integer) governanceResult.getData());
+        GovernanceResult<?> governanceResponse = JsonHelper.json2Object(response.getContentAsString(), GovernanceResult.class);
+        ruleMap.put("brokerId", (Integer) governanceResponse.getData());
     }
 
     @Test
@@ -79,11 +80,11 @@ public class RuleEngineControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/ruleEngine/add").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        GovernanceResult governanceResult = JsonHelper.json2Object(response.getContentAsString(), GovernanceResult.class);
-        Object data = governanceResult.getData();
+        GovernanceResult<?> governanceResponse = JsonHelper.json2Object(response.getContentAsString(), GovernanceResult.class);
+        Object data = governanceResponse.getData();
         RuleEngineEntity engineEntity = JsonHelper.json2Object(JsonHelper.object2Json(data), RuleEngineEntity.class);
         ruleMap.put("ruleId", engineEntity.getId());
-        Assert.assertEquals(governanceResult.getStatus().intValue(), 200);
+        Assert.assertEquals(governanceResponse.getCode().intValue(), 200);
     }
 
     @Test
@@ -105,8 +106,8 @@ public class RuleEngineControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mvcResult.getResponse();
 
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        GovernanceResult governanceResult = JsonHelper.json2Object(response.getContentAsString(), GovernanceResult.class);
-        Assert.assertEquals(governanceResult.getStatus().intValue(), 200);
+        GovernanceResult<?> governanceResponse = JsonHelper.json2Object(response.getContentAsString(), GovernanceResult.class);
+        Assert.assertEquals(governanceResponse.getCode().intValue(), 200);
     }
 
     @Test
@@ -117,8 +118,8 @@ public class RuleEngineControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mvcResult.getResponse();
 
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        GovernanceResult governanceResult = JsonHelper.json2Object(response.getContentAsString(), GovernanceResult.class);
-        Assert.assertEquals(governanceResult.getStatus().intValue(), 200);
+        GovernanceResult<?> governanceResponse = JsonHelper.json2Object(response.getContentAsString(), GovernanceResult.class);
+        Assert.assertEquals(governanceResponse.getCode().intValue(), 200);
     }
 
 
@@ -131,8 +132,8 @@ public class RuleEngineControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/ruleEngine/update").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token).content(content)).andReturn().getResponse();
 
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        GovernanceResult governanceResult = JsonHelper.json2Object(response.getContentAsString(), GovernanceResult.class);
-        Assert.assertEquals(governanceResult.getStatus().intValue(), 200);
+        GovernanceResult<?> governanceResponse = JsonHelper.json2Object(response.getContentAsString(), GovernanceResult.class);
+        Assert.assertEquals(governanceResponse.getCode().intValue(), 200);
     }
 
     @Test
@@ -179,8 +180,8 @@ public class RuleEngineControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/ruleEngine/start").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        GovernanceResult governanceResult = JsonHelper.json2Object(response.getContentAsString(), GovernanceResult.class);
-        Assert.assertEquals(governanceResult.getStatus().intValue(), 200);
+        GovernanceResult<?> governanceResponse = JsonHelper.json2Object(response.getContentAsString(), GovernanceResult.class);
+        Assert.assertEquals(governanceResponse.getCode().intValue(), 200);
     }
 
     public void testDeleteRuleEngine() throws Exception {
@@ -188,8 +189,8 @@ public class RuleEngineControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/ruleEngine/delete").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        GovernanceResult governanceResult = JsonHelper.json2Object(response.getContentAsString(), GovernanceResult.class);
-        Assert.assertEquals(governanceResult.getStatus().intValue(), 200);
+        GovernanceResult<?> governanceResponse = JsonHelper.json2Object(response.getContentAsString(), GovernanceResult.class);
+        Assert.assertEquals(governanceResponse.getCode().intValue(), 200);
     }
 
 

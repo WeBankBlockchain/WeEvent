@@ -56,8 +56,8 @@ public class TopicHistoricalTest extends JUnitTestBase {
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/add").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        GovernanceResult governanceResult = JsonHelper.json2Object(response.getContentAsString(), GovernanceResult.class);
-        brokerIdMap.put("brokerId", (Integer) governanceResult.getData());
+        GovernanceResult<?> governanceResponse = JsonHelper.json2Object(response.getContentAsString(), GovernanceResult.class);
+        brokerIdMap.put("brokerId", (Integer) governanceResponse.getData());
     }
 
     @Test
@@ -68,8 +68,8 @@ public class TopicHistoricalTest extends JUnitTestBase {
         MockHttpServletResponse response = mvcResult.getResponse();
         String result = response.getContentAsString();
         Assert.assertNotNull(result);
-        GovernanceResult governanceResult = JsonHelper.json2Object(result, GovernanceResult.class);
-        Assert.assertEquals(governanceResult.getStatus().toString(), "200");
+        GovernanceResult<?> governanceResponse = JsonHelper.json2Object(result, GovernanceResult.class);
+        Assert.assertEquals(governanceResponse.getCode().toString(), "200");
     }
 
     @Test
@@ -80,8 +80,8 @@ public class TopicHistoricalTest extends JUnitTestBase {
         MockHttpServletResponse response = mvcResult.getResponse();
         String result = response.getContentAsString();
         Assert.assertNotNull(result);
-        GovernanceResult governanceResult = JsonHelper.json2Object(result, GovernanceResult.class);
-        Assert.assertEquals(governanceResult.getStatus().toString(), "200");
+        GovernanceResult<?> governanceResponse = JsonHelper.json2Object(result, GovernanceResult.class);
+        Assert.assertEquals(governanceResponse.getCode().toString(), "200");
     }
 
     @Test
