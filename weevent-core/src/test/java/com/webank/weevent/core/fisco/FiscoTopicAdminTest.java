@@ -28,7 +28,6 @@ import org.fisco.bcos.sdk.crypto.keypair.SM2KeyPair;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -50,7 +49,7 @@ public class FiscoTopicAdminTest extends JUnitTestBase {
     private IProducer iProducer;
     private final long transactionTimeout = 10;
     private FiscoConfig fiscoConfig;
-    
+
     @Before
     public void before() throws Exception {
         log.info("=============================={}.{}==============================",
@@ -862,7 +861,6 @@ public class FiscoTopicAdminTest extends JUnitTestBase {
      * test queryTransList
      */
     @Test
-    @Ignore
     public void queryTransList() throws BrokerException {
         this.queryEntity = new QueryEntity();
         queryEntity.setGroupId(this.groupId);
@@ -878,7 +876,6 @@ public class FiscoTopicAdminTest extends JUnitTestBase {
      * test queryTransList with blockNumber
      */
     @Test
-    @Ignore
     public void queryTransListBlockNumber() throws BrokerException {
         this.queryEntity = new QueryEntity();
         queryEntity.setGroupId(this.groupId);
@@ -897,7 +894,6 @@ public class FiscoTopicAdminTest extends JUnitTestBase {
      * test queryTransList with tranHash
      */
     @Test
-    @Ignore
     public void queryTransListTranHash() throws BrokerException {
         this.queryEntity = new QueryEntity();
         queryEntity.setGroupId(this.groupId);
@@ -912,7 +908,6 @@ public class FiscoTopicAdminTest extends JUnitTestBase {
      * test queryBlockList
      */
     @Test
-    @Ignore
     public void queryBlockList() throws BrokerException {
         this.queryEntity = new QueryEntity();
         queryEntity.setPageSize(10);
@@ -927,7 +922,6 @@ public class FiscoTopicAdminTest extends JUnitTestBase {
      * test queryBlockList with blockNumber
      */
     @Test
-    @Ignore
     public void queryBlockListBlockNumber() throws BrokerException {
         this.queryEntity = new QueryEntity();
         queryEntity.setGroupId(this.groupId);
@@ -945,7 +939,6 @@ public class FiscoTopicAdminTest extends JUnitTestBase {
      * test queryBlockList with blockHash
      */
     @Test
-    @Ignore
     public void queryBlockListBlockHash() throws BrokerException {
         this.queryEntity = new QueryEntity();
         queryEntity.setGroupId(this.groupId);
@@ -962,7 +955,6 @@ public class FiscoTopicAdminTest extends JUnitTestBase {
      * test queryNodeList
      */
     @Test
-    @Ignore
     public void queryNodeList() throws BrokerException {
         this.queryEntity = new QueryEntity();
         queryEntity.setGroupId(this.groupId);
