@@ -358,10 +358,11 @@ public class WeEventFileClient implements IWeEventFileClient {
     }
 
     public Map<String, String> genPemFile(String filePath) throws BrokerException {
-	validateLocalFile(filePath);
-	try {
+	 validateLocalFile(filePath);
+	 try {
 	     BouncyCastleProvider prov = new BouncyCastleProvider();
 	     Security.addProvider(prov);
+		 
 	     ECNamedCurveParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec(CURVE_TYPE);
 	     KeyPairGenerator generator = KeyPairGenerator.getInstance(ALGORITHM, prov.getName());
 	     generator.initialize(ecSpec, new SecureRandom());
@@ -382,30 +383,30 @@ public class WeEventFileClient implements IWeEventFileClient {
 	     ppkUrlMap.put("privateKeyUrl", getFileKyeInfo(privateKeyUrl));
 	     ppkUrlMap.put("publicKeyUrl", getFileKyeInfo(publicKeyUrl));
 	     return ppkUrlMap;
-	} catch (IOException | NoSuchProviderException | NoSuchAlgorithmException | InvalidAlgorithmParameterException e) {
+	 } catch (IOException | NoSuchProviderException | NoSuchAlgorithmException | InvalidAlgorithmParameterException e) {
 	     log.error("generate pem file error", e);
 	     throw new BrokerException(ErrorCode.FILE_GEN_PEM_BC_FAILED);
 	}
     }
     
     private String getFileKyeInfo(String url) {
-	StringBuffer sb = new StringBuffer();
-	File file = new File(url);
-	// 读取文件
-	BufferedInputStream bis = null;
-	FileInputStream fis = null;
-	try {
+	 StringBuffer sb = new StringBuffer();
+	 File file = new File(url);
+	 // 读取文件
+	 BufferedInputStream bis = null;
+	 FileInputStream fis = null;
+	 try {
 	     // 第一步 通过文件路径来创建文件实例
 	     fis = new FileInputStream(file);
 	     bis = new BufferedInputStream(fis);
 	     while (bis.available() > 0) {
 	     	sb.append((char) bis.read());
 	     }
-	} catch (FileNotFoundException fnfe) {
+	 } catch (FileNotFoundException fnfe) {
 	     log.error("file non-existent", fnfe);
-	} catch (IOException ioe) {
+	 } catch (IOException ioe) {
 	     log.error("I/O error", ioe);
-	} finally {
+	 } finally {
 	     try {
 		 if (bis != null && fis != null) {
 		     fis.close();
@@ -414,7 +415,7 @@ public class WeEventFileClient implements IWeEventFileClient {
 	     } catch (IOException ioe) {
 		 log.error("close InputStream error", ioe);
              }
-	}
+	 }
 	     file.delete();
 	     return sb.toString();
     }
