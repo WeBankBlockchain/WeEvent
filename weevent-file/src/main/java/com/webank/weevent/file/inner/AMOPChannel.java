@@ -1,7 +1,6 @@
 package com.webank.weevent.file.inner;
 
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -228,7 +227,6 @@ public class AMOPChannel extends AmopCallback {
                 log.error("clean up receiver file context failed, rsp:{}", amopMsgResponse.getErrorMessage());
                 throw toBrokerException(amopMsgResponse);
             }
-
 
             log.info("clean up receiver file context success");
             return JsonHelper.json2Object(amopMsgResponse.getContent(), FileChunksMeta.class);
