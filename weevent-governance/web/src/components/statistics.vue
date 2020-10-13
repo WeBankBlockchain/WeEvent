@@ -103,7 +103,7 @@ export default {
         brokerId: localStorage.getItem('brokerId')
       }
       API.historicalData(data).then(res => {
-        if (res.data.status === 200) {
+        if (res.data.code === 0) {
           const resData = res.data.data
           vm.topicList = []
           for (var key in resData) {
@@ -125,7 +125,7 @@ export default {
       }
       vm.getTopic()
       API.historicalData(data).then(res => {
-        if (res.data.status === 200) {
+        if (res.data.code === 0) {
           const resData = res.data.data
           if (!resData || resData.length === 0) {
             Highcharts.chart('chart', vm.option).showNoData()
