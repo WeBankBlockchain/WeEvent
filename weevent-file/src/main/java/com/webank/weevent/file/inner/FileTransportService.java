@@ -23,6 +23,7 @@ import com.webank.weevent.file.dto.FileTransportStats;
 import com.webank.weevent.file.service.FileChunksMeta;
 
 import lombok.extern.slf4j.Slf4j;
+import org.fisco.bcos.sdk.model.AmopMsg;
 import org.fisco.bcos.sdk.model.Response;
 
 /**
@@ -241,9 +242,8 @@ public class FileTransportService {
                 throw AMOPChannel.toBrokerException(rsp);
             }
 
-            // substring the prefix topic of rsp.content
-            String responseContent = rsp.getContent().substring(rsp.getContent().indexOf("{"));
-            AmopMsgResponse amopMsgResponse = JsonHelper.json2Object(responseContent, AmopMsgResponse.class);
+            AmopMsg amopMsg = AMOPChannel.response2AmopMsg(rsp);
+            AmopMsgResponse amopMsgResponse = JsonHelper.json2Object(amopMsg.getData(), AmopMsgResponse.class);
             if (amopMsgResponse.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
                 log.error("sender chunk data to remote failed, rsp:{}", amopMsgResponse.getErrorMessage());
                 throw AMOPChannel.toBrokerException(amopMsgResponse);
