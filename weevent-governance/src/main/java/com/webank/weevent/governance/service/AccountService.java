@@ -26,20 +26,13 @@ public class AccountService {
 
     @Autowired
     private AccountRepository accountRepository;
-    
-    String admin = "admin";
 
     @PostConstruct
     public void init() throws GovernanceException {
         try {
             // check database contain admin
-            AccountEntity accountEntity = this.queryByUsername(admin);
-            if (accountEntity == null) {
-                accountEntity = new AccountEntity();
-                accountEntity.setUsername(admin);
-                accountEntity.setPassword("");
-                accountRepository.save(accountEntity);
-            }
+            AccountEntity accountEntity = this.queryByUsername("admin");
+            accountRepository.save(accountEntity);
         } catch (Exception e) {
             log.error(e.getMessage());
             throw new GovernanceException("init admin account fail,error:{}", e);
@@ -143,8 +136,12 @@ public class AccountService {
         if (!list.isEmpty()) {
             // get user info
             return list.get(0);
+        } else {
+        	AccountEntity accountEntity = new AccountEntity();
+        	accountEntity.setUsername("admin");
+            accountEntity.setPassword("AC0E7D037817094E9E0B4441F9BAE3209D67B02FA484917065F71B16109A1A78");
+            return accountEntity;
         }
-        return null;
     }
 
     public List<AccountEntity> accountEntityList(HttpServletRequest request, AccountEntity accountEntity, String accountId) {
