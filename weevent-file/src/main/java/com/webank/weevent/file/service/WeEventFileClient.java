@@ -2,6 +2,7 @@ package com.webank.weevent.file.service;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.InvalidAlgorithmParameterException;
@@ -298,28 +299,67 @@ public class WeEventFileClient implements IWeEventFileClient {
         return this.fileTransportService.getDiskFiles();
     }
 
-    public void genPemFile(String filePath) throws BrokerException {
-        validateLocalFile(filePath);
-        try {
-            BouncyCastleProvider prov = new BouncyCastleProvider();
-            Security.addProvider(prov);
+    public Map<String, String> genPemFile(String filePath) throws BrokerException {
+    	validateLocalFile(filePath);
+    	try {
+    		BouncyCastleProvider prov = new BouncyCastleProvider();
+    		Security.addProvider(prov);
+		 
+    		ECNamedCurveParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec(CURVE_TYPE);
+    		KeyPairGenerator generator = KeyPairGenerator.getInstance(ALGORITHM, prov.getName());
+    		generator.initialize(ecSpec, new SecureRandom());
+    		KeyPair pair = generator.generateKeyPair();
+    		String pubKey = pair.getPublic().toString();
+    		String account = HEX_HEADER + pubKey.substring(pubKey.indexOf("[") + 1, pubKey.indexOf("]")).replace(":", "");
 
-            ECNamedCurveParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec(CURVE_TYPE);
-            KeyPairGenerator generator = KeyPairGenerator.getInstance(ALGORITHM, prov.getName());
-            generator.initialize(ecSpec, new SecureRandom());
-            KeyPair pair = generator.generateKeyPair();
-            String pubKey = pair.getPublic().toString();
-            String account = HEX_HEADER + pubKey.substring(pubKey.indexOf("[") + 1, pubKey.indexOf("]")).replace(":", "");
+    		PemFile privatePemFile = new PemFile(pair.getPrivate(), PRIVATE_KEY_DESC);
+    		PemFile publicPemFile = new PemFile(pair.getPublic(), PUBLIC_KEY_DESC);
 
-            PemFile privatePemFile = new PemFile(pair.getPrivate(), PRIVATE_KEY_DESC);
-            PemFile publicPemFile = new PemFile(pair.getPublic(), PUBLIC_KEY_DESC);
-
-            privatePemFile.write(filePath + PATH_SEPARATOR + account + PRIVATE_KEY_SUFFIX);
-            publicPemFile.write(filePath + PATH_SEPARATOR + account + PUBLIC_KEY_SUFFIX);
-        } catch (IOException | NoSuchProviderException | NoSuchAlgorithmException | InvalidAlgorithmParameterException e) {
-            log.error("generate pem file error");
-            throw new BrokerException(ErrorCode.FILE_GEN_PEM_BC_FAILED);
-        }
+    		String privateKeyUrl = filePath + PATH_SEPARATOR + account + PRIVATE_KEY_SUFFIX;
+    		String publicKeyUrl = filePath + PATH_SEPARATOR + account + PUBLIC_KEY_SUFFIX;
+			
+    		privatePemFile.write(privateKeyUrl);
+    		publicPemFile.write(publicKeyUrl);
+			
+    		Map<String, String> ppkUrlMap = new HashMap<>();
+    		ppkUrlMap.put("privateKeyUrl", getFileKyeInfo(privateKeyUrl));
+    		ppkUrlMap.put("publicKeyUrl", getFileKyeInfo(publicKeyUrl));
+    		return ppkUrlMap;
+    	} catch (IOException | NoSuchProviderException | NoSuchAlgorithmException | InvalidAlgorithmParameterException e) {
+	     	log.error("generate pem file error", e);
+	     	throw new BrokerException(ErrorCode.FILE_GEN_PEM_BC_FAILED);
+    	}
+    }
+    
+    private String getFileKyeInfo(String url) {
+    	StringBuffer sb = new StringBuffer();
+    	File file = new File(url);
+    	// 读取文件
+    	BufferedInputStream bis = null;
+    	FileInputStream fis = null;
+    	try {
+    		// 第一步 通过文件路径来创建文件实例
+    		fis = new FileInputStream(file);
+    		bis = new BufferedInputStream(fis);
+    		while (bis.available() > 0) {
+    			sb.append((char) bis.read());
+    		}
+    	} catch (FileNotFoundException fnfe) {
+    		log.error("file non-existent", fnfe);
+    	} catch (IOException ioe) {
+    		log.error("I/O error", ioe);
+    	} finally {
+    		try {
+    			if (bis != null && fis != null) {
+    				fis.close();
+    				bis.close();
+    			}
+    		} catch (IOException ioe) {
+    			log.error("close InputStream error", ioe);
+            }
+    	}
+	     	file.delete();
+	     	return sb.toString();
     }
 
     public boolean isFileExist(String fileName, String topic, String groupId) throws BrokerException {
