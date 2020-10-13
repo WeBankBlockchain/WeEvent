@@ -87,7 +87,7 @@ export default {
       vm.option.series[0].data = []
       const chart = new Promise(function (resolve, reject) {
         API.eventList(data).then(res => {
-          if (res.data.status === 200) {
+          if (res.data.code === 0) {
             let max = 20
             const data = res.data.data
             const time = [].concat(vm.option.xAxis.categories)

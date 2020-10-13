@@ -115,10 +115,10 @@ export default {
       const vm = this
       API.getServer('').then(res => {
         if (res.status === 200) {
-          if (res.data.length) {
+          if (res.data.data.length) {
             vm.servers = [].concat(res.data)
             if (brokerId) {
-              res.data.forEach(e => {
+              res.data.data.forEach(e => {
                 if (e.id === Number(brokerId)) {
                   vm.server = e.name
                   const id = e.id
@@ -128,10 +128,10 @@ export default {
                 }
               })
             } else {
-              vm.server = res.data[0].name
-              const id = res.data[0].id
+              vm.server = res.data.data[0].name
+              const id = res.data.data[0].id
               vm.$store.commit('set_id', id)
-              vm.$store.commit('setConfigRule', res.data[0].isConfigRule)
+              vm.$store.commit('setConfigRule', res.data.data[0].isConfigRule)
               localStorage.setItem('brokerId', id)
             }
             vm.listGroup()
