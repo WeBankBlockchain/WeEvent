@@ -1,6 +1,7 @@
 package com.webank.weevent.file.inner;
 
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -30,6 +31,9 @@ import org.fisco.bcos.sdk.amop.topic.AmopMsgIn;
 import org.fisco.bcos.sdk.amop.topic.TopicType;
 import org.fisco.bcos.sdk.crypto.keystore.KeyTool;
 import org.fisco.bcos.sdk.crypto.keystore.PEMKeyStore;
+import org.fisco.bcos.sdk.model.AmopMsg;
+import org.fisco.bcos.sdk.model.Message;
+import org.fisco.bcos.sdk.model.MsgType;
 import org.fisco.bcos.sdk.model.Response;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
@@ -189,9 +193,8 @@ public class AMOPChannel extends AmopCallback {
                 throw toBrokerException(rsp);
             }
 
-            // substring the prefix topic of rsp.content
-            String responseContent = rsp.getContent().substring(rsp.getContent().indexOf("{"));
-            AmopMsgResponse amopMsgResponse = JsonHelper.json2Object(responseContent, AmopMsgResponse.class);
+            AmopMsg amopMsg = response2AmopMsg(rsp);
+            AmopMsgResponse amopMsgResponse = JsonHelper.json2Object(amopMsg.getData(), AmopMsgResponse.class);
             if (amopMsgResponse.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
                 log.error("create remote file context failed, rsp:{}", amopMsgResponse.getErrorMessage());
                 throw toBrokerException(amopMsgResponse);
@@ -219,13 +222,13 @@ public class AMOPChannel extends AmopCallback {
                 throw toBrokerException(rsp);
             }
 
-            // substring the prefix topic of rsp.content
-            String responseContent = rsp.getContent().substring(rsp.getContent().indexOf("{"));
-            AmopMsgResponse amopMsgResponse = JsonHelper.json2Object(responseContent, AmopMsgResponse.class);
+            AmopMsg amopMsg = response2AmopMsg(rsp);
+            AmopMsgResponse amopMsgResponse = JsonHelper.json2Object(amopMsg.getData(), AmopMsgResponse.class);
             if (amopMsgResponse.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
                 log.error("clean up receiver file context failed, rsp:{}", amopMsgResponse.getErrorMessage());
                 throw toBrokerException(amopMsgResponse);
             }
+
 
             log.info("clean up receiver file context success");
             return JsonHelper.json2Object(amopMsgResponse.getContent(), FileChunksMeta.class);
@@ -244,8 +247,8 @@ public class AMOPChannel extends AmopCallback {
                 throw toBrokerException(rsp);
             }
 
-            String responseContent = rsp.getContent().substring(rsp.getContent().indexOf("{"));
-            AmopMsgResponse amopMsgResponse = JsonHelper.json2Object(responseContent, AmopMsgResponse.class);
+            AmopMsg amopMsg = response2AmopMsg(rsp);
+            AmopMsgResponse amopMsgResponse = JsonHelper.json2Object(amopMsg.getData(), AmopMsgResponse.class);
             if (amopMsgResponse.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
                 log.error("check if the file exists failed, rsp:{}", amopMsgResponse.getErrorMessage());
                 throw toBrokerException(amopMsgResponse);
@@ -271,11 +274,8 @@ public class AMOPChannel extends AmopCallback {
                 throw toBrokerException(rsp);
             }
 
-            log.info("rsp.getContent():{}", rsp.getContent());
-            String responseContent = rsp.getContent().substring(rsp.getContent().indexOf("{"));
-
-            AmopMsgResponse amopMsgResponse = JsonHelper.json2Object(responseContent, AmopMsgResponse.class);
-            log.info("amopMsgResponse:{}-{}-{}", amopMsgResponse.getErrorCode(), amopMsgResponse.getErrorMessage(), amopMsgResponse.getContent());
+            AmopMsg amopMsg = response2AmopMsg(rsp);
+            AmopMsgResponse amopMsgResponse = JsonHelper.json2Object(amopMsg.getData(), AmopMsgResponse.class);
             if (amopMsgResponse.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
                 log.error("check file existence failed, rsp:{}", amopMsgResponse.getErrorMessage());
                 throw toBrokerException(amopMsgResponse);
@@ -446,5 +446,22 @@ public class AMOPChannel extends AmopCallback {
                 log.error("unknown file event type on channel");
                 return DataTypeUtils.toChannelResponse(ErrorCode.UNKNOWN_ERROR);
         }
+    }
+
+    /**
+     * convert Response to AmopMsg
+     *
+     * @param rsp send amop msg response
+     * @return amop msg
+     */
+    public static AmopMsg response2AmopMsg(Response rsp) {
+        Message msg = new Message();
+        msg.setResult(rsp.getErrorCode());
+        msg.setType((short) MsgType.AMOP_RESPONSE.getType());
+        msg.setData(rsp.getContentBytes());
+        msg.setSeq(rsp.getMessageID());
+        AmopMsg amopMsg = new AmopMsg(msg);
+        amopMsg.decodeAmopBody(rsp.getContentBytes());
+        return amopMsg;
     }
 }
