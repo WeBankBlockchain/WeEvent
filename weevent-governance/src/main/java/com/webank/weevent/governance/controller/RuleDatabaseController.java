@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import com.webank.weevent.governance.common.GovernanceException;
-import com.webank.weevent.governance.common.GovernanceResponse;
+import com.webank.weevent.governance.common.GovernanceResult;
 import com.webank.weevent.governance.entity.RuleDatabaseEntity;
 import com.webank.weevent.governance.service.RuleDatabaseService;
 import com.webank.weevent.governance.utils.JwtUtils;
@@ -32,44 +32,44 @@ public class RuleDatabaseController {
     private RuleDatabaseService ruleDatabaseService;
 
     @PostMapping("/list")
-    public GovernanceResponse<List<RuleDatabaseEntity>> getRuleDataBaseList(HttpServletRequest request, @RequestBody RuleDatabaseEntity ruleDatabaseEntity) throws GovernanceException {
+    public GovernanceResult<List<RuleDatabaseEntity>> getRuleDataBaseList(HttpServletRequest request, @RequestBody RuleDatabaseEntity ruleDatabaseEntity) throws GovernanceException {
         log.info("getRuleDataBaseList,userId:{}", ruleDatabaseEntity.getUserId());
         ruleDatabaseEntity.setUserId(Integer.valueOf(JwtUtils.getAccountId(request)));
         List<RuleDatabaseEntity> ruleDatabases = ruleDatabaseService.getRuleDataBaseList(request, ruleDatabaseEntity);
-        return new GovernanceResponse<>(ruleDatabases);
+        return new GovernanceResult<>(ruleDatabases);
     }
 
     // add ruleDatabase
     @PostMapping("/add")
-    public GovernanceResponse<RuleDatabaseEntity> addRuleDatabase(@Valid @RequestBody RuleDatabaseEntity ruleDatabaseEntity, HttpServletRequest request,
+    public GovernanceResult<RuleDatabaseEntity> addRuleDatabase(@Valid @RequestBody RuleDatabaseEntity ruleDatabaseEntity, HttpServletRequest request,
                                             HttpServletResponse response) throws GovernanceException {
         log.info("add  ruleDatabaseEntity service into db :{}", ruleDatabaseEntity);
         ruleDatabaseEntity.setUserId(Integer.valueOf(JwtUtils.getAccountId(request)));
         RuleDatabaseEntity rule = ruleDatabaseService.addRuleDatabase(ruleDatabaseEntity, request, response);
-        return new GovernanceResponse<>(rule);
+        return new GovernanceResult<>(rule);
     }
 
     @PostMapping("/update")
-    public GovernanceResponse<Boolean> updateRuleDatabase(@Validated @RequestBody RuleDatabaseEntity ruleDatabaseEntity, HttpServletRequest request,
+    public GovernanceResult<Boolean> updateRuleDatabase(@Validated @RequestBody RuleDatabaseEntity ruleDatabaseEntity, HttpServletRequest request,
                                                HttpServletResponse response) throws GovernanceException {
         log.info("update  ruleDatabaseEntity service ,id:{}", ruleDatabaseEntity.getId());
         ruleDatabaseEntity.setUserId(Integer.valueOf(JwtUtils.getAccountId(request)));
         ruleDatabaseService.updateRuleDatabase(ruleDatabaseEntity, request, response);
-        return new GovernanceResponse<>(true);
+        return new GovernanceResult<>(true);
     }
 
 
     @PostMapping("/delete")
-    public GovernanceResponse<Boolean> deleteRuleDatabase(@RequestBody RuleDatabaseEntity ruleDatabaseEntity, HttpServletRequest request) throws GovernanceException {
+    public GovernanceResult<Boolean> deleteRuleDatabase(@RequestBody RuleDatabaseEntity ruleDatabaseEntity, HttpServletRequest request) throws GovernanceException {
         log.info("delete  ruleDatabaseEntity service ,id:{}", ruleDatabaseEntity.getId());
         ruleDatabaseService.deleteRuleDatabase(ruleDatabaseEntity, request);
-        return new GovernanceResponse<>(true);
+        return new GovernanceResult<>(true);
     }
 
     @PostMapping("/checkDataBaseUrl")
-    public GovernanceResponse<Boolean> checkDataBaseUrl(@RequestBody RuleDatabaseEntity ruleDatabaseEntity, HttpServletRequest request) throws GovernanceException {
+    public GovernanceResult<Boolean> checkDataBaseUrl(@RequestBody RuleDatabaseEntity ruleDatabaseEntity, HttpServletRequest request) throws GovernanceException {
         log.info("checkDataBaseUrl service ,ruleDatabaseEntity:{}", ruleDatabaseEntity);
         ruleDatabaseService.checkRuleDataBaseUrl(ruleDatabaseEntity, request);
-        return new GovernanceResponse<>(true);
+        return new GovernanceResult<>(true);
     }
 }

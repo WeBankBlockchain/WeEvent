@@ -8,7 +8,7 @@ import java.util.List;
 
 import com.webank.weevent.governance.common.ConstantCode;
 import com.webank.weevent.governance.common.GovernanceException;
-import com.webank.weevent.governance.common.GovernanceResponse;
+import com.webank.weevent.governance.common.GovernanceResult;
 import com.webank.weevent.governance.entity.AccountEntity;
 import com.webank.weevent.governance.entity.BaseResponse;
 import com.webank.weevent.governance.service.AccountService;
@@ -34,27 +34,27 @@ public class AccountController {
     private AccountService accountService;
 
     @RequestMapping("/check/{param}/{type}")
-    public GovernanceResponse<Object> checkData(@PathVariable String param, @PathVariable Integer type) {
+    public GovernanceResult<Object> checkData(@PathVariable String param, @PathVariable Integer type) {
         return accountService.checkData(param, type);
     }
 
     @PostMapping(value = "/register")
-    public GovernanceResponse<Object> register(@Valid @RequestBody AccountEntity user, BindingResult result) throws GovernanceException {
+    public GovernanceResult<Object> register(@Valid @RequestBody AccountEntity user, BindingResult result) throws GovernanceException {
         return accountService.register(user);
     }
 
     @PostMapping(value = "/update")
-    public GovernanceResponse<Object> updatePassword(@RequestBody AccountEntity user) {
+    public GovernanceResult<Object> updatePassword(@RequestBody AccountEntity user) {
         return accountService.updatePassword(user);
     }
 
     @PostMapping(value = "/reset")
-    public GovernanceResponse<Object> resetPassword(@RequestBody AccountEntity user) {
+    public GovernanceResult<Object> resetPassword(@RequestBody AccountEntity user) {
         return accountService.resetPassword(user);
     }
 
     @GetMapping("/getUserId")
-    public GovernanceResponse<Object> getUserId(@RequestParam String username) {
+    public GovernanceResult<Object> getUserId(@RequestParam String username) {
         return accountService.getUserId(username);
     }
 
@@ -67,20 +67,20 @@ public class AccountController {
      * Query all account except themselves
      */
     @RequestMapping("/accountList")
-    public GovernanceResponse<List<AccountEntity>> accountEntityList(AccountEntity accountEntity, HttpServletRequest request,
+    public GovernanceResult<List<AccountEntity>> accountEntityList(AccountEntity accountEntity, HttpServletRequest request,
                                               HttpServletResponse response) throws GovernanceException {
         List<AccountEntity> accountEntities = accountService.accountEntityList(request, accountEntity, JwtUtils.getAccountId(request));
-        return new GovernanceResponse<>(accountEntities);
+        return new GovernanceResult<>(accountEntities);
     }
 
     /**
      * delete user by id
      */
     @RequestMapping("/delete")
-    public GovernanceResponse<Boolean> deleteUser(@RequestBody AccountEntity accountEntity, HttpServletRequest request,
+    public GovernanceResult<Boolean> deleteUser(@RequestBody AccountEntity accountEntity, HttpServletRequest request,
                                        HttpServletResponse response) throws GovernanceException {
         accountService.deleteUser(request, accountEntity);
-        return new GovernanceResponse<>(true);
+        return new GovernanceResult<>(true);
     }
 
 

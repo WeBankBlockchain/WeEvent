@@ -17,7 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.webank.weevent.file.service.FileChunksMeta;
 import com.webank.weevent.governance.common.GovernanceException;
-import com.webank.weevent.governance.common.GovernanceResponse;
+import com.webank.weevent.governance.common.GovernanceResult;
 import com.webank.weevent.governance.entity.FileChunksMetaEntity;
 import com.webank.weevent.governance.entity.FileTransportChannelEntity;
 import com.webank.weevent.governance.entity.FileTransportStatusEntity;
@@ -59,20 +59,20 @@ public class FileController {
 
     @PostMapping(path = "/openTransport")
     @ResponseBody
-    public GovernanceResponse<Boolean> openTransport(@RequestBody FileTransportChannelEntity fileTransport) throws GovernanceException {
+    public GovernanceResult<Boolean> openTransport(@RequestBody FileTransportChannelEntity fileTransport) throws GovernanceException {
         log.info("openTransport, fileTransport:{}.", fileTransport.toString());
         return this.fileService.openTransport(fileTransport);
     }
 
     @PostMapping(path = "/upload")
     @ResponseBody
-    public GovernanceResponse<Boolean> uploadChunk(HttpServletRequest request) throws GovernanceException {
+    public GovernanceResult<Boolean> uploadChunk(HttpServletRequest request) throws GovernanceException {
         return this.fileService.uploadFile(request);
     }
 
     @GetMapping(path = "/upload")
     @ResponseBody
-    public GovernanceResponse<List<Integer>> prepareUploadFile(@RequestParam(name = "groupId") String groupId,
+    public GovernanceResult<List<Integer>> prepareUploadFile(@RequestParam(name = "groupId") String groupId,
                                               @RequestParam(name = "identifier") String fileId,
                                               @RequestParam(name = "topicName") String topicName,
                                               @RequestParam(name = "totalChunks") Integer totalChunks,
@@ -123,7 +123,7 @@ public class FileController {
 
     @RequestMapping(path = "/listFile")
     @ResponseBody
-    public GovernanceResponse<List<FileChunksMeta>> listFile(@RequestParam(name = "groupId") String groupId,
+    public GovernanceResult<List<FileChunksMeta>> listFile(@RequestParam(name = "groupId") String groupId,
                                      @RequestParam(name = "brokerId") Integer brokerId,
                                      @RequestParam(name = "topicName") String topicName) throws GovernanceException {
         log.info("listFile, groupId:{}, topic:{}.", groupId, topicName);
@@ -132,7 +132,7 @@ public class FileController {
 
     @RequestMapping(path = "/downLoadStatus")
     @ResponseBody
-    public GovernanceResponse<List<FileChunksMetaEntity>> downLoadStatus(@RequestParam(name = "groupId") String groupId,
+    public GovernanceResult<List<FileChunksMetaEntity>> downLoadStatus(@RequestParam(name = "groupId") String groupId,
                                            @RequestParam(name = "brokerId") Integer brokerId,
                                            @RequestParam(name = "topicName") String topicName) throws GovernanceException {
         log.info("status, groupId:{}, topic:{}.", groupId, topicName);
@@ -141,7 +141,7 @@ public class FileController {
 
     @RequestMapping(path = "/uploadStatus")
     @ResponseBody
-    public GovernanceResponse<List<FileTransportStatusEntity>> uploadStatus(@RequestParam(name = "groupId") String groupId,
+    public GovernanceResult<List<FileTransportStatusEntity>> uploadStatus(@RequestParam(name = "groupId") String groupId,
                                          @RequestParam(name = "brokerId") Integer brokerId,
                                          @RequestParam(name = "topicName") String topicName) throws GovernanceException {
         log.info("status, groupId:{}, topic:{}.", groupId, topicName);
@@ -150,7 +150,7 @@ public class FileController {
 
     @RequestMapping(path = "/listTransport")
     @ResponseBody
-    public GovernanceResponse<List<FileTransportChannelEntity>> listTransport(@RequestParam(name = "groupId") String groupId,
+    public GovernanceResult<List<FileTransportChannelEntity>> listTransport(@RequestParam(name = "groupId") String groupId,
                                           @RequestParam(name = "brokerId") Integer brokerId) {
         log.info("listTransport, groupId:{}, brokerId:{}.", groupId, brokerId);
         return this.fileService.listTransport(groupId, brokerId);
@@ -158,7 +158,7 @@ public class FileController {
 
     @PostMapping(path = "/closeTransport")
     @ResponseBody
-    public GovernanceResponse<Boolean> closeTransport(@RequestBody FileTransportChannelEntity fileTransport) throws GovernanceException {
+    public GovernanceResult<Boolean> closeTransport(@RequestBody FileTransportChannelEntity fileTransport) throws GovernanceException {
         log.info("closeTransport, groupId:{}, brokerId:{}, transportId:{}, roleId:{}, topic:{}.", fileTransport.getGroupId(),
                 fileTransport.getBrokerId(), fileTransport.getId(), fileTransport.getRole(), fileTransport.getTopicName());
         return fileService.closeTransport(fileTransport);
@@ -220,7 +220,7 @@ public class FileController {
 
     @RequestMapping(path = "/checkUploaded")
     @ResponseBody
-    public GovernanceResponse<Object> checkFileIsUploaded(@RequestParam(name = "groupId") String groupId,
+    public GovernanceResult<Object> checkFileIsUploaded(@RequestParam(name = "groupId") String groupId,
                                                 @RequestParam(name = "brokerId") Integer brokerId,
                                                 @RequestParam(name = "topicName") String topicName,
                                                 @RequestParam(name = "fileName") String fileName) throws GovernanceException {

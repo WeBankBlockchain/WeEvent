@@ -13,7 +13,7 @@ import com.webank.weevent.client.JsonHelper;
 import com.webank.weevent.governance.common.ConstantProperties;
 import com.webank.weevent.governance.common.ErrorCode;
 import com.webank.weevent.governance.common.GovernanceException;
-import com.webank.weevent.governance.common.GovernanceResponse;
+import com.webank.weevent.governance.common.GovernanceResult;
 import com.webank.weevent.governance.entity.BrokerEntity;
 import com.webank.weevent.governance.entity.PermissionEntity;
 import com.webank.weevent.governance.entity.RuleDatabaseEntity;
@@ -107,7 +107,7 @@ public class BrokerService {
     }
 
     @Transactional(rollbackFor = Throwable.class)
-    public GovernanceResponse<Integer> addBroker(BrokerEntity brokerEntity, HttpServletRequest request, HttpServletResponse response)
+    public GovernanceResult<Integer> addBroker(BrokerEntity brokerEntity, HttpServletRequest request, HttpServletResponse response)
             throws GovernanceException {
         //check  broker serverUrl
         ErrorCode errorCode = checkServerByBrokerEntity(brokerEntity, request);
@@ -117,7 +117,7 @@ public class BrokerService {
         //checkBrokerUrlRepeat
         boolean repeat = checkBrokerUrlRepeat(brokerEntity);
         if (!repeat) {
-            return new GovernanceResponse<>(ErrorCode.BROKER_REPEAT);
+            return new GovernanceResult<>(ErrorCode.BROKER_REPEAT);
         }
 
         try {
@@ -135,7 +135,7 @@ public class BrokerService {
                 log.info("processor exist");
                 topicHistoricalService.createRule(request, response, brokerEntity);
             }
-            return GovernanceResponse.ok(brokerEntity.getId());
+            return GovernanceResult.ok(brokerEntity.getId());
         } catch (Exception e) {
             log.error("add broker fail", e);
             throw new GovernanceException("add broker fail" + e.getMessage());
@@ -174,7 +174,7 @@ public class BrokerService {
     }
 
     @Transactional(rollbackFor = Throwable.class)
-    public GovernanceResponse<Boolean> deleteBroker(BrokerEntity brokerEntity, HttpServletRequest request) throws GovernanceException {
+    public GovernanceResult<Boolean> deleteBroker(BrokerEntity brokerEntity, HttpServletRequest request) throws GovernanceException {
         try {
 
             deleteOldData(brokerEntity, request);
@@ -184,11 +184,11 @@ public class BrokerService {
             throw new GovernanceException("delete broker fail" + e.getMessage());
         }
 
-        return GovernanceResponse.ok(true);
+        return GovernanceResult.ok(true);
     }
 
     @Transactional(rollbackFor = Throwable.class)
-    public GovernanceResponse<Object> updateBroker(BrokerEntity brokerEntity, HttpServletRequest request, HttpServletResponse response)
+    public GovernanceResult<Object> updateBroker(BrokerEntity brokerEntity, HttpServletRequest request, HttpServletResponse response)
             throws GovernanceException {
         //check  broker  serverUrl
         ErrorCode errorCode = checkServerByBrokerEntity(brokerEntity, request);
@@ -198,7 +198,7 @@ public class BrokerService {
         //checkBrokerUrlRepeat
         boolean repeat = checkBrokerUrlRepeat(brokerEntity);
         if (!repeat) {
-            return new GovernanceResponse<>(ErrorCode.BROKER_REPEAT);
+            return new GovernanceResult<>(ErrorCode.BROKER_REPEAT);
         }
         brokerEntity.setLastUpdate(new Date());
         /**
@@ -216,7 +216,7 @@ public class BrokerService {
         if (perMissionList.size() > 0) {
             permissionRepository.saveAll(perMissionList);
         }
-        return GovernanceResponse.ok(true);
+        return GovernanceResult.ok(true);
     }
 
     private void modifyRule(BrokerEntity brokerEntity, HttpServletRequest request, HttpServletResponse response) throws GovernanceException {

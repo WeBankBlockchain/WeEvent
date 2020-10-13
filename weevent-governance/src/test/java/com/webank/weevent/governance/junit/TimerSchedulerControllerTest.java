@@ -6,7 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.webank.weevent.client.JsonHelper;
 import com.webank.weevent.governance.JUnitTestBase;
-import com.webank.weevent.governance.common.GovernanceResponse;
+import com.webank.weevent.governance.common.GovernanceResult;
 import com.webank.weevent.governance.utils.JwtUtils;
 
 import lombok.extern.slf4j.Slf4j;
@@ -57,7 +57,7 @@ public class TimerSchedulerControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/add").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        GovernanceResponse<?> governanceResponse = JsonHelper.json2Object(response.getContentAsString(), GovernanceResponse.class);
+        GovernanceResult<?> governanceResponse = JsonHelper.json2Object(response.getContentAsString(), GovernanceResult.class);
         brokerIdMap.put("brokerId", (Integer) governanceResponse.getData());
     }
 
@@ -69,7 +69,7 @@ public class TimerSchedulerControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/timerScheduler/add").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        GovernanceResponse<?> governanceResponse = JsonHelper.json2Object(response.getContentAsString(), GovernanceResponse.class);
+        GovernanceResult<?> governanceResponse = JsonHelper.json2Object(response.getContentAsString(), GovernanceResult.class);
         Assert.assertEquals(governanceResponse.getCode().intValue(), 200);
     }
 
@@ -81,7 +81,7 @@ public class TimerSchedulerControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mvcResult.getResponse();
 
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        GovernanceResponse<?> governanceResponse = JsonHelper.json2Object(response.getContentAsString(), GovernanceResponse.class);
+        GovernanceResult<?> governanceResponse = JsonHelper.json2Object(response.getContentAsString(), GovernanceResult.class);
         Assert.assertEquals(governanceResponse.getCode().intValue(), 200);
     }
 
@@ -93,7 +93,7 @@ public class TimerSchedulerControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/timerScheduler/update").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token).content(content)).andReturn().getResponse();
 
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        GovernanceResponse<?> governanceResponse = JsonHelper.json2Object(response.getContentAsString(), GovernanceResponse.class);
+        GovernanceResult<?> governanceResponse = JsonHelper.json2Object(response.getContentAsString(), GovernanceResult.class);
         Assert.assertEquals(governanceResponse.getCode().intValue(), 200);
     }
 
@@ -103,7 +103,7 @@ public class TimerSchedulerControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/timerScheduler/delete").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        GovernanceResponse<?> governanceResponse = JsonHelper.json2Object(response.getContentAsString(), GovernanceResponse.class);
+        GovernanceResult<?> governanceResponse = JsonHelper.json2Object(response.getContentAsString(), GovernanceResult.class);
         Assert.assertEquals(governanceResponse.getCode().intValue(), 200);
     }
 

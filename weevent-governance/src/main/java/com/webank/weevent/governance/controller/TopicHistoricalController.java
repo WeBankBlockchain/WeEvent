@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.webank.weevent.governance.common.GovernanceException;
-import com.webank.weevent.governance.common.GovernanceResponse;
+import com.webank.weevent.governance.common.GovernanceResult;
 import com.webank.weevent.governance.entity.TopicHistoricalEntity;
 import com.webank.weevent.governance.service.TopicHistoricalService;
 
@@ -30,25 +30,25 @@ public class TopicHistoricalController {
     private TopicHistoricalService topicHistoricalService;
 
     @PostMapping("/list")
-    public GovernanceResponse<Map<String, List<Integer>>> historicalDataList(@RequestBody TopicHistoricalEntity topicHistoricalEntity, HttpServletRequest request,
+    public GovernanceResult<Map<String, List<Integer>>> historicalDataList(@RequestBody TopicHistoricalEntity topicHistoricalEntity, HttpServletRequest request,
                                                HttpServletResponse response) throws GovernanceException {
         log.info("get  historicalDataEntity:{} ", topicHistoricalEntity);
         Map<String, List<Integer>> returnMap = topicHistoricalService.historicalDataList(topicHistoricalEntity, request, response);
-        return new GovernanceResponse<>(returnMap);
+        return new GovernanceResult<>(returnMap);
     }
 
     @PostMapping("/eventList")
-    public GovernanceResponse<List<TopicHistoricalEntity>> eventList(@RequestBody TopicHistoricalEntity topicHistoricalEntity, HttpServletRequest request,
+    public GovernanceResult<List<TopicHistoricalEntity>> eventList(@RequestBody TopicHistoricalEntity topicHistoricalEntity, HttpServletRequest request,
                                       HttpServletResponse response) throws GovernanceException {
         log.info("get  eventList:{} ", topicHistoricalEntity);
         List<TopicHistoricalEntity> topicTopicHistoricalEntities = topicHistoricalService.eventList(topicHistoricalEntity, request);
-        return new GovernanceResponse<>(topicTopicHistoricalEntities);
+        return new GovernanceResult<>(topicTopicHistoricalEntities);
     }
 
     @PostMapping("/insertHistoricalData")
-    public GovernanceResponse<Boolean> insertHistoricalData(@RequestBody TopicHistoricalEntity topicHistoricalEntity) {
+    public GovernanceResult<Boolean> insertHistoricalData(@RequestBody TopicHistoricalEntity topicHistoricalEntity) {
         log.info("insert  historicalData:{} ", topicHistoricalEntity);
-        return new GovernanceResponse<>(topicHistoricalService.insertHistoricalData(topicHistoricalEntity));
+        return new GovernanceResult<>(topicHistoricalService.insertHistoricalData(topicHistoricalEntity));
     }
 
 }

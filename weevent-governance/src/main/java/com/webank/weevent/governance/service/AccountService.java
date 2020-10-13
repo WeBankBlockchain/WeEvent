@@ -8,7 +8,7 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 
 import com.webank.weevent.governance.common.GovernanceException;
-import com.webank.weevent.governance.common.GovernanceResponse;
+import com.webank.weevent.governance.common.GovernanceResult;
 import com.webank.weevent.governance.entity.AccountEntity;
 import com.webank.weevent.governance.enums.IsDeleteEnum;
 import com.webank.weevent.governance.repository.AccountRepository;
@@ -44,14 +44,14 @@ public class AccountService {
         }
     }
 
-    public GovernanceResponse<Object> checkData(String param, int type) {
+    public GovernanceResult<Object> checkData(String param, int type) {
         // according type generate select condition
         AccountEntity accountEntity = new AccountEntity();
         // 1：username
         if (type == 1) {
             accountEntity.setUsername(param);
         } else {
-            return GovernanceResponse.build(400, "data type error");
+            return GovernanceResult.build(400, "data type error");
         }
         // excute select
 
@@ -59,70 +59,70 @@ public class AccountService {
         // is list contain data
         if (!CollectionUtils.isEmpty(list)) {
             // if list contain data return false
-            return GovernanceResponse.ok(false);
+            return GovernanceResult.ok(false);
         }
         // if not contain data true
-        return GovernanceResponse.ok(true);
+        return GovernanceResult.ok(true);
     }
 
-    public GovernanceResponse<Object> register(AccountEntity user) throws GovernanceException {
+    public GovernanceResult<Object> register(AccountEntity user) throws GovernanceException {
         // data criteral
         if (StringUtils.isBlank(user.getUsername()) || StringUtils.isBlank(user.getPassword())) {
-            return GovernanceResponse.build(400, "user data incomplete，register fail");
+            return GovernanceResult.build(400, "user data incomplete，register fail");
         }
         // check username exist
-        GovernanceResponse result = checkData(user.getUsername(), 1);
+        GovernanceResult result = checkData(user.getUsername(), 1);
         if (!(boolean) result.getData()) {
-            return GovernanceResponse.build(400, "this username occupied");
+            return GovernanceResult.build(400, "this username occupied");
         }
 
         if (user.getPassword().length() < 6) {
-            return GovernanceResponse.build(400, "password is too short");
+            return GovernanceResult.build(400, "password is too short");
         }
 
         // secret
         // insert user into database
         accountRepository.save(user);
         // return true
-        return GovernanceResponse.ok();
+        return GovernanceResult.ok();
     }
 
-    public GovernanceResponse<Object> updatePassword(AccountEntity user) {
+    public GovernanceResult<Object> updatePassword(AccountEntity user) {
         // data criteral
         if (StringUtils.isBlank(user.getPassword()) || StringUtils.isBlank(user.getOldPassword())) {
-            return GovernanceResponse.build(400, "password is blank，update fail");
+            return GovernanceResult.build(400, "password is blank，update fail");
         }
 
         if (user.getPassword().length() < 6) {
-            return GovernanceResponse.build(400, "password is too short");
+            return GovernanceResult.build(400, "password is too short");
         }
         // check oldPassword is correct
         String oldPassword = user.getOldPassword();
 
         List<AccountEntity> accountEntityList = this.findAllByUsernameAndDeleteAt(user.getUsername());
         if (CollectionUtils.isEmpty(accountEntityList)) {
-            return GovernanceResponse.build(400, "username is not exist");
+            return GovernanceResult.build(400, "username is not exist");
         }
         AccountEntity storeUser = accountEntityList.get(0);
         if (!oldPassword.equals(storeUser.getPassword())) {
-            return GovernanceResponse.build(400, "old password is incorrect");
+            return GovernanceResult.build(400, "old password is incorrect");
         }
 
         storeUser.setPassword(user.getPassword());
         accountRepository.save(storeUser);
-        return GovernanceResponse.ok();
+        return GovernanceResult.ok();
     }
 
-    public GovernanceResponse<Object> getUserId(String username) {
+    public GovernanceResult<Object> getUserId(String username) {
         // get user by username
         AccountEntity user = this.queryByUsername(username);
         Integer userId = user == null ? null : user.getId();
-        return GovernanceResponse.ok(userId);
+        return GovernanceResult.ok(userId);
     }
 
-    public GovernanceResponse<Object> resetPassword(AccountEntity user) {
+    public GovernanceResult<Object> resetPassword(AccountEntity user) {
         if (user.getPassword().length() < 6) {
-            return GovernanceResponse.build(400, "password is too short");
+            return GovernanceResult.build(400, "password is too short");
         }
 
         AccountEntity storeUser = this.queryByUsername(user.getUsername());
@@ -131,7 +131,7 @@ public class AccountService {
         //   storeUser.setPassword(password);
         storeUser.setLastUpdate(new Date());
         accountRepository.save(storeUser);
-        return GovernanceResponse.ok(true);
+        return GovernanceResult.ok(true);
     }
 
 
