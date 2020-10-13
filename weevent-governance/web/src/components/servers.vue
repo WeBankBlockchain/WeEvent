@@ -194,13 +194,13 @@ export default {
       data.userIdList = [].concat(this.form.userIdList)
       API.addServer(data).then(res => {
         if (res.status === 200) {
-          if (res.data.status === 200) {
+          if (res.data.code === 0) {
             this.$message({
               type: 'success',
               message: this.$t('common.addSuccess')
             })
             this.getServer()
-          } else if (res.data.status === 100108) {
+          } else if (res.data.code === 100108) {
             this.$store.commit('set_Msg', this.$message({
               type: 'warning',
               message: this.$t('serverSet.exitBrokerURL'),
@@ -237,7 +237,16 @@ export default {
               showClose: true
             }))
           } else {
-            this.server = [].concat(res.data)
+          	if(res.data.code === 0){
+	            this.server = [].concat(res.data.data)
+          	}else{
+          		this.$store.commit('set_Msg', this.$message({
+              	type: 'warning',
+              	message: res.data.message,
+              	duration: 0,
+              	showClose: true
+            }))
+          	}
           }
         }
       })
@@ -252,7 +261,7 @@ export default {
       data.userIdList = [].concat(this.form.userIdList)
       API.updateServer(data).then(res => {
         if (res.status === 200) {
-          if (res.data.status === 200) {
+          if (res.data.code === 0) {
             this.$message({
               type: 'success',
               message: this.$t('common.editSuccess')
@@ -295,7 +304,7 @@ export default {
           brokerId: e.id
         }
         API.permissionList(data).then(res => {
-          if (res.data.status === 200) {
+          if (res.data.code === 0) {
             res.data.data.forEach(e => {
               vm.form.userIdList.push(e.userId)
             })
@@ -315,7 +324,7 @@ export default {
           id: e.id
         }
         API.deleteServer(data).then(res => {
-          if (res.data.status === 200) {
+          if (res.data.code === 0) {
             vm.$message({
               type: 'success',
               message: vm.$t('common.deleteSuccess')
