@@ -37,6 +37,8 @@ import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
 import org.fisco.bcos.sdk.client.protocol.response.BlockNumber;
+import org.fisco.bcos.sdk.client.protocol.response.ConsensusStatus;
+import org.fisco.bcos.sdk.client.protocol.response.SyncStatus;
 import org.fisco.bcos.sdk.client.protocol.response.TotalTransactionCount;
 import org.fisco.bcos.sdk.contract.Contract;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
@@ -120,7 +122,6 @@ public class Web3SDK2Wrapper {
      *
      * @param web3j web3j handler
      * @param credentials credentials
-     * @param timeout time out in ms
      * @return contract address
      * @throws BrokerException BrokerException
      */
@@ -159,7 +160,6 @@ public class Web3SDK2Wrapper {
      * getBlockHeight
      *
      * @param web3j web3j
-     * @param timeout time out in ms
      * @return 0L if net error
      */
     public static Long getBlockHeight(Client client) throws BrokerException {
@@ -185,13 +185,11 @@ public class Web3SDK2Wrapper {
      * @param blockNum the blockNum
      * @param supportedVersion version list
      * @param historyTopic topic list
-     * @param timeout time out in ms
      * @return null if net error
      */
     public static List<WeEvent> loop(Client client, BigInteger blockNum,
                                      Map<String, Long> supportedVersion,
-                                     Map<String, Contract> historyTopic,
-                                     int timeout) throws BrokerException {
+                                     Map<String, Contract> historyTopic) throws BrokerException {
         List<WeEvent> events = new ArrayList<>();
         if (blockNum.compareTo(BigInteger.ZERO) <= 0) {
             return events;
@@ -241,7 +239,7 @@ public class Web3SDK2Wrapper {
         }
     }
 
-    public static GroupGeneral getGroupGeneral(Client client, int timeout) throws BrokerException {
+    public static GroupGeneral getGroupGeneral(Client client) throws BrokerException {
         // Current number of nodes, number of blocks, number of transactions
         GroupGeneral groupGeneral = new GroupGeneral();
         try {
@@ -263,7 +261,7 @@ public class Web3SDK2Wrapper {
     }
 
     //Traversing transactions
-    public static ListPage<TbTransHash> queryTransList(Client client, String blockHash, BigInteger blockNumber, Integer pageIndex, Integer pageSize, int timeout) throws BrokerException {
+    public static ListPage<TbTransHash> queryTransList(Client client, String blockHash, BigInteger blockNumber, Integer pageIndex, Integer pageSize) throws BrokerException {
         ListPage<TbTransHash> tbTransHashListPage = new ListPage<>();
         List<TbTransHash> tbTransHashes = new ArrayList<>();
 
@@ -313,7 +311,7 @@ public class Web3SDK2Wrapper {
                 .map(transactionResult -> (JsonTransactionResponse) transactionResult.get()).collect(Collectors.toList()).subList(transIndexStart, transSize + transIndexStart);
         transactionHashList.forEach(tx -> {
             TbTransHash tbTransHash = new TbTransHash(tx.getHash(), tx.getFrom(), tx.getTo(),
-                    tx.getBlockNumber(), DataTypeUtils.getTimestamp(Long.getLong(bcosBlock.getBlock().getTimestamp())));
+                    tx.getBlockNumber(), DataTypeUtils.getTimestamp(Numeric.decodeQuantity(bcosBlock.getBlock().getTimestamp()).longValue()));
             tbTransHashes.add(tbTransHash);
         });
         tbTransHashListPage.setPageSize(transSize);
@@ -322,7 +320,7 @@ public class Web3SDK2Wrapper {
     }
 
     //Traverse block
-    public static ListPage<TbBlock> queryBlockList(Client client, String blockHash, BigInteger blockNumber, Integer pageIndex, Integer pageSize, int timeout) throws BrokerException {
+    public static ListPage<TbBlock> queryBlockList(Client client, String blockHash, BigInteger blockNumber, Integer pageIndex, Integer pageSize) throws BrokerException {
         ListPage<TbBlock> tbBlockListPage = new ListPage<>();
         List<TbBlock> tbBlocks = new CopyOnWriteArrayList<>();
         Integer blockCount;
@@ -376,7 +374,7 @@ public class Web3SDK2Wrapper {
             throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
         }
 
-        String blockTimestamp = DataTypeUtils.getTimestamp(Long.getLong(block.getTimestamp()));
+        String blockTimestamp = DataTypeUtils.getTimestamp(Numeric.decodeQuantity(block.getTimestamp()).longValue());
         int transactions = 0;
         if (!block.getTransactions().isEmpty()) {
             transactions = block.getTransactions().size();
@@ -430,42 +428,35 @@ public class Web3SDK2Wrapper {
         }
     }
 
-    private static Map<String, Map<String, String>> getNodeViews(Client client) throws IOException {
-        JsonNode jsonNode = JsonHelper.getObjectMapper().readTree(client.getConsensusStatus().getResult().toString());
+    private static Map<String, Map<String, String>> getNodeViews(Client client) {
+        ConsensusStatus.ConsensusInfo result = client.getConsensusStatus().getResult();
         Map<String, Map<String, String>> nodeViews = new HashMap<>();
-        for (JsonNode node : jsonNode) {
-            if (node.isArray()) {
-                convertJsonArrayToList(nodeViews, node);
-            }
-        }
+
+        result.getViewInfos().forEach(viewInfo -> {
+            Map<String, String> map = new HashMap<>();
+            map.put(NODE_ID, viewInfo.getNodeId());
+            map.put(VIEW, viewInfo.getView());
+            nodeViews.put(viewInfo.getNodeId(), map);
+        });
         return nodeViews;
     }
 
-    private static Map<String, Map<String, String>> getBlockNums(Client client) throws IOException {
-        JsonNode jsonObj = JsonHelper.getObjectMapper().readTree(client.getSyncStatus().toString());
+    private static Map<String, Map<String, String>> getBlockNums(Client client) {
         Map<String, Map<String, String>> nodeBlockNums = new HashMap<>();
+        SyncStatus.SyncStatusInfo statusInfo = client.getSyncStatus().getResult();
 
-        Map<String, String> map = new HashMap<>();
-        jsonObj.fields().forEachRemaining(entry -> {
-            if (BLOCK_NUMBER.equals(entry.getKey()) || NODE_ID.equals(entry.getKey())) {
-                map.put(entry.getKey(), entry.getValue().asText());
-            }
-            if (PEERS.equals(entry.getKey())) {
-                convertJsonArrayToList(nodeBlockNums, entry.getValue());
-            }
+        Map<String, String> currentPeer = new HashMap<>();
+        currentPeer.put(NODE_ID, statusInfo.getNodeId());
+        currentPeer.put(BLOCK_NUMBER, Numeric.decodeQuantity(statusInfo.getBlockNumber()).toString());
+        nodeBlockNums.put(statusInfo.getNodeId(), currentPeer);
+
+        statusInfo.getPeers().forEach(peersInfo -> {
+            Map<String, String> connectedPeer = new HashMap<>();
+            connectedPeer.put(NODE_ID, peersInfo.getNodeId());
+            connectedPeer.put(BLOCK_NUMBER, Numeric.decodeQuantity(peersInfo.getBlockNumber()).toString());
+            nodeBlockNums.put(peersInfo.getNodeId(), connectedPeer);
         });
-        nodeBlockNums.put(jsonObj.get(NODE_ID).asText(), map);
         return nodeBlockNums;
-    }
-
-    private static void convertJsonArrayToList(Map<String, Map<String, String>> map, JsonNode jsonArray) {
-        for (JsonNode jsonObj : jsonArray) {
-            if (jsonObj.isObject()) {
-                Map<String, String> objMap = new HashMap<>();
-                jsonObj.fields().forEachRemaining(entry -> objMap.put(entry.getKey(), entry.getValue().asText()));
-                map.put(jsonObj.get(NODE_ID).asText(), objMap);
-            }
-        }
     }
 
     private static TbNode generateTbNode(Map<String, Map<String, String>> nodeViews,
@@ -503,7 +494,7 @@ public class Web3SDK2Wrapper {
                     return null;
                 }
 
-                String blockTimestamp = DataTypeUtils.getTimestamp(Long.getLong(block.getTimestamp()));
+                String blockTimestamp = DataTypeUtils.getTimestamp(Numeric.decodeQuantity(block.getTimestamp()).longValue());
                 int transactions = 0;
                 if (!block.getTransactions().isEmpty()) {
                     transactions = block.getTransactions().size();

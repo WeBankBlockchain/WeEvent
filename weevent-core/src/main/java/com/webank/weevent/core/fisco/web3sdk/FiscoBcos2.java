@@ -177,7 +177,6 @@ public class FiscoBcos2 {
     }
 
     public boolean createTopic(String topicName) throws BrokerException {
-//        try {
         // check if topic contract exist
         if (isTopicExist(topicName)) {
             log.info("topic name already exist, {}", topicName);
@@ -390,19 +389,19 @@ public class FiscoBcos2 {
      * @return java.lang.Integer null if net error
      */
     public List<WeEvent> loop(BigInteger blockNum) throws BrokerException {
-        return Web3SDK2Wrapper.loop(this.client, blockNum, this.historyTopicVersion, this.historyTopicContract, this.timeout);
+        return Web3SDK2Wrapper.loop(this.client, blockNum, this.historyTopicVersion, this.historyTopicContract);
     }
 
     public GroupGeneral getGroupGeneral() throws BrokerException {
-        return Web3SDK2Wrapper.getGroupGeneral(this.client, this.timeout);
+        return Web3SDK2Wrapper.getGroupGeneral(this.client);
     }
 
     public ListPage<TbTransHash> queryTransList(String transHash, BigInteger blockNumber, Integer pageIndex, Integer pageSize) throws BrokerException {
-        return Web3SDK2Wrapper.queryTransList(this.client, transHash, blockNumber, pageIndex, pageSize, this.timeout);
+        return Web3SDK2Wrapper.queryTransList(this.client, transHash, blockNumber, pageIndex, pageSize);
     }
 
     public ListPage<TbBlock> queryBlockList(String transHash, BigInteger blockNumber, Integer pageIndex, Integer pageSize) throws BrokerException {
-        return Web3SDK2Wrapper.queryBlockList(this.client, transHash, blockNumber, pageIndex, pageSize, this.timeout);
+        return Web3SDK2Wrapper.queryBlockList(this.client, transHash, blockNumber, pageIndex, pageSize);
     }
 
     public ListPage<TbNode> queryNodeList() throws BrokerException {
