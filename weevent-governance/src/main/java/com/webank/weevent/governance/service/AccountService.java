@@ -27,8 +27,8 @@ public class AccountService {
     @Autowired
     private AccountRepository accountRepository;
     
-    String admin = "admin";
-    String password = "AC0E7D037817094E9E0B4441F9BAE3209D67B02FA484917065F71B16109A1A78";
+    final String admin = "admin";
+    final String password = "AC0E7D037817094E9E0B4441F9BAE3209D67B02FA484917065F71B16109A1A78";
 
     @PostConstruct
     public void init() throws GovernanceException {
