@@ -16,6 +16,7 @@ import com.webank.weevent.governance.repository.AccountRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -23,6 +24,12 @@ import org.springframework.util.CollectionUtils;
 @Service
 @Slf4j
 public class AccountService {
+	
+	@Value("${user.admin}")
+    private String admin;
+	
+	@Value("${user.password}")
+    private String password;
 
     @Autowired
     private AccountRepository accountRepository;
@@ -138,8 +145,8 @@ public class AccountService {
             return list.get(0);
         } else {
         	AccountEntity accountEntity = new AccountEntity();
-        	accountEntity.setUsername("admin");
-            accountEntity.setPassword("AC0E7D037817094E9E0B4441F9BAE3209D67B02FA484917065F71B16109A1A78");
+        	accountEntity.setUsername(admin);
+            accountEntity.setPassword(password);
             return accountEntity;
         }
     }
