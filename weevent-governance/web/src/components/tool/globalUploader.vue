@@ -85,7 +85,7 @@ export default {
       if (ov === '0') {
         const url = '?fileName=' + file.name + '&brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topicName=' + sessionStorage.getItem('uploadName')
         API.checkUploaded(url).then(res => {
-          if (res.data.status === 200 && !res.data.data) {
+          if (res.data.code === 0 && !res.data.data) {
             vm.computeMD5(file)
             Bus.$emit('fileAdded')
             vm.$emit('pop', true)

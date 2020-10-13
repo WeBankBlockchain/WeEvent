@@ -343,6 +343,7 @@ module.exports = {
     downloadFile: '下载',
     downloadList: '下载列表',
     fileuploadList: '当前传输列表',
-    fileCover: '该通道已设置覆盖同文件'
+    fileCover: '该通道已设置覆盖同文件',
+    generatePPK: '生成公私钥'
   }
 }

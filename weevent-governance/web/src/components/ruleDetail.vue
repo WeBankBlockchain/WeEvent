@@ -567,7 +567,7 @@ export default {
         id: sessionStorage.getItem('ruleId')
       }
       API.ruleDetail(data).then(res => {
-        if (res.data.status === 200) {
+        if (res.data.code === 0) {
           for (const key in vm.ruleItem) {
             if (res.data.data[key] || key === 'ruleDescription') {
               vm.ruleItem[key] = res.data.data[key]
@@ -631,7 +631,7 @@ export default {
     },
     getDBLsit () {
       API.dbList({}).then(res => {
-        if (res.data.status === 200) {
+        if (res.data.code === 0) {
           this.dbList = [].concat(res.data.data)
         }
       })
@@ -732,7 +732,7 @@ export default {
           }
         }
         API.ruleUpdate(data).then(res => {
-          if (res.data.status === 200) {
+          if (res.data.code === 0) {
             vm.$message({
               type: 'success',
               message: vm.$t('common.editSuccess')
@@ -773,9 +773,9 @@ export default {
       }
       API.topicList(data).then(res => {
         if (res.status === 200) {
-          vm.total = res.data.total
-          vm.listData = [].concat(res.data.topicInfoList)
-          vm.listTopic = [].concat(res.data.topicInfoList)
+          vm.total = res.data.data.total
+          vm.listData = [].concat(res.data.data.topicInfoList)
+          vm.listTopic = [].concat(res.data.data.topicInfoList)
         }
       })
     },
