@@ -131,8 +131,8 @@ export default {
       }
       API.topicList(data).then(res => {
         if (res.status === 200) {
-          vm.total = res.data.total
-          const last = Math.ceil(res.data.total / vm.pageSize)
+          vm.total = res.data.data.total
+          const last = Math.ceil(res.data.data.total / vm.pageSize)
           this.pageIndex = last
           const data = {
             pageIndex: last - 1,
@@ -142,7 +142,7 @@ export default {
           }
           API.topicList(data).then(res => {
             if (res.status === 200) {
-              const listData = res.data.topicInfoList.reverse()
+              const listData = res.data.data.topicInfoList.reverse()
               const det = {
                 topicName: '',
                 createdTimestamp: '',

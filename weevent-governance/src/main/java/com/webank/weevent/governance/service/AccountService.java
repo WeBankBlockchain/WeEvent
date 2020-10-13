@@ -44,7 +44,7 @@ public class AccountService {
         }
     }
 
-    public GovernanceResult checkData(String param, int type) {
+    public GovernanceResult<Object> checkData(String param, int type) {
         // according type generate select condition
         AccountEntity accountEntity = new AccountEntity();
         // 1：username
@@ -65,7 +65,7 @@ public class AccountService {
         return GovernanceResult.ok(true);
     }
 
-    public GovernanceResult register(AccountEntity user) throws GovernanceException {
+    public GovernanceResult<Object> register(AccountEntity user) throws GovernanceException {
         // data criteral
         if (StringUtils.isBlank(user.getUsername()) || StringUtils.isBlank(user.getPassword())) {
             return GovernanceResult.build(400, "user data incomplete，register fail");
@@ -87,7 +87,7 @@ public class AccountService {
         return GovernanceResult.ok();
     }
 
-    public GovernanceResult updatePassword(AccountEntity user) {
+    public GovernanceResult<Object> updatePassword(AccountEntity user) {
         // data criteral
         if (StringUtils.isBlank(user.getPassword()) || StringUtils.isBlank(user.getOldPassword())) {
             return GovernanceResult.build(400, "password is blank，update fail");
@@ -113,14 +113,14 @@ public class AccountService {
         return GovernanceResult.ok();
     }
 
-    public GovernanceResult getUserId(String username) {
+    public GovernanceResult<Object> getUserId(String username) {
         // get user by username
         AccountEntity user = this.queryByUsername(username);
         Integer userId = user == null ? null : user.getId();
         return GovernanceResult.ok(userId);
     }
 
-    public GovernanceResult resetPassword(AccountEntity user) {
+    public GovernanceResult<Object> resetPassword(AccountEntity user) {
         if (user.getPassword().length() < 6) {
             return GovernanceResult.build(400, "password is too short");
         }

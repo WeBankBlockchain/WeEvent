@@ -1,7 +1,9 @@
 package com.webank.weevent.governance.controller;
 
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -32,40 +34,41 @@ public class TimerSchedulerController {
 
     // get  TimerScheduler list
     @PostMapping("/list")
-    public GovernanceResult getTimerSchedulerList(HttpServletRequest request, @RequestBody TimerSchedulerEntity timerSchedulerEntity) throws GovernanceException {
+    public GovernanceResult<Map<String, Object>> getTimerSchedulerList(HttpServletRequest request, @RequestBody TimerSchedulerEntity timerSchedulerEntity) throws GovernanceException {
         log.info("get TimerScheduler , timerScheduler :{}", timerSchedulerEntity);
         timerSchedulerEntity.setUserId(Integer.valueOf(JwtUtils.getAccountId(request)));
         List<TimerSchedulerEntity> timerSchedulerEntityList = timerSchedulerService.getTimerSchedulerList(request, timerSchedulerEntity);
-        GovernanceResult governanceResult = new GovernanceResult(timerSchedulerEntityList);
-        governanceResult.setTotalCount(timerSchedulerEntity.getTotalCount());
-        return governanceResult;
+        Map<String, Object> map = new HashMap<>();
+        map.put("timerSchedulerEntityList", timerSchedulerEntityList);
+        map.put("totalCount", timerSchedulerEntity.getTotalCount());
+        return new GovernanceResult<>(map);
     }
 
     // add TimerSchedulerEntity
     @PostMapping("/add")
-    public GovernanceResult addTimerScheduler(@Valid @RequestBody TimerSchedulerEntity timerSchedulerEntity, HttpServletRequest request,
+    public GovernanceResult<TimerSchedulerEntity> addTimerScheduler(@Valid @RequestBody TimerSchedulerEntity timerSchedulerEntity, HttpServletRequest request,
                                               HttpServletResponse response) throws GovernanceException {
         log.info("add  timerSchedulerEntity service into db :{}", timerSchedulerEntity);
         timerSchedulerEntity.setUserId(Integer.valueOf(JwtUtils.getAccountId(request)));
         TimerSchedulerEntity rule = timerSchedulerService.addTimerScheduler(timerSchedulerEntity, request, response);
-        return new GovernanceResult(rule);
+        return new GovernanceResult<>(rule);
     }
 
     @PostMapping("/update")
-    public GovernanceResult updateTimerScheduler(@RequestBody TimerSchedulerEntity timerSchedulerEntity, HttpServletRequest request,
+    public GovernanceResult<Boolean> updateTimerScheduler(@RequestBody TimerSchedulerEntity timerSchedulerEntity, HttpServletRequest request,
                                                  HttpServletResponse response) throws GovernanceException {
         log.info("update  timerSchedulerEntity service ,timerSchedulerEntity:{}", timerSchedulerEntity);
         timerSchedulerEntity.setUserId(Integer.valueOf(JwtUtils.getAccountId(request)));
         timerSchedulerService.updateTimerScheduler(timerSchedulerEntity, request, response);
-        return new GovernanceResult(true);
+        return new GovernanceResult<>(true);
     }
 
 
     @PostMapping("/delete")
-    public GovernanceResult deleteTimerScheduler(@RequestBody TimerSchedulerEntity timerSchedulerEntity, HttpServletRequest request) throws GovernanceException {
+    public GovernanceResult<Boolean> deleteTimerScheduler(@RequestBody TimerSchedulerEntity timerSchedulerEntity, HttpServletRequest request) throws GovernanceException {
         log.info("delete  TimerSchedulerEntity service ,id:{}", timerSchedulerEntity.getId());
         timerSchedulerEntity.setUserId(Integer.valueOf(JwtUtils.getAccountId(request)));
         timerSchedulerService.deleteTimerScheduler(timerSchedulerEntity, request);
-        return new GovernanceResult(true);
+        return new GovernanceResult<>(true);
     }
 }
