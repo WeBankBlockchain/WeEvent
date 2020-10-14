@@ -47,7 +47,7 @@ public class TimerSchedulerController {
     // add TimerSchedulerEntity
     @PostMapping("/add")
     public GovernanceResult<TimerSchedulerEntity> addTimerScheduler(@Valid @RequestBody TimerSchedulerEntity timerSchedulerEntity, HttpServletRequest request,
-                                              HttpServletResponse response) throws GovernanceException {
+                                                                    HttpServletResponse response) throws GovernanceException {
         log.info("add  timerSchedulerEntity service into db :{}", timerSchedulerEntity);
         timerSchedulerEntity.setUserId(Integer.valueOf(JwtUtils.getAccountId(request)));
         TimerSchedulerEntity rule = timerSchedulerService.addTimerScheduler(timerSchedulerEntity, request, response);
@@ -56,7 +56,7 @@ public class TimerSchedulerController {
 
     @PostMapping("/update")
     public GovernanceResult<Boolean> updateTimerScheduler(@RequestBody TimerSchedulerEntity timerSchedulerEntity, HttpServletRequest request,
-                                                 HttpServletResponse response) throws GovernanceException {
+                                                          HttpServletResponse response) throws GovernanceException {
         log.info("update  timerSchedulerEntity service ,timerSchedulerEntity:{}", timerSchedulerEntity);
         timerSchedulerEntity.setUserId(Integer.valueOf(JwtUtils.getAccountId(request)));
         timerSchedulerService.updateTimerScheduler(timerSchedulerEntity, request, response);

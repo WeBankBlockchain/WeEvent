@@ -50,20 +50,20 @@ public class BrokerController {
 
     // get brokerEntity service by id
     @PostMapping("/add")
-	public GovernanceResult<Integer> addBroker(@Valid @RequestBody BrokerEntity brokerEntity,
-			HttpServletRequest request, HttpServletResponse response) throws GovernanceException {
-		log.info("add  brokerEntity service into db brokerEntity :{} ", brokerEntity);
-		brokerEntity.setUserId(1);
-		return brokerService.addBroker(brokerEntity, request, response);
-	}
+    public GovernanceResult<Integer> addBroker(@Valid @RequestBody BrokerEntity brokerEntity,
+                                               HttpServletRequest request, HttpServletResponse response) throws GovernanceException {
+        log.info("add  brokerEntity service into db brokerEntity :{} ", brokerEntity);
+        brokerEntity.setUserId(1);
+        return brokerService.addBroker(brokerEntity, request, response);
+    }
 
     @PostMapping("/update")
-	public GovernanceResult<Object> updateBroker(@RequestBody BrokerEntity brokerEntity, HttpServletRequest request,
-			HttpServletResponse response) throws GovernanceException {
-		log.info("update  brokerEntity service ,brokerEntity:{} ", brokerEntity);
-		brokerEntity.setUserId(Integer.valueOf(JwtUtils.getAccountId(request)));
-		return brokerService.updateBroker(brokerEntity, request, response);
-	}
+    public GovernanceResult<Object> updateBroker(@RequestBody BrokerEntity brokerEntity, HttpServletRequest request,
+                                                 HttpServletResponse response) throws GovernanceException {
+        log.info("update  brokerEntity service ,brokerEntity:{} ", brokerEntity);
+        brokerEntity.setUserId(Integer.valueOf(JwtUtils.getAccountId(request)));
+        return brokerService.updateBroker(brokerEntity, request, response);
+    }
 
     @PostMapping("/delete")
     public GovernanceResult<Boolean> deleteBroker(@RequestBody BrokerEntity brokerEntity, HttpServletRequest request) throws GovernanceException {
@@ -72,9 +72,9 @@ public class BrokerController {
     }
 
     @PostMapping("/checkServer")
-	public GovernanceResult<ErrorCode> checkServerByUrl(@RequestBody BrokerEntity brokerEntity,
-			HttpServletRequest request) throws GovernanceException {
-		log.info("checkServer  brokerEntity, id: {}", brokerEntity.getId());
-		return new GovernanceResult<>(brokerService.checkServerByUrl(brokerEntity, request));
-	}
+    public GovernanceResult<ErrorCode> checkServerByUrl(@RequestBody BrokerEntity brokerEntity,
+                                                        HttpServletRequest request) throws GovernanceException {
+        log.info("checkServer  brokerEntity, id: {}", brokerEntity.getId());
+        return new GovernanceResult<>(brokerService.checkServerByUrl(brokerEntity, request));
+    }
 }
