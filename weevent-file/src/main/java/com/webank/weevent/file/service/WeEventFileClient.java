@@ -3,6 +3,7 @@ package com.webank.weevent.file.service;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.InvalidAlgorithmParameterException;
@@ -343,7 +344,6 @@ public class WeEventFileClient implements IWeEventFileClient {
         file.delete();
         return sb.toString();
     }
-
 
     public boolean isFileExist(String fileName, String topic, String groupId) throws BrokerException {
         return this.fileTransportService.getFileExistence(fileName, topic, groupId);
