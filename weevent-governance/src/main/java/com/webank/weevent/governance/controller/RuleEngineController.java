@@ -34,11 +34,11 @@ public class RuleEngineController {
 
     // get  ruleEngine list
     @PostMapping("/list")
-    public GovernanceResult<Map<String,Object>> getRuleEngines(HttpServletRequest request, @RequestBody RuleEngineEntity ruleEngineEntity) throws GovernanceException {
+    public GovernanceResult<Map<String, Object>> getRuleEngines(HttpServletRequest request, @RequestBody RuleEngineEntity ruleEngineEntity) throws GovernanceException {
         log.info("get ruleEngines , ruleEngineEntity :{}", ruleEngineEntity);
         ruleEngineEntity.setUserId(Integer.valueOf(JwtUtils.getAccountId(request)));
         List<RuleEngineEntity> ruleEngines = ruleEngineService.getRuleEngines(request, ruleEngineEntity);
-        Map<String,Object> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>();
         map.put("ruleEngines", ruleEngines);
         map.put("totalCount", ruleEngineEntity.getTotalCount());
         return new GovernanceResult<>(map);
@@ -47,7 +47,7 @@ public class RuleEngineController {
     // add RuleEngineEntity
     @PostMapping("/add")
     public GovernanceResult<RuleEngineEntity> addRuleEngine(@Valid @RequestBody RuleEngineEntity ruleEngineEntity, HttpServletRequest request,
-                                          HttpServletResponse response) throws GovernanceException {
+                                                            HttpServletResponse response) throws GovernanceException {
         log.info("add  ruleEngineEntity service into db :{}", ruleEngineEntity);
         ruleEngineEntity.setUserId(Integer.valueOf(JwtUtils.getAccountId(request)));
         RuleEngineEntity rule = ruleEngineService.addRuleEngine(ruleEngineEntity, request, response);
@@ -56,7 +56,7 @@ public class RuleEngineController {
 
     @PostMapping("/update")
     public GovernanceResult<Boolean> updateRuleEngine(@RequestBody RuleEngineEntity ruleEngineEntity, HttpServletRequest request,
-                                             HttpServletResponse response) throws GovernanceException {
+                                                      HttpServletResponse response) throws GovernanceException {
         log.info("update  ruleEngineEntity service ,ruleEngineEntity:{}", ruleEngineEntity);
         ruleEngineEntity.setUserId(Integer.valueOf(JwtUtils.getAccountId(request)));
         boolean flag = ruleEngineService.updateRuleEngine(ruleEngineEntity, request, response);
@@ -65,7 +65,7 @@ public class RuleEngineController {
 
     @PostMapping("/updateStatus")
     public GovernanceResult<Boolean> updateRuleEngineStatus(@RequestBody RuleEngineEntity ruleEngineEntity, HttpServletRequest request,
-                                                   HttpServletResponse response) throws GovernanceException {
+                                                            HttpServletResponse response) throws GovernanceException {
         log.info("update  ruleEngineStatus service ,status:{}", ruleEngineEntity.getStatus());
         ruleEngineEntity.setUserId(Integer.valueOf(JwtUtils.getAccountId(request)));
         boolean flag = ruleEngineService.updateRuleEngineStatus(ruleEngineEntity, request, response);
@@ -82,7 +82,7 @@ public class RuleEngineController {
 
     @PostMapping("/start")
     public GovernanceResult<Boolean> startRuleEngine(@RequestBody RuleEngineEntity ruleEngineEntity, HttpServletRequest request,
-                                            HttpServletResponse response) throws GovernanceException {
+                                                     HttpServletResponse response) throws GovernanceException {
         log.info("update  ruleEngineStatus service ,ruleEngineEntity:{}", ruleEngineEntity);
         ruleEngineEntity.setUserId(Integer.valueOf(JwtUtils.getAccountId(request)));
         boolean flag = ruleEngineService.startRuleEngine(ruleEngineEntity, request, response);
@@ -91,7 +91,7 @@ public class RuleEngineController {
 
     @PostMapping("/detail")
     public GovernanceResult<RuleEngineEntity> getRuleEngineDetail(@RequestBody RuleEngineEntity ruleEngineEntity, HttpServletRequest request,
-                                                HttpServletResponse response) throws GovernanceException {
+                                                                  HttpServletResponse response) throws GovernanceException {
         log.info("get ruleEngineDetail service ,status:{}", ruleEngineEntity.getStatus());
         ruleEngineEntity.setUserId(Integer.valueOf(JwtUtils.getAccountId(request)));
         RuleEngineEntity ruleEngineDetail = ruleEngineService.getRuleEngineDetail(ruleEngineEntity, request, response);
