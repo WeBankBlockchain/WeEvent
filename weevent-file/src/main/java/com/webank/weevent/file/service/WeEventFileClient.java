@@ -3,7 +3,6 @@ package com.webank.weevent.file.service;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.InvalidAlgorithmParameterException;
@@ -332,34 +331,19 @@ public class WeEventFileClient implements IWeEventFileClient {
         }
     }
 
-    private String getFileKyeInfo(String url) {
+    private String getFileKyeInfo(String url) throws IOException {
         StringBuffer sb = new StringBuffer();
         File file = new File(url);
-        BufferedInputStream bis = null;
-        FileInputStream fis = null;
-        try {
-            fis = new FileInputStream(file);
-            bis = new BufferedInputStream(fis);
+        try (FileInputStream fis = new FileInputStream(file);
+             BufferedInputStream bis = new BufferedInputStream(fis)) {
             while (bis.available() > 0) {
                 sb.append((char) bis.read());
-            }
-        } catch (FileNotFoundException fnfe) {
-            log.error("file non-existent", fnfe);
-        } catch (IOException ioe) {
-            log.error("I/O error", ioe);
-        } finally {
-            try {
-                if (bis != null && fis != null) {
-                    fis.close();
-                    bis.close();
-                }
-            } catch (IOException ioe) {
-                log.error("close InputStream error", ioe);
             }
         }
         file.delete();
         return sb.toString();
     }
+
 
     public boolean isFileExist(String fileName, String topic, String groupId) throws BrokerException {
         return this.fileTransportService.getFileExistence(fileName, topic, groupId);
