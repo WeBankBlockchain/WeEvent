@@ -31,7 +31,7 @@ public class TopicHistoricalController {
 
     @PostMapping("/list")
     public GovernanceResult<Map<String, List<Integer>>> historicalDataList(@RequestBody TopicHistoricalEntity topicHistoricalEntity, HttpServletRequest request,
-                                               HttpServletResponse response) throws GovernanceException {
+                                                                           HttpServletResponse response) throws GovernanceException {
         log.info("get  historicalDataEntity:{} ", topicHistoricalEntity);
         Map<String, List<Integer>> returnMap = topicHistoricalService.historicalDataList(topicHistoricalEntity, request, response);
         return new GovernanceResult<>(returnMap);
@@ -39,7 +39,7 @@ public class TopicHistoricalController {
 
     @PostMapping("/eventList")
     public GovernanceResult<List<TopicHistoricalEntity>> eventList(@RequestBody TopicHistoricalEntity topicHistoricalEntity, HttpServletRequest request,
-                                      HttpServletResponse response) throws GovernanceException {
+                                                                   HttpServletResponse response) throws GovernanceException {
         log.info("get  eventList:{} ", topicHistoricalEntity);
         List<TopicHistoricalEntity> topicTopicHistoricalEntities = topicHistoricalService.eventList(topicHistoricalEntity, request);
         return new GovernanceResult<>(topicTopicHistoricalEntities);

@@ -1,7 +1,5 @@
 package com.webank.weevent.governance.service;
 
-import javax.servlet.http.HttpServletRequest;
-
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -14,6 +12,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+
+import javax.servlet.http.HttpServletRequest;
 
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.core.config.FiscoConfig;
@@ -289,23 +289,23 @@ public class FileService {
 
     public GovernanceResult<List<FileChunksMetaEntity>> downLoadStatus(String groupId, Integer brokerId, String topic) throws GovernanceException {
         List<FileChunksMetaStatus> fileChunksMetaStatusList = null;
-        List<FileChunksMetaEntity> chunksMetaEntities = new ArrayList<FileChunksMetaEntity>(); 
+        List<FileChunksMetaEntity> chunksMetaEntities = new ArrayList<FileChunksMetaEntity>();
         IWeEventFileClient fileClient = this.getIWeEventFileClient(groupId, brokerId);
         FileTransportStats status = fileClient.status(topic);
         if (status.getReceiver().containsKey(groupId)) {
             fileChunksMetaStatusList = status.getReceiver().get(groupId).get(topic);
             for (FileChunksMetaStatus fileChunksMetaStatus : fileChunksMetaStatusList) {
-            	FileChunksMeta chunksMeta = fileChunksMetaStatus.getFile();
-            	FileChunksMetaEntity fileChunksMetaEntity = new FileChunksMetaEntity(); 
-            	BeanUtils.copyProperties(chunksMeta, fileChunksMetaEntity);
-            	if(Objects.equals(fileChunksMetaStatus.getProcess(), "100.00%")) {
-            		fileChunksMetaEntity.setStatus("1");
-            	} else {
-            		fileChunksMetaEntity.setStatus("3");
-            	}
-            	BeanUtils.copyProperties(fileChunksMetaStatus, fileChunksMetaEntity);
-            	chunksMetaEntities.add(fileChunksMetaEntity);
-			}
+                FileChunksMeta chunksMeta = fileChunksMetaStatus.getFile();
+                FileChunksMetaEntity fileChunksMetaEntity = new FileChunksMetaEntity();
+                BeanUtils.copyProperties(chunksMeta, fileChunksMetaEntity);
+                if (Objects.equals(fileChunksMetaStatus.getProcess(), "100.00%")) {
+                    fileChunksMetaEntity.setStatus("1");
+                } else {
+                    fileChunksMetaEntity.setStatus("3");
+                }
+                BeanUtils.copyProperties(fileChunksMetaStatus, fileChunksMetaEntity);
+                chunksMetaEntities.add(fileChunksMetaEntity);
+            }
         }
         return GovernanceResult.ok(chunksMetaEntities);
     }
@@ -319,22 +319,22 @@ public class FileService {
         if (status.getSender().containsKey(groupId)) {
             List<FileChunksMetaStatus> fileChunksMetaStatusList = status.getSender().get(groupId).get(topic);
             fileTransportStatusList.forEach(fileTransportStatusEntity -> fileChunksMetaStatusList.forEach(fileChunksMetaStatus -> {
-            	log.info("fileChunksMetaStatus.getSpeed():=" + fileChunksMetaStatus.getSpeed());
+                log.info("fileChunksMetaStatus.getSpeed():=" + fileChunksMetaStatus.getSpeed());
                 if (Objects.equals(fileChunksMetaStatus.getFile().getFileName(), fileTransportStatusEntity.getFileName())) {
-                	BeanUtils.copyProperties(fileChunksMetaStatus, fileTransportStatusEntity);
+                    BeanUtils.copyProperties(fileChunksMetaStatus, fileTransportStatusEntity);
                 }
                 if (Objects.equals(fileTransportStatusEntity.getStatus(), ConstantProperties.SUCCESS)) {
                     fileTransportStatusEntity.setProcess("100%");
                 } else {
-                	String speed = fileChunksMetaStatus.getSpeed();
-                	this.transportStatusRepository.updateTransportSpeed(speed, fileTransportStatusEntity.getId().longValue());
+                    String speed = fileChunksMetaStatus.getSpeed();
+                    this.transportStatusRepository.updateTransportSpeed(speed, fileTransportStatusEntity.getId().longValue());
                 }
             }));
             for (FileTransportStatusEntity fileTransportStatusEntity : fileTransportStatusList) {
-            	if (Objects.equals(fileTransportStatusEntity.getStatus(), ConstantProperties.SUCCESS)) {
+                if (Objects.equals(fileTransportStatusEntity.getStatus(), ConstantProperties.SUCCESS)) {
                     fileTransportStatusEntity.setProcess("100%");
                 }
-			}
+            }
         }
         return GovernanceResult.ok(fileTransportStatusList);
     }
@@ -362,7 +362,7 @@ public class FileService {
     }
 
     public GovernanceResult<List<Integer>> prepareUploadFile(String fileId, String filename, String topic, String groupId, long totalSize,
-                                              Integer chunkSize) throws GovernanceException {
+                                                             Integer chunkSize) throws GovernanceException {
 
         if (this.fileChunksMap.containsKey(fileId)) {
             FileChunksMeta fileChunksMeta = this.fileChunksMap.get(fileId).getKey();

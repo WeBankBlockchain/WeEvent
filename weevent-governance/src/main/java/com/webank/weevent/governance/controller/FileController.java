@@ -73,12 +73,12 @@ public class FileController {
     @GetMapping(path = "/upload")
     @ResponseBody
     public GovernanceResult<List<Integer>> prepareUploadFile(@RequestParam(name = "groupId") String groupId,
-                                              @RequestParam(name = "identifier") String fileId,
-                                              @RequestParam(name = "topicName") String topicName,
-                                              @RequestParam(name = "totalChunks") Integer totalChunks,
-                                              @RequestParam(name = "totalSize") long totalSize,
-                                              @RequestParam(name = "chunkSize") Integer chunkSize,
-                                              @RequestParam(name = "filename") String filename) throws GovernanceException {
+                                                             @RequestParam(name = "identifier") String fileId,
+                                                             @RequestParam(name = "topicName") String topicName,
+                                                             @RequestParam(name = "totalChunks") Integer totalChunks,
+                                                             @RequestParam(name = "totalSize") long totalSize,
+                                                             @RequestParam(name = "chunkSize") Integer chunkSize,
+                                                             @RequestParam(name = "filename") String filename) throws GovernanceException {
         log.info("prepareUploadFile, groupId:{}, fileId:{}, filename:{}, topic:{}, totalSize:{}, totalChunks:{}",
                 groupId, fileId, filename, topicName, totalSize, totalChunks);
         return this.fileService.prepareUploadFile(fileId, filename, topicName, groupId, totalSize, chunkSize);
@@ -124,8 +124,8 @@ public class FileController {
     @RequestMapping(path = "/listFile")
     @ResponseBody
     public GovernanceResult<List<FileChunksMeta>> listFile(@RequestParam(name = "groupId") String groupId,
-                                     @RequestParam(name = "brokerId") Integer brokerId,
-                                     @RequestParam(name = "topicName") String topicName) throws GovernanceException {
+                                                           @RequestParam(name = "brokerId") Integer brokerId,
+                                                           @RequestParam(name = "topicName") String topicName) throws GovernanceException {
         log.info("listFile, groupId:{}, topic:{}.", groupId, topicName);
         return this.fileService.listFile(groupId, brokerId, topicName);
     }
@@ -133,8 +133,8 @@ public class FileController {
     @RequestMapping(path = "/downLoadStatus")
     @ResponseBody
     public GovernanceResult<List<FileChunksMetaEntity>> downLoadStatus(@RequestParam(name = "groupId") String groupId,
-                                           @RequestParam(name = "brokerId") Integer brokerId,
-                                           @RequestParam(name = "topicName") String topicName) throws GovernanceException {
+                                                                       @RequestParam(name = "brokerId") Integer brokerId,
+                                                                       @RequestParam(name = "topicName") String topicName) throws GovernanceException {
         log.info("status, groupId:{}, topic:{}.", groupId, topicName);
         return this.fileService.downLoadStatus(groupId, brokerId, topicName);
     }
@@ -142,8 +142,8 @@ public class FileController {
     @RequestMapping(path = "/uploadStatus")
     @ResponseBody
     public GovernanceResult<List<FileTransportStatusEntity>> uploadStatus(@RequestParam(name = "groupId") String groupId,
-                                         @RequestParam(name = "brokerId") Integer brokerId,
-                                         @RequestParam(name = "topicName") String topicName) throws GovernanceException {
+                                                                          @RequestParam(name = "brokerId") Integer brokerId,
+                                                                          @RequestParam(name = "topicName") String topicName) throws GovernanceException {
         log.info("status, groupId:{}, topic:{}.", groupId, topicName);
         return this.fileService.uploadStatus(groupId, brokerId, topicName);
     }
@@ -151,7 +151,7 @@ public class FileController {
     @RequestMapping(path = "/listTransport")
     @ResponseBody
     public GovernanceResult<List<FileTransportChannelEntity>> listTransport(@RequestParam(name = "groupId") String groupId,
-                                          @RequestParam(name = "brokerId") Integer brokerId) {
+                                                                            @RequestParam(name = "brokerId") Integer brokerId) {
         log.info("listTransport, groupId:{}, brokerId:{}.", groupId, brokerId);
         return this.fileService.listTransport(groupId, brokerId);
     }
@@ -169,61 +169,61 @@ public class FileController {
                            @RequestParam(name = "brokerId") Integer brokerId,
                            @RequestParam(name = "filePath") String filePath,
                            HttpServletResponse response) throws GovernanceException {
-    	log.info("download file, groupId:{}, brokerId:{}", groupId, brokerId);
-		response.setHeader("content-type", "application/octet-stream");
-		response.setContentType("application/octet-stream; charset=UTF-8");
-		Map<String, String> map = this.fileService.genPemFile(groupId, brokerId, filePath);
-		
-		String fileName = "公私钥文件.txt";
-		String downloadFile = filePath+ "/" + fileName;
-		FileWriter fwriter = null;
-		try {
-			// true表示不覆盖原来的内容，而是加到文件的后面。若要覆盖原来的内容，直接省略这个参数就好
-			fwriter = new FileWriter(downloadFile, true);
-			for(Map.Entry<String, String> entry : map.entrySet()){
-			    String fileContent = entry.getValue();
-			    fwriter.write(fileContent);
-			}
-		} catch (IOException ex) {
-			ex.printStackTrace();
-		} finally {
-			try {
-				fwriter.flush();
-				fwriter.close();
-			} catch (IOException ex) {
-				ex.printStackTrace();
-			}
-		}
+        log.info("download file, groupId:{}, brokerId:{}", groupId, brokerId);
+        response.setHeader("content-type", "application/octet-stream");
+        response.setContentType("application/octet-stream; charset=UTF-8");
+        Map<String, String> map = this.fileService.genPemFile(groupId, brokerId, filePath);
 
-		try {
-			response.setHeader("filename", URLEncoder.encode(fileName, StandardCharsets.UTF_8.toString()));
-		} catch (UnsupportedEncodingException e) {
-			log.error("encode fileName error, fileName:{}", fileName, e);
-		}
+        String fileName = "公私钥文件.txt";
+        String downloadFile = filePath + "/" + fileName;
+        FileWriter fwriter = null;
+        try {
+            // true表示不覆盖原来的内容，而是加到文件的后面。若要覆盖原来的内容，直接省略这个参数就好
+            fwriter = new FileWriter(downloadFile, true);
+            for (Map.Entry<String, String> entry : map.entrySet()) {
+                String fileContent = entry.getValue();
+                fwriter.write(fileContent);
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        } finally {
+            try {
+                fwriter.flush();
+                fwriter.close();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
 
-		byte[] buffer = new byte[1024];
-		try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(downloadFile));
-				OutputStream os = response.getOutputStream()) {
-			int i = bis.read(buffer);
-			while (i != -1) {
-				os.write(buffer, 0, i);
-				os.flush();
-				i = bis.read(buffer);
-			}
-			log.info("download file success, brokerId:{}, fileName:{}", brokerId, fileName);
-		} catch (IOException e) {
-			log.error("download file error, brokerId:{} fileName:{}", brokerId, fileName, e);
-			throw new GovernanceException("download file error", e);
-		}
-		new File(downloadFile).delete();
+        try {
+            response.setHeader("filename", URLEncoder.encode(fileName, StandardCharsets.UTF_8.toString()));
+        } catch (UnsupportedEncodingException e) {
+            log.error("encode fileName error, fileName:{}", fileName, e);
+        }
+
+        byte[] buffer = new byte[1024];
+        try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(downloadFile));
+             OutputStream os = response.getOutputStream()) {
+            int i = bis.read(buffer);
+            while (i != -1) {
+                os.write(buffer, 0, i);
+                os.flush();
+                i = bis.read(buffer);
+            }
+            log.info("download file success, brokerId:{}, fileName:{}", brokerId, fileName);
+        } catch (IOException e) {
+            log.error("download file error, brokerId:{} fileName:{}", brokerId, fileName, e);
+            throw new GovernanceException("download file error", e);
+        }
+        new File(downloadFile).delete();
     }
 
     @RequestMapping(path = "/checkUploaded")
     @ResponseBody
     public GovernanceResult<Object> checkFileIsUploaded(@RequestParam(name = "groupId") String groupId,
-                                                @RequestParam(name = "brokerId") Integer brokerId,
-                                                @RequestParam(name = "topicName") String topicName,
-                                                @RequestParam(name = "fileName") String fileName) throws GovernanceException {
+                                                        @RequestParam(name = "brokerId") Integer brokerId,
+                                                        @RequestParam(name = "topicName") String topicName,
+                                                        @RequestParam(name = "fileName") String fileName) throws GovernanceException {
         log.info("checkFileIsUploaded, groupId:{}, topic:{}, fileName:{}.", groupId, topicName, fileName);
         return this.fileService.checkFileIsUploaded(groupId, brokerId, topicName, fileName);
     }

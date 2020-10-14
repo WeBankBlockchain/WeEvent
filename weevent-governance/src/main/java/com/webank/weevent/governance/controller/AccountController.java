@@ -1,10 +1,10 @@
 package com.webank.weevent.governance.controller;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-
-import java.util.List;
 
 import com.webank.weevent.governance.common.ConstantCode;
 import com.webank.weevent.governance.common.GovernanceException;
@@ -68,7 +68,7 @@ public class AccountController {
      */
     @RequestMapping("/accountList")
     public GovernanceResult<List<AccountEntity>> accountEntityList(AccountEntity accountEntity, HttpServletRequest request,
-                                              HttpServletResponse response) throws GovernanceException {
+                                                                   HttpServletResponse response) throws GovernanceException {
         List<AccountEntity> accountEntities = accountService.accountEntityList(request, accountEntity, JwtUtils.getAccountId(request));
         return new GovernanceResult<>(accountEntities);
     }
@@ -78,7 +78,7 @@ public class AccountController {
      */
     @RequestMapping("/delete")
     public GovernanceResult<Boolean> deleteUser(@RequestBody AccountEntity accountEntity, HttpServletRequest request,
-                                       HttpServletResponse response) throws GovernanceException {
+                                                HttpServletResponse response) throws GovernanceException {
         accountService.deleteUser(request, accountEntity);
         return new GovernanceResult<>(true);
     }

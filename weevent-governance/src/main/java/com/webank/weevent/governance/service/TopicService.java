@@ -168,7 +168,7 @@ public class TopicService {
 
     @Transactional(rollbackFor = Throwable.class)
     public GovernanceResult<Object> open(Integer brokerId, String topic, String creater, String groupId, HttpServletRequest request,
-                                 HttpServletResponse response) throws GovernanceException {
+                                         HttpServletResponse response) throws GovernanceException {
         BrokerEntity brokerEntity = brokerService.getBroker(brokerId);
         if (brokerEntity == null) {
             return null;

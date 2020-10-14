@@ -62,7 +62,7 @@ public class BrowerSecurityConfig extends WebSecurityConfigurerAdapter {
                 .failureHandler(loginfailHandler) // if login fail
                 .and()
                 .addFilterAfter(new UserFilter(), LoginFilter.class)
-                .addFilter(new LoginFilter(authenticationManagerBean(), authenticationSuccessHandler,loginfailHandler))
+                .addFilter(new LoginFilter(authenticationManagerBean(), authenticationSuccessHandler, loginfailHandler))
                 .authorizeRequests()
                 .antMatchers("/user/**", "/", "/static/**", "/weevent-governance/user/**").permitAll()
                 .anyRequest().authenticated()
