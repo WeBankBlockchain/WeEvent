@@ -1,13 +1,13 @@
 package com.webank.weevent.governance.service;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import com.webank.weevent.client.JsonHelper;
 import com.webank.weevent.governance.common.ConstantProperties;
@@ -56,7 +56,6 @@ public class BrokerService {
     @Autowired
     private BrokerMapper brokerMapper;
 
-
     @Autowired
     private TopicRepository topicRepository;
 
@@ -83,7 +82,6 @@ public class BrokerService {
 
 
     private final static String HTTP_GET_SUCCESS_CODE = "0";
-
 
 
     public List<BrokerEntity> getBrokers(HttpServletRequest request, String accountId) {

@@ -26,7 +26,7 @@ public class PermissionController {
      *
      */
     @PostMapping("/permissionList")
-    public  GovernanceResult<List<PermissionEntity>> permissionList(@RequestBody AccountEntity accountEntity) {
+    public GovernanceResult<List<PermissionEntity>> permissionList(@RequestBody AccountEntity accountEntity) {
         List<PermissionEntity> accountEntities = permissionService.permissionList(accountEntity);
         return new GovernanceResult<>(accountEntities);
     }
