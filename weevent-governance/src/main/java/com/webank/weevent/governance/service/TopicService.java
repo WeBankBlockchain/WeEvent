@@ -167,8 +167,8 @@ public class TopicService {
     }
 
     @Transactional(rollbackFor = Throwable.class)
-    public GovernanceResult open(Integer brokerId, String topic, String creater, String groupId, HttpServletRequest request,
-                                 HttpServletResponse response) throws GovernanceException {
+    public GovernanceResult<Object> open(Integer brokerId, String topic, String creater, String groupId, HttpServletRequest request,
+                                         HttpServletResponse response) throws GovernanceException {
         BrokerEntity brokerEntity = brokerService.getBroker(brokerId);
         if (brokerEntity == null) {
             return null;
@@ -178,7 +178,7 @@ public class TopicService {
             boolean exist = exist(topic, brokerEntity.getBrokerUrl(), groupId, request);
             if (exist) {
                 log.info("topic already exists,topic{}", topic);
-                return new GovernanceResult(ErrorCode.TOPIC_EXISTS);
+                return new GovernanceResult<>(ErrorCode.TOPIC_EXISTS);
             }
             TopicEntity topicEntity = new TopicEntity();
             topicEntity.setBrokerId(brokerId);
@@ -199,7 +199,7 @@ public class TopicService {
         }
         log.info("url: {}", url);
 
-        return new GovernanceResult(invokeBrokerCGI(request, url, new TypeReference<BaseResponse<Boolean>>() {
+        return new GovernanceResult<>(invokeBrokerCGI(request, url, new TypeReference<BaseResponse<Boolean>>() {
         }).getData());
 
     }

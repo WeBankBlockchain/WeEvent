@@ -5,55 +5,55 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class GovernanceResult {
+public class GovernanceResult<T> {
 
-    // response status
-    private Integer status;
+	// response code
+    private Integer code;
 
-    // response message
+    // response msg
     private String message;
 
     // response data
-    private Object data;
+    private T data;
 
     // total number;
-    private Integer totalCount;
+    // private Integer totalCount;
 
 
-    public static GovernanceResult build(Integer status, String message, Object data) {
-        return new GovernanceResult(status, message, data);
+    public static <T> GovernanceResult<T> build(Integer code, String message, T data) {
+        return new GovernanceResult<T>(code, message, data);
     }
 
-    public static GovernanceResult ok(Object data) {
-        return new GovernanceResult(data);
+    public static <T> GovernanceResult<T> ok(T data) {
+        return new GovernanceResult<T>(data);
     }
 
-    public static GovernanceResult ok() {
-        return new GovernanceResult(200,"OK",null);
+    public static <T> GovernanceResult<T> ok() {
+        return new GovernanceResult<T>(0,"OK",null);
     }
 
     public GovernanceResult() {
 
     }
 
-    public static GovernanceResult build(Integer status, String message) {
-        return new GovernanceResult(status, message, null);
+    public static <T> GovernanceResult<T> build(Integer code, String message) {
+        return new GovernanceResult<T>(code, message, null);
     }
 
-    public GovernanceResult(Integer status, String message, Object data) {
-        this.status = status;
+    public GovernanceResult(Integer code, String message, T data) {
+        this.code = code;
         this.message = message;
         this.data = data;
     }
 
     public GovernanceResult(ErrorCode errorCode) {
-        this.status = errorCode.getCode();
+        this.code = errorCode.getCode();
         this.message = errorCode.getCodeDesc();
         this.data = null;
     }
 
-    public GovernanceResult(Object data) {
-        this.status = 200;
+    public GovernanceResult(T data) {
+        this.code = 0;
         this.message = "OK";
         this.data = data;
     }

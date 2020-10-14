@@ -1,7 +1,9 @@
 package com.webank.weevent.file.service;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.InvalidAlgorithmParameterException;
@@ -298,7 +300,7 @@ public class WeEventFileClient implements IWeEventFileClient {
         return this.fileTransportService.getDiskFiles();
     }
 
-    public void genPemFile(String filePath) throws BrokerException {
+    public Map<String, String> genPemFile(String filePath) throws BrokerException {
         validateLocalFile(filePath);
         try {
             BouncyCastleProvider prov = new BouncyCastleProvider();
@@ -314,12 +316,33 @@ public class WeEventFileClient implements IWeEventFileClient {
             PemFile privatePemFile = new PemFile(pair.getPrivate(), PRIVATE_KEY_DESC);
             PemFile publicPemFile = new PemFile(pair.getPublic(), PUBLIC_KEY_DESC);
 
-            privatePemFile.write(filePath + PATH_SEPARATOR + account + PRIVATE_KEY_SUFFIX);
-            publicPemFile.write(filePath + PATH_SEPARATOR + account + PUBLIC_KEY_SUFFIX);
+            String privateKeyUrl = filePath + PATH_SEPARATOR + account + PRIVATE_KEY_SUFFIX;
+            String publicKeyUrl = filePath + PATH_SEPARATOR + account + PUBLIC_KEY_SUFFIX;
+
+            privatePemFile.write(privateKeyUrl);
+            publicPemFile.write(publicKeyUrl);
+
+            Map<String, String> ppkUrlMap = new HashMap<>();
+            ppkUrlMap.put("privateKeyUrl", getFileKyeInfo(privateKeyUrl));
+            ppkUrlMap.put("publicKeyUrl", getFileKyeInfo(publicKeyUrl));
+            return ppkUrlMap;
         } catch (IOException | NoSuchProviderException | NoSuchAlgorithmException | InvalidAlgorithmParameterException e) {
-            log.error("generate pem file error");
+            log.error("generate pem file error", e);
             throw new BrokerException(ErrorCode.FILE_GEN_PEM_BC_FAILED);
         }
+    }
+
+    private String getFileKyeInfo(String url) throws IOException {
+        StringBuffer sb = new StringBuffer();
+        File file = new File(url);
+        try (FileInputStream fis = new FileInputStream(file);
+             BufferedInputStream bis = new BufferedInputStream(fis)) {
+            while (bis.available() > 0) {
+                sb.append((char) bis.read());
+            }
+        }
+        file.delete();
+        return sb.toString();
     }
 
     public boolean isFileExist(String fileName, String topic, String groupId) throws BrokerException {

@@ -30,25 +30,25 @@ public class TopicHistoricalController {
     private TopicHistoricalService topicHistoricalService;
 
     @PostMapping("/list")
-    public GovernanceResult historicalDataList(@RequestBody TopicHistoricalEntity topicHistoricalEntity, HttpServletRequest request,
-                                               HttpServletResponse response) throws GovernanceException {
+    public GovernanceResult<Map<String, List<Integer>>> historicalDataList(@RequestBody TopicHistoricalEntity topicHistoricalEntity, HttpServletRequest request,
+                                                                           HttpServletResponse response) throws GovernanceException {
         log.info("get  historicalDataEntity:{} ", topicHistoricalEntity);
         Map<String, List<Integer>> returnMap = topicHistoricalService.historicalDataList(topicHistoricalEntity, request, response);
-        return new GovernanceResult(returnMap);
+        return new GovernanceResult<>(returnMap);
     }
 
     @PostMapping("/eventList")
-    public GovernanceResult eventList(@RequestBody TopicHistoricalEntity topicHistoricalEntity, HttpServletRequest request,
-                                      HttpServletResponse response) throws GovernanceException {
+    public GovernanceResult<List<TopicHistoricalEntity>> eventList(@RequestBody TopicHistoricalEntity topicHistoricalEntity, HttpServletRequest request,
+                                                                   HttpServletResponse response) throws GovernanceException {
         log.info("get  eventList:{} ", topicHistoricalEntity);
         List<TopicHistoricalEntity> topicTopicHistoricalEntities = topicHistoricalService.eventList(topicHistoricalEntity, request);
-        return new GovernanceResult(topicTopicHistoricalEntities);
+        return new GovernanceResult<>(topicTopicHistoricalEntities);
     }
 
     @PostMapping("/insertHistoricalData")
-    public Boolean insertHistoricalData(@RequestBody TopicHistoricalEntity topicHistoricalEntity) {
+    public GovernanceResult<Boolean> insertHistoricalData(@RequestBody TopicHistoricalEntity topicHistoricalEntity) {
         log.info("insert  historicalData:{} ", topicHistoricalEntity);
-        return topicHistoricalService.insertHistoricalData(topicHistoricalEntity);
+        return new GovernanceResult<>(topicHistoricalService.insertHistoricalData(topicHistoricalEntity));
     }
 
 }

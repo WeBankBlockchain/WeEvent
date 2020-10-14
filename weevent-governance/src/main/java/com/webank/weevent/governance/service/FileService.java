@@ -85,7 +85,7 @@ public class FileService {
         this.transportStatusRepository = transportStatusRepository;
     }
 
-    public GovernanceResult openTransport(FileTransportChannelEntity fileTransport) throws GovernanceException {
+    public GovernanceResult<Boolean> openTransport(FileTransportChannelEntity fileTransport) throws GovernanceException {
         ParamCheckUtils.validateTransportName(fileTransport.getTopicName());
         ParamCheckUtils.validateTransportRole(fileTransport.getRole());
         ParamCheckUtils.validateOverWrite(fileTransport.getOverWrite());
@@ -165,7 +165,7 @@ public class FileService {
         log.info("open receiver transport success, groupId:{}, topic:{}", fileTransport.getGroupId(), fileTransport.getTopicName());
     }
 
-    public GovernanceResult uploadFile(HttpServletRequest request) throws GovernanceException {
+    public GovernanceResult<Boolean> uploadFile(HttpServletRequest request) throws GovernanceException {
         UploadChunkParam chunkParam = parseUploadChunkRequest(request);
         log.info("upload chunk:{}", chunkParam);
 
@@ -275,7 +275,7 @@ public class FileService {
         return filePath;
     }
 
-    public GovernanceResult listFile(String groupId, Integer brokerId, String topic) throws GovernanceException {
+    public GovernanceResult<List<FileChunksMeta>> listFile(String groupId, Integer brokerId, String topic) throws GovernanceException {
 
         IWeEventFileClient fileClient = getIWeEventFileClient(groupId, brokerId);
         try {
@@ -287,30 +287,30 @@ public class FileService {
         }
     }
 
-    public GovernanceResult downLoadStatus(String groupId, Integer brokerId, String topic) throws GovernanceException {
+    public GovernanceResult<List<FileChunksMetaEntity>> downLoadStatus(String groupId, Integer brokerId, String topic) throws GovernanceException {
         List<FileChunksMetaStatus> fileChunksMetaStatusList = null;
-        List<FileChunksMetaEntity> chunksMetaEntities = new ArrayList<FileChunksMetaEntity>(); 
+        List<FileChunksMetaEntity> chunksMetaEntities = new ArrayList<FileChunksMetaEntity>();
         IWeEventFileClient fileClient = this.getIWeEventFileClient(groupId, brokerId);
         FileTransportStats status = fileClient.status(topic);
         if (status.getReceiver().containsKey(groupId)) {
             fileChunksMetaStatusList = status.getReceiver().get(groupId).get(topic);
             for (FileChunksMetaStatus fileChunksMetaStatus : fileChunksMetaStatusList) {
-            	FileChunksMeta chunksMeta = fileChunksMetaStatus.getFile();
-            	FileChunksMetaEntity fileChunksMetaEntity = new FileChunksMetaEntity(); 
-            	BeanUtils.copyProperties(chunksMeta, fileChunksMetaEntity);
-            	if(Objects.equals(fileChunksMetaStatus.getProcess(), "100.00%")) {
-            		fileChunksMetaEntity.setStatus("1");
-            	} else {
-            		fileChunksMetaEntity.setStatus("downloading");
-            	}
-            	BeanUtils.copyProperties(fileChunksMetaStatus, fileChunksMetaEntity);
-            	chunksMetaEntities.add(fileChunksMetaEntity);
-			}
+                FileChunksMeta chunksMeta = fileChunksMetaStatus.getFile();
+                FileChunksMetaEntity fileChunksMetaEntity = new FileChunksMetaEntity();
+                BeanUtils.copyProperties(chunksMeta, fileChunksMetaEntity);
+                if (Objects.equals(fileChunksMetaStatus.getProcess(), "100.00%")) {
+                    fileChunksMetaEntity.setStatus("1");
+                } else {
+                    fileChunksMetaEntity.setStatus("3");
+                }
+                BeanUtils.copyProperties(fileChunksMetaStatus, fileChunksMetaEntity);
+                chunksMetaEntities.add(fileChunksMetaEntity);
+            }
         }
         return GovernanceResult.ok(chunksMetaEntities);
     }
 
-    public GovernanceResult uploadStatus(String groupId, Integer brokerId, String topic) throws GovernanceException {
+    public GovernanceResult<List<FileTransportStatusEntity>> uploadStatus(String groupId, Integer brokerId, String topic) throws GovernanceException {
         List<FileTransportStatusEntity> fileTransportStatusList = this.transportStatusRepository
                 .queryByBrokerIdAndGroupIdAndTopicName(brokerId, groupId, topic);
 
@@ -319,27 +319,27 @@ public class FileService {
         if (status.getSender().containsKey(groupId)) {
             List<FileChunksMetaStatus> fileChunksMetaStatusList = status.getSender().get(groupId).get(topic);
             fileTransportStatusList.forEach(fileTransportStatusEntity -> fileChunksMetaStatusList.forEach(fileChunksMetaStatus -> {
-            	log.info("fileChunksMetaStatus.getSpeed():=" + fileChunksMetaStatus.getSpeed());
+                log.info("fileChunksMetaStatus.getSpeed():=" + fileChunksMetaStatus.getSpeed());
                 if (Objects.equals(fileChunksMetaStatus.getFile().getFileName(), fileTransportStatusEntity.getFileName())) {
-                	BeanUtils.copyProperties(fileChunksMetaStatus, fileTransportStatusEntity);
+                    BeanUtils.copyProperties(fileChunksMetaStatus, fileTransportStatusEntity);
                 }
                 if (Objects.equals(fileTransportStatusEntity.getStatus(), ConstantProperties.SUCCESS)) {
                     fileTransportStatusEntity.setProcess("100%");
                 } else {
-                	String speed = fileChunksMetaStatus.getSpeed();
-                	this.transportStatusRepository.updateTransportSpeed(speed, fileTransportStatusEntity.getId().longValue());
+                    String speed = fileChunksMetaStatus.getSpeed();
+                    this.transportStatusRepository.updateTransportSpeed(speed, fileTransportStatusEntity.getId().longValue());
                 }
             }));
             for (FileTransportStatusEntity fileTransportStatusEntity : fileTransportStatusList) {
-            	if (Objects.equals(fileTransportStatusEntity.getStatus(), ConstantProperties.SUCCESS)) {
+                if (Objects.equals(fileTransportStatusEntity.getStatus(), ConstantProperties.SUCCESS)) {
                     fileTransportStatusEntity.setProcess("100%");
                 }
-			}
+            }
         }
         return GovernanceResult.ok(fileTransportStatusList);
     }
 
-    public GovernanceResult listTransport(String groupId, Integer brokerId) {
+    public GovernanceResult<List<FileTransportChannelEntity>> listTransport(String groupId, Integer brokerId) {
         List<FileTransportChannelEntity> fileTransportList = this.transportChannelRepository.queryByBrokerIdAndGroupId(brokerId, groupId);
         fileTransportList.forEach(fileTransport -> {
             fileTransport.setCreateTime(Utils.dateToStr(fileTransport.getCreateDate()));
@@ -352,7 +352,7 @@ public class FileService {
         return GovernanceResult.ok(fileTransportList);
     }
 
-    public GovernanceResult closeTransport(FileTransportChannelEntity fileTransport) throws GovernanceException {
+    public GovernanceResult<Boolean> closeTransport(FileTransportChannelEntity fileTransport) throws GovernanceException {
         IWeEventFileClient fileClient = this.getIWeEventFileClient(fileTransport.getGroupId(), fileTransport.getBrokerId());
         fileClient.closeTransport(fileTransport.getTopicName());
 
@@ -361,8 +361,8 @@ public class FileService {
         return GovernanceResult.ok(true);
     }
 
-    public GovernanceResult prepareUploadFile(String fileId, String filename, String topic, String groupId, long totalSize,
-                                              Integer chunkSize) throws GovernanceException {
+    public GovernanceResult<List<Integer>> prepareUploadFile(String fileId, String filename, String topic, String groupId, long totalSize,
+                                                             Integer chunkSize) throws GovernanceException {
 
         if (this.fileChunksMap.containsKey(fileId)) {
             FileChunksMeta fileChunksMeta = this.fileChunksMap.get(fileId).getKey();
@@ -384,17 +384,17 @@ public class FileService {
         return GovernanceResult.ok(chunkUploadedList(fileChunksMeta));
     }
 
-    public void genPemFile(String groupId, Integer brokerId, String pemPath) throws GovernanceException {
+    public Map<String, String> genPemFile(String groupId, Integer brokerId, String filePath) throws GovernanceException {
         IWeEventFileClient fileClient = getIWeEventFileClient(groupId, brokerId);
         try {
-            fileClient.genPemFile(pemPath);
+            return fileClient.genPemFile(filePath);
         } catch (BrokerException e) {
-            log.error("genPemFile error, pemPath:{}.", pemPath, e);
+            log.error("genPemFile error, pemPath:{}.", e);
             throw new GovernanceException(ErrorCode.GENERATE_PEM_FAILED);
         }
     }
 
-    public GovernanceResult checkFileIsUploaded(String groupId, Integer brokerId, String topic, String fileName) throws GovernanceException {
+    public GovernanceResult<Object> checkFileIsUploaded(String groupId, Integer brokerId, String topic, String fileName) throws GovernanceException {
         ParamCheckUtils.validateTransportName(topic);
         ParamCheckUtils.validateFileName(fileName);
         IWeEventFileClient fileClient = getIWeEventFileClient(groupId, brokerId);
