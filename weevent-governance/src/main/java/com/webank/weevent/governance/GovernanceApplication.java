@@ -46,7 +46,7 @@ public class GovernanceApplication {
 
     public static GovernanceConfig governanceConfig;
 
-    public static void main(String[] args)  {
+    public static void main(String[] args) {
         SpringApplication app = new SpringApplication(GovernanceApplication.class);
         app.addListeners(new ApplicationPidFileWriter());
         app.run(args);
