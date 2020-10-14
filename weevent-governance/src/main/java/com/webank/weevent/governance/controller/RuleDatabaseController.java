@@ -42,7 +42,7 @@ public class RuleDatabaseController {
     // add ruleDatabase
     @PostMapping("/add")
     public GovernanceResult<RuleDatabaseEntity> addRuleDatabase(@Valid @RequestBody RuleDatabaseEntity ruleDatabaseEntity, HttpServletRequest request,
-                                            HttpServletResponse response) throws GovernanceException {
+                                                                HttpServletResponse response) throws GovernanceException {
         log.info("add  ruleDatabaseEntity service into db :{}", ruleDatabaseEntity);
         ruleDatabaseEntity.setUserId(Integer.valueOf(JwtUtils.getAccountId(request)));
         RuleDatabaseEntity rule = ruleDatabaseService.addRuleDatabase(ruleDatabaseEntity, request, response);
@@ -51,7 +51,7 @@ public class RuleDatabaseController {
 
     @PostMapping("/update")
     public GovernanceResult<Boolean> updateRuleDatabase(@Validated @RequestBody RuleDatabaseEntity ruleDatabaseEntity, HttpServletRequest request,
-                                               HttpServletResponse response) throws GovernanceException {
+                                                        HttpServletResponse response) throws GovernanceException {
         log.info("update  ruleDatabaseEntity service ,id:{}", ruleDatabaseEntity.getId());
         ruleDatabaseEntity.setUserId(Integer.valueOf(JwtUtils.getAccountId(request)));
         ruleDatabaseService.updateRuleDatabase(ruleDatabaseEntity, request, response);
