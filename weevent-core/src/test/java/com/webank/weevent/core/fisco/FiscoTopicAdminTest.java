@@ -22,8 +22,9 @@ import com.webank.weevent.core.dto.TbTransHash;
 import com.webank.weevent.core.fisco.web3sdk.FiscoBcosDelegate;
 
 import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.web3j.crypto.Credentials;
-import org.fisco.bcos.web3j.crypto.gm.GenCredential;
+import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
+import org.fisco.bcos.sdk.crypto.keypair.ECDSAKeyPair;
+import org.fisco.bcos.sdk.crypto.keypair.SM2KeyPair;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -47,6 +48,7 @@ public class FiscoTopicAdminTest extends JUnitTestBase {
     private final BigInteger blockNumber = BigInteger.valueOf(1);
     private IProducer iProducer;
     private final long transactionTimeout = 10;
+    private FiscoConfig fiscoConfig;
 
     @Before
     public void before() throws Exception {
@@ -54,13 +56,14 @@ public class FiscoTopicAdminTest extends JUnitTestBase {
                 this.getClass().getSimpleName(),
                 this.testName.getMethodName());
 
-        FiscoConfig fiscoConfig = new FiscoConfig();
+        this.fiscoConfig = new FiscoConfig();
         Assert.assertTrue(fiscoConfig.load(""));
         FiscoBcosDelegate fiscoBcosDelegate = new FiscoBcosDelegate();
         fiscoBcosDelegate.initProxy(fiscoConfig);
         this.iProducer = new FiscoBcosBroker4Producer(fiscoBcosDelegate);
 
         Assert.assertTrue(this.iProducer.startProducer());
+        Assert.assertTrue(this.iProducer.open(this.topicName, this.groupId));
         SendResult sendResult = this.iProducer.publish(new WeEvent(this.topicName, "hello world.".getBytes()), this.groupId).get(transactionTimeout, TimeUnit.SECONDS);
         Assert.assertEquals(SendResult.SendResultStatus.SUCCESS, sendResult.getStatus());
         this.eventId = sendResult.getEventId();
@@ -966,7 +969,7 @@ public class FiscoTopicAdminTest extends JUnitTestBase {
     @Test
     public void testAddOperator() throws BrokerException {
         // new address
-        String address = getExternalAccountCredentials().getAddress();
+        String address = getExternalAccountCryptoKeyPair().getAddress();
 
         boolean result = this.iProducer.addOperator(this.groupId, this.topicName, address);
         Assert.assertTrue(result);
@@ -979,7 +982,7 @@ public class FiscoTopicAdminTest extends JUnitTestBase {
     @Test
     public void testAddOperatorTopicNotExist() {
         // new address
-        String address = getExternalAccountCredentials().getAddress();
+        String address = getExternalAccountCryptoKeyPair().getAddress();
 
         try {
             // operator already exist
@@ -995,7 +998,7 @@ public class FiscoTopicAdminTest extends JUnitTestBase {
     @Test
     public void testAddOperatorAlreadyExist() {
         // new address
-        String address = getExternalAccountCredentials().getAddress();
+        String address = getExternalAccountCryptoKeyPair().getAddress();
 
         try {
             boolean result = this.iProducer.addOperator(this.groupId, this.topicName, address);
@@ -1013,7 +1016,7 @@ public class FiscoTopicAdminTest extends JUnitTestBase {
     @Test
     public void testDelOperator() throws BrokerException {
         // new address
-        String address = getExternalAccountCredentials().getAddress();
+        String address = getExternalAccountCryptoKeyPair().getAddress();
 
         // add operator
         boolean addResult = this.iProducer.addOperator(this.groupId, this.topicName, address);
@@ -1030,7 +1033,7 @@ public class FiscoTopicAdminTest extends JUnitTestBase {
     @Test
     public void testDelOperatorTopicNotExist() {
         // new address
-        String address = getExternalAccountCredentials().getAddress();
+        String address = getExternalAccountCryptoKeyPair().getAddress();
 
         try {
             this.iProducer.delOperator(this.groupId, "AAA", address);
@@ -1045,7 +1048,7 @@ public class FiscoTopicAdminTest extends JUnitTestBase {
     @Test
     public void testDelOperatorNotExist() {
         // new address
-        String address = getExternalAccountCredentials().getAddress();
+        String address = getExternalAccountCryptoKeyPair().getAddress();
 
         try {
             this.iProducer.delOperator(this.groupId, this.topicName, address);
@@ -1099,7 +1102,11 @@ public class FiscoTopicAdminTest extends JUnitTestBase {
         Assert.assertTrue(blockHeight >= 1);
     }
 
-    private Credentials getExternalAccountCredentials() {
-        return GenCredential.create();
+    private CryptoKeyPair getExternalAccountCryptoKeyPair() {
+        if (fiscoConfig.getWeb3sdkEncryptType().equals("ECDSA_TYPE")) {
+            return (new ECDSAKeyPair()).generateKeyPair();
+        } else {
+            return (new SM2KeyPair()).generateKeyPair();
+        }
     }
 }

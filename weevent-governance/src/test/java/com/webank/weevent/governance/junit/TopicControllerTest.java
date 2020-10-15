@@ -62,9 +62,9 @@ public class TopicControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/broker/add").contentType(MediaType.APPLICATION_JSON_UTF8).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token).content(content))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        GovernanceResult governanceResult = JsonHelper.json2Object(response.getContentAsString(), GovernanceResult.class);
-        brokerIdMap.put("brokerId", (Integer) governanceResult.getData());
-        Assert.assertEquals(governanceResult.getStatus().toString(), "200");
+        GovernanceResult<?> governanceResponse = JsonHelper.json2Object(response.getContentAsString(), GovernanceResult.class);
+        brokerIdMap.put("brokerId", (Integer) governanceResponse.getData());
+        Assert.assertEquals(governanceResponse.getCode().toString(), "200");
     }
 
 
@@ -81,8 +81,8 @@ public class TopicControllerTest extends JUnitTestBase {
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/topic/openTopic").contentType(MediaType.APPLICATION_JSON_UTF8).content(content).header(JwtUtils.AUTHORIZATION_HEADER_PREFIX, token))
                 .andReturn().getResponse();
         Assert.assertEquals(response.getStatus(), HttpStatus.SC_OK);
-        GovernanceResult governanceResult = JsonHelper.json2Object(response.getContentAsString(), GovernanceResult.class);
-        Assert.assertEquals(governanceResult.getStatus().toString(), "100109");
+        GovernanceResult<?> governanceResponse = JsonHelper.json2Object(response.getContentAsString(), GovernanceResult.class);
+        Assert.assertEquals(governanceResponse.getCode().toString(), "100109");
     }
 
     @Test

@@ -3,9 +3,9 @@ package com.webank.weevent.file.service;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.ErrorCode;
@@ -39,16 +38,13 @@ import com.webank.weevent.file.inner.FileTransportService;
 import com.webank.weevent.file.inner.PemFile;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
-import org.fisco.bcos.channel.client.Service;
-import org.fisco.bcos.channel.handler.AMOPVerifyKeyInfo;
-import org.fisco.bcos.channel.handler.AMOPVerifyTopicToKeyInfo;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.core.io.Resource;
+import org.fisco.bcos.sdk.amop.Amop;
+import org.fisco.bcos.sdk.crypto.keystore.KeyTool;
+import org.fisco.bcos.sdk.crypto.keystore.PEMKeyStore;
 
 @Slf4j
 public class WeEventFileClient implements IWeEventFileClient {
@@ -100,9 +96,7 @@ public class WeEventFileClient implements IWeEventFileClient {
             iConsumer.startConsumer();
 
             // create FileTransportService instance
-            FileTransportService fileTransportService = new FileTransportService(this.config, iProducer, "", this.localReceivePath, this.fileChunkSize, this.groupId);
-            this.fileTransportService = fileTransportService;
-
+            this.fileTransportService = new FileTransportService(this.config, iProducer, "", this.localReceivePath, this.fileChunkSize, this.groupId);
         } catch (BrokerException e) {
             log.error("init WeEventFileClient failed", e);
         }
@@ -116,24 +110,6 @@ public class WeEventFileClient implements IWeEventFileClient {
 
     public void openTransport4Sender(String topic, InputStream publicPem) throws BrokerException {
         // publicPem is public key
-        BufferedInputStream bufferedInputStream = new BufferedInputStream(publicPem);
-        try {
-            if (publicPem == null) {
-                log.error("public key pem inputstream is null.");
-                throw new BrokerException(ErrorCode.PARAM_ISNULL);
-            }
-            bufferedInputStream.mark(bufferedInputStream.available() + 1);
-            String publicKey = IOUtils.toString(bufferedInputStream, StandardCharsets.UTF_8);
-            if (!publicKey.contains(PUBLIC_KEY_DESC)) {
-                log.error("inputStream is not a public key.");
-                throw new BrokerException(ErrorCode.FILE_PEM_KEY_INVALID);
-            }
-            bufferedInputStream.reset();
-        } catch (IOException e) {
-            log.error("public key inputStream is invalid.");
-            throw new BrokerException(ErrorCode.FILE_PEM_KEY_INVALID);
-        }
-
         // get AMOPChannel, fileTransportService and amopChannel is One-to-one correspondence
         AMOPChannel amopChannel = this.fileTransportService.getChannel();
 
@@ -144,36 +120,20 @@ public class WeEventFileClient implements IWeEventFileClient {
         }
 
         // service not exist, new service
-        Service service = Web3SDKConnector.initService(Long.valueOf(this.groupId), this.fileTransportService.getFiscoConfig());
+        Amop amop = Web3SDKConnector.buidBcosSDK(this.fileTransportService.getFiscoConfig()).getAmop();
 
-        // construct attribute for service
-        AMOPVerifyTopicToKeyInfo verifyTopicToKeyInfo = new AMOPVerifyTopicToKeyInfo();
-        ConcurrentHashMap<String, AMOPVerifyKeyInfo> topicToKeyInfo = new ConcurrentHashMap<>();
-        AMOPVerifyKeyInfo verifyKeyInfo = new AMOPVerifyKeyInfo();
-
-        // set private pem for service
-        InputStreamResource inputStreamResource = new InputStreamResource(bufferedInputStream);
-        List<Resource> publicPemList = new ArrayList<>();
-        publicPemList.add(inputStreamResource);
-
-        verifyKeyInfo.setPublicKey(publicPemList);
-        topicToKeyInfo.put(topic, verifyKeyInfo);
-        verifyTopicToKeyInfo.setTopicToKeyInfo(topicToKeyInfo);
-
-        // set service attribute
-        service.setNeedVerifyTopics(topic);
-        service.setTopic2KeyInfo(verifyTopicToKeyInfo);
-
-        // run service
+        List<KeyTool> keyToolList = new ArrayList<>();
         try {
-            service.run();
+            keyToolList.add(new PEMKeyStore(publicPem));
         } catch (Exception e) {
-            log.error("service run failed", e);
-            throw new BrokerException(ErrorCode.WEB3SDK_INIT_SERVICE_ERROR);
+            log.error("load public key in pem format failed.", e);
+            throw new BrokerException(ErrorCode.FILE_PEM_KEY_INVALID);
         }
 
+        amop.publishPrivateTopic(topic, keyToolList);
+
         // put <topic-service> to map in AMOPChannel
-        amopChannel.senderVerifyTopics.put(topic, service);
+        amopChannel.senderVerifyTopics.put(topic, amop);
     }
 
     public void openTransport4Sender(String topic, String publicPemPath) throws BrokerException, IOException {
@@ -193,7 +153,7 @@ public class WeEventFileClient implements IWeEventFileClient {
 
     @Override
     public FileChunksMeta publishFile(String topic, String filePath, boolean overwrite) throws BrokerException, IOException {
-
+        FileChunksMeta fileChunksMeta;
         if (this.ftpInfo == null) {
             // publish local file
             validateLocalFile(filePath);
@@ -206,8 +166,7 @@ public class WeEventFileClient implements IWeEventFileClient {
             }
 
             FileChunksTransport fileChunksTransport = new FileChunksTransport(this.fileTransportService);
-            FileChunksMeta fileChunksMeta = fileChunksTransport.upload(filePath, topic, this.groupId, overwrite);
-            return fileChunksMeta;
+            fileChunksMeta = fileChunksTransport.upload(filePath, topic, this.groupId, overwrite);
         } else {
             // publish ftp file
             FtpClientService ftpClientService = new FtpClientService();
@@ -215,9 +174,9 @@ public class WeEventFileClient implements IWeEventFileClient {
             ftpClientService.downLoadFile(filePath, this.localReceivePath);
 
             FileChunksTransport fileChunksTransport = new FileChunksTransport(this.fileTransportService);
-            FileChunksMeta fileChunksMeta = fileChunksTransport.upload(this.localReceivePath + filePath.substring(filePath.indexOf('/')), topic, this.groupId, overwrite);
-            return fileChunksMeta;
+            fileChunksMeta = fileChunksTransport.upload(this.localReceivePath + filePath.substring(filePath.indexOf('/')), topic, this.groupId, overwrite);
         }
+        return fileChunksMeta;
     }
 
     public void openTransport4Receiver(String topic, FileListener fileListener) throws BrokerException {
@@ -229,27 +188,12 @@ public class WeEventFileClient implements IWeEventFileClient {
     }
 
     public void openTransport4Receiver(String topic, FileListener fileListener, InputStream privatePem) throws BrokerException {
-        // privatePem is private  key
-        BufferedInputStream bufferedInputStream = new BufferedInputStream(privatePem);
-        try {
-            bufferedInputStream.mark(bufferedInputStream.available() + 1);
-            String publicKey = IOUtils.toString(bufferedInputStream, StandardCharsets.UTF_8);
-            if (!publicKey.contains(PRIVATE_KEY_DESC)) {
-                log.error("inputStream is not a private key.");
-                throw new BrokerException(ErrorCode.FILE_PEM_KEY_INVALID);
-            }
-            bufferedInputStream.reset();
-        } catch (IOException e) {
-            log.error("private key inputStream is invalid.");
-            throw new BrokerException(ErrorCode.FILE_PEM_KEY_INVALID);
-        }
-
         // get AMOPChannel, fileTransportService and amopChannel is One-to-one correspondence
         AMOPChannel amopChannel = this.fileTransportService.getChannel();
 
         FileEventListener fileEventListener = new FileEventListener(this.localReceivePath, this.ftpInfo, fileListener);
 
-        amopChannel.subTopic(topic, groupId, bufferedInputStream, fileEventListener);
+        amopChannel.subTopic(topic, privatePem, fileEventListener);
     }
 
     public void openTransport4Receiver(String topic, FileListener fileListener, String privatePemPath) throws IOException, BrokerException {
@@ -290,16 +234,16 @@ public class WeEventFileClient implements IWeEventFileClient {
 
         // sender
         Map<String, List<FileChunksMetaStatus>> senderTopicStatusMap = new HashMap<>();
-        List<FileChunksMetaStatus> senderFileChunksMetaStatusList = new ArrayList<>();
-        senderFileChunksMetaStatusList = fileTransportStats.getSender().get(groupId).get(topicName);
+        List<FileChunksMetaStatus> senderFileChunksMetaStatusList =
+                fileTransportStats.getSender().get(groupId).get(topicName);
         senderTopicStatusMap.put(topicName, senderFileChunksMetaStatusList);
         Map<String, Map<String, List<FileChunksMetaStatus>>> sender = new HashMap<>();
         sender.put(groupId, senderTopicStatusMap);
 
         // receiver
         Map<String, List<FileChunksMetaStatus>> receiverTopicStatusMap = new HashMap<>();
-        List<FileChunksMetaStatus> receiverFileChunksMetaStatusList = new ArrayList<>();
-        receiverFileChunksMetaStatusList = fileTransportStats.getReceiver().get(groupId).get(topicName);
+        List<FileChunksMetaStatus> receiverFileChunksMetaStatusList =
+                fileTransportStats.getReceiver().get(groupId).get(topicName);
         receiverTopicStatusMap.put(topicName, receiverFileChunksMetaStatusList);
         Map<String, Map<String, List<FileChunksMetaStatus>>> receiver = new HashMap<>();
         receiver.put(groupId, receiverTopicStatusMap);
@@ -356,7 +300,7 @@ public class WeEventFileClient implements IWeEventFileClient {
         return this.fileTransportService.getDiskFiles();
     }
 
-    public void genPemFile(String filePath) throws BrokerException {
+    public Map<String, String> genPemFile(String filePath) throws BrokerException {
         validateLocalFile(filePath);
         try {
             BouncyCastleProvider prov = new BouncyCastleProvider();
@@ -372,12 +316,33 @@ public class WeEventFileClient implements IWeEventFileClient {
             PemFile privatePemFile = new PemFile(pair.getPrivate(), PRIVATE_KEY_DESC);
             PemFile publicPemFile = new PemFile(pair.getPublic(), PUBLIC_KEY_DESC);
 
-            privatePemFile.write(filePath + PATH_SEPARATOR + account + PRIVATE_KEY_SUFFIX);
-            publicPemFile.write(filePath + PATH_SEPARATOR + account + PUBLIC_KEY_SUFFIX);
+            String privateKeyUrl = filePath + PATH_SEPARATOR + account + PRIVATE_KEY_SUFFIX;
+            String publicKeyUrl = filePath + PATH_SEPARATOR + account + PUBLIC_KEY_SUFFIX;
+
+            privatePemFile.write(privateKeyUrl);
+            publicPemFile.write(publicKeyUrl);
+
+            Map<String, String> ppkUrlMap = new HashMap<>();
+            ppkUrlMap.put("privateKeyUrl", getFileKyeInfo(privateKeyUrl));
+            ppkUrlMap.put("publicKeyUrl", getFileKyeInfo(publicKeyUrl));
+            return ppkUrlMap;
         } catch (IOException | NoSuchProviderException | NoSuchAlgorithmException | InvalidAlgorithmParameterException e) {
-            log.error("generate pem file error");
+            log.error("generate pem file error", e);
             throw new BrokerException(ErrorCode.FILE_GEN_PEM_BC_FAILED);
         }
+    }
+
+    private String getFileKyeInfo(String url) throws IOException {
+        StringBuffer sb = new StringBuffer();
+        File file = new File(url);
+        try (FileInputStream fis = new FileInputStream(file);
+             BufferedInputStream bis = new BufferedInputStream(fis)) {
+            while (bis.available() > 0) {
+                sb.append((char) bis.read());
+            }
+        }
+        file.delete();
+        return sb.toString();
     }
 
     public boolean isFileExist(String fileName, String topic, String groupId) throws BrokerException {
