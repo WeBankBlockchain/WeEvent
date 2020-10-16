@@ -168,6 +168,7 @@ public interface IWeEventFileClient {
      * generate pem key pair.
      *
      * @param filePath output pem file path
+     * @return Map<String, String>
      * @throws BrokerException BrokerException
      */
     Map<String, String> genPemFile(String filePath) throws BrokerException;
