@@ -357,7 +357,7 @@ export default {
       const vm = this
       const url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topicName=' + e.topicName
       API.downLoadStatus(url).then(res => {
-        if (res.data.status === 200) {
+        if (res.data.code === 0) {
           if (res.data.data && res.data.data.length > 0) {
             const list = res.data.data
             const newList = []
