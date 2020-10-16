@@ -249,7 +249,7 @@ export default {
             description: vm.form.describe
           }
           API.openTopic(data).then(res => {
-            if (res.data.status === 200) {
+            if (res.data.code === 0) {
               vm.$message({
                 type: 'success',
                 message: this.$t('common.addSuccess')

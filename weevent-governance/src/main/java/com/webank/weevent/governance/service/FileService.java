@@ -405,7 +405,7 @@ public class FileService {
             }
             return GovernanceResult.ok(false);
         } catch (BrokerException e) {
-            log.error("check file is uploaded, topic:{}, fileName:{}", topic, fileName);
+            log.error("check file is uploaded, topic:{}, fileName:{}", topic, fileName , e);
             throw new GovernanceException(ErrorCode.CHECK_FILE_IS_UPLOADED_ERROR);
         }
     }
