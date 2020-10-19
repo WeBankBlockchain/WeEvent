@@ -384,10 +384,10 @@ public class FileService {
         return GovernanceResult.ok(chunkUploadedList(fileChunksMeta));
     }
 
-    public Map<String, String> genPemFile(String groupId, Integer brokerId, String filePath) throws GovernanceException {
+    public String genPemFile(String groupId, Integer brokerId) throws GovernanceException {
         IWeEventFileClient fileClient = getIWeEventFileClient(groupId, brokerId);
         try {
-            return fileClient.genPemFile(filePath);
+            return fileClient.genPemFile();
         } catch (BrokerException e) {
             log.error("genPemFile error, pemPath:{}.", e);
             throw new GovernanceException(ErrorCode.GENERATE_PEM_FAILED);

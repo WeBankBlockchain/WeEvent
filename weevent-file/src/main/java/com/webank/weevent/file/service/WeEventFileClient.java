@@ -1,9 +1,8 @@
 package com.webank.weevent.file.service;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.InvalidAlgorithmParameterException;
@@ -17,6 +16,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.ErrorCode;
@@ -49,6 +50,8 @@ import org.fisco.bcos.sdk.crypto.keystore.PEMKeyStore;
 @Slf4j
 public class WeEventFileClient implements IWeEventFileClient {
 
+    private static final String ZIP_NAME = "PPK.zip";
+    private static final String FILE_PATH = "./logs";
     private static final String PATH_SEPARATOR = "/";
     private static final String PRIVATE_KEY_SUFFIX = ".pem";
     private static final String PUBLIC_KEY_SUFFIX = ".pub.pem";
@@ -188,7 +191,8 @@ public class WeEventFileClient implements IWeEventFileClient {
     }
 
     public void openTransport4Receiver(String topic, FileListener fileListener, InputStream privatePem) throws BrokerException {
-        // get AMOPChannel, fileTransportService and amopChannel is One-to-one correspondence
+        // get AMOPChannel, fileTransportService and amopChannel is One-to-one
+        // correspondence
         AMOPChannel amopChannel = this.fileTransportService.getChannel();
 
         FileEventListener fileEventListener = new FileEventListener(this.localReceivePath, this.ftpInfo, fileListener);
@@ -234,16 +238,14 @@ public class WeEventFileClient implements IWeEventFileClient {
 
         // sender
         Map<String, List<FileChunksMetaStatus>> senderTopicStatusMap = new HashMap<>();
-        List<FileChunksMetaStatus> senderFileChunksMetaStatusList =
-                fileTransportStats.getSender().get(groupId).get(topicName);
+        List<FileChunksMetaStatus> senderFileChunksMetaStatusList = fileTransportStats.getSender().get(groupId).get(topicName);
         senderTopicStatusMap.put(topicName, senderFileChunksMetaStatusList);
         Map<String, Map<String, List<FileChunksMetaStatus>>> sender = new HashMap<>();
         sender.put(groupId, senderTopicStatusMap);
 
         // receiver
         Map<String, List<FileChunksMetaStatus>> receiverTopicStatusMap = new HashMap<>();
-        List<FileChunksMetaStatus> receiverFileChunksMetaStatusList =
-                fileTransportStats.getReceiver().get(groupId).get(topicName);
+        List<FileChunksMetaStatus> receiverFileChunksMetaStatusList = fileTransportStats.getReceiver().get(groupId).get(topicName);
         receiverTopicStatusMap.put(topicName, receiverFileChunksMetaStatusList);
         Map<String, Map<String, List<FileChunksMetaStatus>>> receiver = new HashMap<>();
         receiver.put(groupId, receiverTopicStatusMap);
@@ -300,8 +302,7 @@ public class WeEventFileClient implements IWeEventFileClient {
         return this.fileTransportService.getDiskFiles();
     }
 
-    public Map<String, String> genPemFile(String filePath) throws BrokerException {
-        validateLocalFile(filePath);
+    public String genPemFile() throws BrokerException {
         try {
             BouncyCastleProvider prov = new BouncyCastleProvider();
             Security.addProvider(prov);
@@ -316,33 +317,62 @@ public class WeEventFileClient implements IWeEventFileClient {
             PemFile privatePemFile = new PemFile(pair.getPrivate(), PRIVATE_KEY_DESC);
             PemFile publicPemFile = new PemFile(pair.getPublic(), PUBLIC_KEY_DESC);
 
-            String privateKeyUrl = filePath + PATH_SEPARATOR + account + PRIVATE_KEY_SUFFIX;
-            String publicKeyUrl = filePath + PATH_SEPARATOR + account + PUBLIC_KEY_SUFFIX;
+            String privateKeyUrl = FILE_PATH + PATH_SEPARATOR + account + PRIVATE_KEY_SUFFIX;
+            String publicKeyUrl = FILE_PATH + PATH_SEPARATOR + account + PUBLIC_KEY_SUFFIX;
 
             privatePemFile.write(privateKeyUrl);
             publicPemFile.write(publicKeyUrl);
 
-            Map<String, String> ppkUrlMap = new HashMap<>();
-            ppkUrlMap.put("privateKeyUrl", getFileKyeInfo(privateKeyUrl));
-            ppkUrlMap.put("publicKeyUrl", getFileKyeInfo(publicKeyUrl));
-            return ppkUrlMap;
-        } catch (IOException | NoSuchProviderException | NoSuchAlgorithmException | InvalidAlgorithmParameterException e) {
+            File[] srcFiles = { new File(privateKeyUrl), new File(publicKeyUrl) };
+            String zipUrl = FILE_PATH + "/" + ZIP_NAME;
+            File zipFile = new File(zipUrl);
+
+            zipFiles(srcFiles, zipFile);
+            for (File file : srcFiles) {
+                file.delete();
+            }
+            return zipUrl;
+        } catch (IOException | NoSuchProviderException | NoSuchAlgorithmException
+                | InvalidAlgorithmParameterException e) {
             log.error("generate pem file error", e);
             throw new BrokerException(ErrorCode.FILE_GEN_PEM_BC_FAILED);
         }
     }
 
-    private String getFileKyeInfo(String url) throws IOException {
-        StringBuffer sb = new StringBuffer();
-        File file = new File(url);
-        try (FileInputStream fis = new FileInputStream(file);
-             BufferedInputStream bis = new BufferedInputStream(fis)) {
-            while (bis.available() > 0) {
-                sb.append((char) bis.read());
+    private static void zipFiles(File[] srcFiles, File zipFile) throws IOException {
+        if (!zipFile.exists()) {
+            try {
+                zipFile.createNewFile();
+            } catch (IOException e) {
+                log.error("zipFiles create zip file error", e);
+                throw new IOException();
             }
         }
-        file.delete();
-        return sb.toString();
+        FileOutputStream fileOutputStream = null;
+        ZipOutputStream zipOutputStream = null;
+        FileInputStream fileInputStream = null;
+        try {
+            fileOutputStream = new FileOutputStream(zipFile);
+            zipOutputStream = new ZipOutputStream(fileOutputStream);
+            ZipEntry zipEntry = null;
+            for (int i = 0; i < srcFiles.length; i++) {
+                fileInputStream = new FileInputStream(srcFiles[i]);
+                zipEntry = new ZipEntry(srcFiles[i].getName());
+                zipOutputStream.putNextEntry(zipEntry);
+                int len;
+                byte[] buffer = new byte[1024];
+                while ((len = fileInputStream.read(buffer)) > 0) {
+                    zipOutputStream.write(buffer, 0, len);
+                }
+            }
+            zipOutputStream.closeEntry();
+            zipOutputStream.close();
+            fileInputStream.close();
+            fileOutputStream.close();
+        } catch (IOException e) {
+            log.error("write zip file error", e);
+            throw new IOException();
+        }
     }
 
     public boolean isFileExist(String fileName, String topic, String groupId) throws BrokerException {
@@ -373,7 +403,7 @@ public class WeEventFileClient implements IWeEventFileClient {
         /**
          * Called while new event arrived.
          *
-         * @param topic topic name
+         * @param topic    topic name
          * @param fileName file name
          */
         void onEvent(String topic, String fileName);
@@ -402,7 +432,8 @@ public class WeEventFileClient implements IWeEventFileClient {
             if (this.ftpInfo != null) {
                 try {
                     FtpClientService ftpClientService = new FtpClientService();
-                    ftpClientService.connect(this.ftpInfo.getHost(), this.ftpInfo.getPort(), this.ftpInfo.getUserName(), this.ftpInfo.getPassWord());
+                    ftpClientService.connect(this.ftpInfo.getHost(), this.ftpInfo.getPort(), this.ftpInfo.getUserName(),
+                            this.ftpInfo.getPassWord());
 
                     // check file exist
                     if (StringUtils.isBlank(this.ftpInfo.getFtpReceivePath())) {
@@ -431,19 +462,23 @@ public class WeEventFileClient implements IWeEventFileClient {
 
         @Override
         public void onEvent(String topic, String fileName) {
-            // upload file to ftp
+            // upload file to ftpf
             if (this.ftpInfo != null) {
                 try {
                     FtpClientService ftpClientService = new FtpClientService();
-                    ftpClientService.connect(this.ftpInfo.getHost(), this.ftpInfo.getPort(), this.ftpInfo.getUserName(), this.ftpInfo.getPassWord());
+                    ftpClientService.connect(this.ftpInfo.getHost(), this.ftpInfo.getPort(), this.ftpInfo.getUserName(),
+                            this.ftpInfo.getPassWord());
                     // upload file
                     if (StringUtils.isBlank(this.ftpInfo.getFtpReceivePath())) {
                         log.info("upload file to ftp server, file：{}", fileName);
-                        ftpClientService.upLoadFile(this.receivePath + PATH_SEPARATOR + topic + PATH_SEPARATOR + fileName);
+                        ftpClientService
+                                .upLoadFile(this.receivePath + PATH_SEPARATOR + topic + PATH_SEPARATOR + fileName);
                     } else {
                         // specify upload directory
-                        log.info("upload file to ftp server, to path: {}, file：{}", this.ftpInfo.getFtpReceivePath(), fileName);
-                        ftpClientService.upLoadFile(this.ftpInfo.getFtpReceivePath(), this.receivePath + PATH_SEPARATOR + topic + PATH_SEPARATOR + fileName);
+                        log.info("upload file to ftp server, to path: {}, file：{}", this.ftpInfo.getFtpReceivePath(),
+                                fileName);
+                        ftpClientService.upLoadFile(this.ftpInfo.getFtpReceivePath(),
+                                this.receivePath + PATH_SEPARATOR + topic + PATH_SEPARATOR + fileName);
                     }
                 } catch (BrokerException e) {
                     e.printStackTrace();
