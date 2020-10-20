@@ -165,13 +165,13 @@ public class FileController {
     public void genPemFile(@RequestParam(name = "groupId") String groupId,
                            @RequestParam(name = "brokerId") Integer brokerId,
                            HttpServletResponse response) throws GovernanceException {
-    	
-    	log.info("genPemFile, groupId:{}, brokerId:{}.", groupId, brokerId);
-    	List<FileTransportChannelEntity> list = this.fileService.listTransport(groupId, brokerId).getData();
-    	if(list.size() == 0) {
-    		throw new GovernanceException("please create file transport");
-    	}
-    	
+
+        log.info("genPemFile, groupId:{}, brokerId:{}.", groupId, brokerId);
+        List<FileTransportChannelEntity> list = this.fileService.listTransport(groupId, brokerId).getData();
+        if (list.size() == 0) {
+            throw new GovernanceException("please create file transport");
+        }
+
         log.info("download file, groupId:{}, brokerId:{}.", groupId, brokerId);
         response.setHeader("content-type", "application/octet-stream");
         response.setContentType("application/octet-stream; charset=UTF-8");
