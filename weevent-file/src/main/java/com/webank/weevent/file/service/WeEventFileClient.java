@@ -460,7 +460,7 @@ public class WeEventFileClient implements IWeEventFileClient {
 
         @Override
         public void onEvent(String topic, String fileName) {
-            // upload file to ftpf
+            // upload file to ftp
             if (this.ftpInfo != null) {
                 try {
                     FtpClientService ftpClientService = new FtpClientService();
