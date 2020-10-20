@@ -387,7 +387,7 @@ public class FileService {
     public String genPemFile(String groupId, Integer brokerId) throws GovernanceException {
         IWeEventFileClient fileClient = getIWeEventFileClient(groupId, brokerId);
         try {
-            return fileClient.genPemFile();
+        	return fileClient.genPemFile();
         } catch (BrokerException e) {
             log.error("genPemFile error, pemPath:{}.", e);
             throw new GovernanceException(ErrorCode.GENERATE_PEM_FAILED);
@@ -430,7 +430,7 @@ public class FileService {
         }
         return this.fileClientMap.get(brokerId).get(groupId).getKey();
     }
-
+    
     private DiskFiles getDiskFiles(String groupId, Integer brokerId) {
         return this.fileClientMap.get(brokerId).get(groupId).getValue();
     }
