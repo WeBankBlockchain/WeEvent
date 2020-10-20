@@ -323,7 +323,7 @@ public class WeEventFileClient implements IWeEventFileClient {
             privatePemFile.write(privateKeyUrl);
             publicPemFile.write(publicKeyUrl);
 
-            File[] srcFiles = { new File(privateKeyUrl), new File(publicKeyUrl) };
+            File[] srcFiles = {new File(privateKeyUrl), new File(publicKeyUrl)};
             String zipUrl = FILE_PATH + "/" + ZIP_NAME;
             File zipFile = new File(zipUrl);
 
@@ -344,7 +344,6 @@ public class WeEventFileClient implements IWeEventFileClient {
             try {
                 zipFile.createNewFile();
             } catch (IOException e) {
-                log.error("zipFiles create zip file error", e);
                 throw new IOException();
             }
         }
@@ -370,7 +369,6 @@ public class WeEventFileClient implements IWeEventFileClient {
             fileInputStream.close();
             fileOutputStream.close();
         } catch (IOException e) {
-            log.error("write zip file error", e);
             throw new IOException();
         }
     }
@@ -403,7 +401,7 @@ public class WeEventFileClient implements IWeEventFileClient {
         /**
          * Called while new event arrived.
          *
-         * @param topic    topic name
+         * @param topic topic name
          * @param fileName file name
          */
         void onEvent(String topic, String fileName);

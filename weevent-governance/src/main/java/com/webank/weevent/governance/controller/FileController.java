@@ -1,16 +1,13 @@
 package com.webank.weevent.governance.controller;
 
 import java.io.BufferedInputStream;
-import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -168,7 +165,7 @@ public class FileController {
     public void genPemFile(@RequestParam(name = "groupId") String groupId,
                            @RequestParam(name = "brokerId") Integer brokerId,
                            HttpServletResponse response) throws GovernanceException {
-    	log.info("download file, groupId:{}, brokerId:{}.", groupId, brokerId);
+        log.info("download file, groupId:{}, brokerId:{}.", groupId, brokerId);
         response.setHeader("content-type", "application/octet-stream");
         response.setContentType("application/octet-stream; charset=UTF-8");
 
