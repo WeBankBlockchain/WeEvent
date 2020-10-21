@@ -52,13 +52,10 @@ public class AMOPChannel extends AmopCallback {
     public Amop amop;
     public ThreadPoolTaskExecutor threadPool;
 
-    // verify topic in AMOP(WeEvent's topic hash) <-> service correspond to topic
-    public Map<String, Amop> senderVerifyTopics = new ConcurrentHashMap<>();
+    public List<String> senderVerifyTopics = new ArrayList<>();
     // topic not verify
     public List<String> senderTopics = new ArrayList<>();
 
-    //public Map<String, Service> subVerifyTopics = new ConcurrentHashMap<>();
-    //  verify topic in AMOP(WeEvent's topic hash) <-> service correspond to topic
     public List<String> subVerifyTopics = new ArrayList<>();
     // topic not verify
     public List<String> subTopics = new ArrayList<>();
@@ -87,7 +84,7 @@ public class AMOPChannel extends AmopCallback {
     public Set<String> getSenderTopics() {
         Set<String> topicMap = new HashSet<>();
         topicMap.addAll(senderTopics);
-        topicMap.addAll(senderVerifyTopics.keySet());
+        topicMap.addAll(senderVerifyTopics);
         return topicMap;
     }
 
@@ -105,7 +102,7 @@ public class AMOPChannel extends AmopCallback {
 
     // Receiver call subscribe topic
     public void subTopic(String topic, WeEventFileClient.EventListener eventListener) throws BrokerException {
-        if (this.senderTopics.contains(topic) || senderVerifyTopics.containsKey(topic)) {
+        if (this.senderTopics.contains(topic) || senderVerifyTopics.contains(topic)) {
             log.error("this is already sender side for topic: {}", topic);
             throw new BrokerException(ErrorCode.FILE_SENDER_RECEIVER_CONFLICT);
         }
@@ -120,7 +117,7 @@ public class AMOPChannel extends AmopCallback {
 
     // Receiver call subscribe verify topic
     public void subTopic(String topic, InputStream privatePem, WeEventFileClient.EventListener eventListener) throws BrokerException {
-        if (this.senderTopics.contains(topic) || senderVerifyTopics.containsKey(topic)) {
+        if (this.senderTopics.contains(topic) || senderVerifyTopics.contains(topic)) {
             log.error("this is already sender side for topic: {}", topic);
             throw new BrokerException(ErrorCode.FILE_SENDER_RECEIVER_CONFLICT);
         }
@@ -159,7 +156,7 @@ public class AMOPChannel extends AmopCallback {
     }
 
     public void deleteTransport(String topic) {
-        if (senderVerifyTopics.containsKey(topic)) {
+        if (senderVerifyTopics.contains(topic)) {
             log.info("delete verify topic on AMOP channel, {}", topic);
             this.amop.unsubscribeTopic(topic);
             this.subVerifyTopics.remove(topic);
@@ -290,7 +287,7 @@ public class AMOPChannel extends AmopCallback {
         msgOut.setContent(json);
         msgOut.setTopic(topic);
         msgOut.setTimeout(6000L);
-        if (this.senderVerifyTopics.containsKey(topic)) {
+        if (this.senderVerifyTopics.contains(topic)) {
             log.info("over verified AMOP channel");
             msgOut.setType(TopicType.PRIVATE_TOPIC);
         } else {
