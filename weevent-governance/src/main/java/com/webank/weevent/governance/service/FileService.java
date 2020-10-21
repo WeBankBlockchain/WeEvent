@@ -384,10 +384,10 @@ public class FileService {
         return GovernanceResult.ok(chunkUploadedList(fileChunksMeta));
     }
 
-    public Map<String, String> genPemFile(String groupId, Integer brokerId, String filePath) throws GovernanceException {
+    public String genPemFile(String groupId, Integer brokerId) throws GovernanceException {
         IWeEventFileClient fileClient = getIWeEventFileClient(groupId, brokerId);
         try {
-            return fileClient.genPemFile(filePath);
+        	return fileClient.genPemFile();
         } catch (BrokerException e) {
             log.error("genPemFile error, pemPath:{}.", e);
             throw new GovernanceException(ErrorCode.GENERATE_PEM_FAILED);
@@ -405,7 +405,7 @@ public class FileService {
             }
             return GovernanceResult.ok(false);
         } catch (BrokerException e) {
-            log.error("check file is uploaded, topic:{}, fileName:{}", topic, fileName);
+            log.error("check file is uploaded, topic:{}, fileName:{}", topic, fileName, e);
             throw new GovernanceException(ErrorCode.CHECK_FILE_IS_UPLOADED_ERROR);
         }
     }
@@ -430,7 +430,7 @@ public class FileService {
         }
         return this.fileClientMap.get(brokerId).get(groupId).getKey();
     }
-
+    
     private DiskFiles getDiskFiles(String groupId, Integer brokerId) {
         return this.fileClientMap.get(brokerId).get(groupId).getValue();
     }
