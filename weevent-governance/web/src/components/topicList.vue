@@ -130,6 +130,7 @@ export default {
         groupId: Number(localStorage.getItem('groupId'))
       }
       API.topicList(data).then(res => {
+      debugger
         if (res.status === 200) {
           vm.total = res.data.data.total
           const last = Math.ceil(res.data.data.total / vm.pageSize)
@@ -172,8 +173,8 @@ export default {
       }
       API.topicList(data).then(res => {
         if (res.status === 200) {
-          vm.total = res.data.total
-          const listData = res.data.topicInfoList.reverse()
+          vm.total = res.data.data.total
+          const listData = res.data.data.topicInfoList.reverse()
           const det = {
             topicName: '',
             createdTimestamp: '',
@@ -249,7 +250,7 @@ export default {
             description: vm.form.describe
           }
           API.openTopic(data).then(res => {
-            if (res.data.status === 200) {
+            if (res.data.code === 0) {
               vm.$message({
                 type: 'success',
                 message: this.$t('common.addSuccess')
@@ -291,10 +292,10 @@ export default {
         vm.tableData = []
         const url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topic=' + vm.topicName
         API.topicInfo(url).then(res => {
-          const time = getDateDetail(res.data.createdTimestamp)
+          const time = getDateDetail(res.data.data.createdTimestamp)
           res.data.createdTimestamp = time
           const item = {
-            topicName: res.data.topicName,
+            topicName: res.data.data.topicName,
             creater: '——',
             createdTimestamp: time,
             detail: {}
