@@ -130,6 +130,7 @@ export default {
         groupId: Number(localStorage.getItem('groupId'))
       }
       API.topicList(data).then(res => {
+      debugger
         if (res.status === 200) {
           vm.total = res.data.data.total
           const last = Math.ceil(res.data.data.total / vm.pageSize)
@@ -172,8 +173,8 @@ export default {
       }
       API.topicList(data).then(res => {
         if (res.status === 200) {
-          vm.total = res.data.total
-          const listData = res.data.topicInfoList.reverse()
+          vm.total = res.data.data.total
+          const listData = res.data.data.topicInfoList.reverse()
           const det = {
             topicName: '',
             createdTimestamp: '',
