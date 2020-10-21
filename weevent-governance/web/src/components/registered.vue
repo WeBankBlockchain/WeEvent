@@ -149,7 +149,7 @@ export default {
             email: this.ruleForm.email
           }
           API.register(data).then(res => {
-            if (res.data.status === 200) {
+            if (res.data.code === 0) {
               this.$message({
                 type: 'success',
                 message: this.$t('userSet.regSuccess')
