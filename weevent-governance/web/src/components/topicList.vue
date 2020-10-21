@@ -130,7 +130,6 @@ export default {
         groupId: Number(localStorage.getItem('groupId'))
       }
       API.topicList(data).then(res => {
-      debugger
         if (res.status === 200) {
           vm.total = res.data.data.total
           const last = Math.ceil(res.data.data.total / vm.pageSize)
