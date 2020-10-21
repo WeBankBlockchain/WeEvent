@@ -291,10 +291,10 @@ export default {
         vm.tableData = []
         const url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topic=' + vm.topicName
         API.topicInfo(url).then(res => {
-          const time = getDateDetail(res.data.createdTimestamp)
+          const time = getDateDetail(res.data.data.createdTimestamp)
           res.data.createdTimestamp = time
           const item = {
-            topicName: res.data.topicName,
+            topicName: res.data.data.topicName,
             creater: '——',
             createdTimestamp: time,
             detail: {}
