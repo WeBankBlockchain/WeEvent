@@ -357,7 +357,7 @@ export default {
       const vm = this
       const url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topicName=' + e.topicName
       API.downLoadStatus(url).then(res => {
-        if (res.data.status === 200) {
+        if (res.data.code === 0) {
           if (res.data.data && res.data.data.length > 0) {
             const list = res.data.data
             const newList = []
@@ -594,6 +594,7 @@ export default {
       xhr.send(formData)
     },
     generatePPK (e) {
+      const vm = this
       const url = con.ROOT + 'file/genPemFile?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&filePath=' + "./logs"
       var xhr = new XMLHttpRequest()
       var formData = new FormData()
@@ -605,6 +606,13 @@ export default {
           const blob = this.response
           const f = this.getResponseHeader('filename')
           const filename = decodeURI(f)
+          if("null" === filename){
+          	vm.$message({
+              type: 'warning',
+              message: '请先创建文件通道'
+            })
+          	return;
+          }
           if (window.navigator.msSaveOrOpenBlob) {
             navigator.msSaveBlob(blob, filename)
           } else {
