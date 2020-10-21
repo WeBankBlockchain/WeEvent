@@ -59,7 +59,7 @@ public class AMOPChannel extends AmopCallback {
 
     //public Map<String, Service> subVerifyTopics = new ConcurrentHashMap<>();
     //  verify topic in AMOP(WeEvent's topic hash) <-> service correspond to topic
-    public Map<String, Amop> subVerifyTopics = new ConcurrentHashMap<>();
+    public List<String> subVerifyTopics = new ArrayList<>();
     // topic not verify
     public List<String> subTopics = new ArrayList<>();
 
@@ -94,18 +94,12 @@ public class AMOPChannel extends AmopCallback {
     public Set<String> getSubTopics() {
         Set<String> topicMap = new HashSet<>();
         topicMap.addAll(subTopics);
-        topicMap.addAll(subVerifyTopics.keySet());
-
+        topicMap.addAll(subVerifyTopics);
         return topicMap;
     }
 
     public Set<String> getVerifyTopics() {
-        Set<String> topics = new HashSet<>();
-        for (String topicVerify : subVerifyTopics.keySet()) {
-            topics.addAll(this.subVerifyTopics.get(topicVerify).getSubTopics());
-        }
-
-        return topics;
+        return this.amop.getTopicManager().getAllTopics();
     }
 
 
@@ -131,8 +125,6 @@ public class AMOPChannel extends AmopCallback {
             throw new BrokerException(ErrorCode.FILE_SENDER_RECEIVER_CONFLICT);
         }
 
-        Amop amop = Web3SDKConnector.buidBcosSDK(this.fileTransportService.getFiscoConfig()).getAmop();
-
         KeyTool kt;
         try {
             kt = new PEMKeyStore(privatePem);
@@ -141,19 +133,19 @@ public class AMOPChannel extends AmopCallback {
             throw new BrokerException(ErrorCode.FILE_PEM_KEY_INVALID);
         }
 
-        amop.subscribePrivateTopics(topic, kt, this);
+        this.amop.subscribePrivateTopics(topic, kt, this);
         log.info("subscribe verify topic on AMOP channel, {}", topic);
         this.topicListenerMap.put(topic, eventListener);
 
         // put <topic-service> to map in AMOPChannel
-        this.subVerifyTopics.put(topic, amop);
+        this.subVerifyTopics.add(topic);
 
     }
 
     public void unSubTopic(String topic) {
-        if (subVerifyTopics.containsKey(topic)) {
+        if (subVerifyTopics.contains(topic)) {
             log.info("unSubscribe verify topic on AMOP channel, {}", topic);
-            this.subVerifyTopics.get(topic).unsubscribeTopic(topic);
+            this.amop.unsubscribeTopic(topic);
             this.subVerifyTopics.remove(topic);
             this.topicListenerMap.remove(topic);
         } else {
@@ -169,7 +161,7 @@ public class AMOPChannel extends AmopCallback {
     public void deleteTransport(String topic) {
         if (senderVerifyTopics.containsKey(topic)) {
             log.info("delete verify topic on AMOP channel, {}", topic);
-            this.subVerifyTopics.get(topic).unsubscribeTopic(topic);
+            this.amop.unsubscribeTopic(topic);
             this.subVerifyTopics.remove(topic);
             this.topicListenerMap.remove(topic);
         } else {
@@ -288,7 +280,7 @@ public class AMOPChannel extends AmopCallback {
     }
 
     public Response sendEvent(String topic, FileEvent fileEvent) throws BrokerException, InterruptedException, TimeoutException {
-        if (this.subTopics.contains(topic) || this.subVerifyTopics.containsKey(topic)) {
+        if (this.subTopics.contains(topic) || this.subVerifyTopics.contains(topic)) {
             log.error("this is already receiver side for topic: {}", topic);
             throw new BrokerException(ErrorCode.FILE_SENDER_RECEIVER_CONFLICT);
         }
@@ -348,7 +340,7 @@ public class AMOPChannel extends AmopCallback {
     @Override
     public byte[] receiveAmopMsg(AmopMsgIn msg) {
         if (!(this.getVerifyTopics().contains(msg.getTopic()) || this.subTopics.contains(msg.getTopic()))) {
-            log.error("unknown topic on channel, {} -> {}", msg.getTopic(), this.subTopics.addAll(this.subVerifyTopics.keySet()));
+            log.error("unknown topic on channel, {} -> {}", msg.getTopic(), this.subTopics.addAll(this.subVerifyTopics));
             return DataTypeUtils.toChannelResponse(ErrorCode.UNKNOWN_AMOP_SUB_TOPIC);
         }
 
