@@ -259,13 +259,6 @@ export default {
         })
       }, 500)
     },
-    refresh () {
-      sessionStorage.removeItem('topic')
-      this.loading = true
-      setTimeout(fun => {
-        this.getData()
-      }, 1000)
-    },
     addTopic (form) {
       const vm = this
       vm.$refs.form.validate((valid) => {
@@ -664,9 +657,12 @@ export default {
     },
     groupId (nVal) {
       if (nVal !== '-1') {
-      	this.tableData = []
-        this.topicName = ''
-        this.refresh()
+      	this.getData()
+      }
+    },
+    brokerId (nVal) {
+      if (nVal !== '-1') {
+      	this.getData()
       }
     }
   },
