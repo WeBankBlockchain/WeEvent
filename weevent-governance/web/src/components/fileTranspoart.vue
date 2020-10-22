@@ -657,6 +657,12 @@ export default {
     },
     groupId (nVal) {
       if (nVal !== '-1') {
+      	this.getData()
+      }
+    },
+    brokerId (nVal) {
+      if (nVal !== '-1') {
+      	this.getData()
       }
     }
   },
