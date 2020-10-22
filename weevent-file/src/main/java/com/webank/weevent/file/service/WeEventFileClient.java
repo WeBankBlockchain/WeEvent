@@ -2,6 +2,7 @@ package com.webank.weevent.file.service;
 
 import java.io.File;
 import java.io.FileInputStream;
+
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -117,13 +118,13 @@ public class WeEventFileClient implements IWeEventFileClient {
         AMOPChannel amopChannel = this.fileTransportService.getChannel();
 
         // service is exist
-        if (amopChannel.getSenderTopics().contains(topic) || amopChannel.senderVerifyTopics.containsKey(topic)) {
+        if (amopChannel.getSenderTopics().contains(topic) || amopChannel.senderVerifyTopics.contains(topic)) {
             log.error("this is already sender side for topic: {}", topic);
             throw new BrokerException(ErrorCode.FILE_SENDER_RECEIVER_CONFLICT);
         }
 
         // service not exist, new service
-        Amop amop = Web3SDKConnector.buidBcosSDK(this.fileTransportService.getFiscoConfig()).getAmop();
+        Amop amop = amopChannel.amop;
 
         List<KeyTool> keyToolList = new ArrayList<>();
         try {
@@ -136,7 +137,7 @@ public class WeEventFileClient implements IWeEventFileClient {
         amop.publishPrivateTopic(topic, keyToolList);
 
         // put <topic-service> to map in AMOPChannel
-        amopChannel.senderVerifyTopics.put(topic, amop);
+        amopChannel.senderVerifyTopics.add(topic);
     }
 
     public void openTransport4Sender(String topic, String publicPemPath) throws BrokerException, IOException {
@@ -191,8 +192,7 @@ public class WeEventFileClient implements IWeEventFileClient {
     }
 
     public void openTransport4Receiver(String topic, FileListener fileListener, InputStream privatePem) throws BrokerException {
-        // get AMOPChannel, fileTransportService and amopChannel is One-to-one
-        // correspondence
+        // get AMOPChannel, fileTransportService and amopChannel is One-to-one correspondence
         AMOPChannel amopChannel = this.fileTransportService.getChannel();
 
         FileEventListener fileEventListener = new FileEventListener(this.localReceivePath, this.ftpInfo, fileListener);
