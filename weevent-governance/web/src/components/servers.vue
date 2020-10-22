@@ -161,7 +161,7 @@ export default {
           this.title = this.$t('serverSet.addServer')
         }
         API.accountList('').then(res => {
-          if (res.data.status === 200) {
+          if (res.data.code === 0) {
             this.accountList = [].concat(res.data.data)
           }
         })

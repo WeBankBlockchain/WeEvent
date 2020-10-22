@@ -114,9 +114,9 @@ export default {
       const brokerId = localStorage.getItem('brokerId')
       const vm = this
       API.getServer('').then(res => {
-        if (res.status === 200) {
+        if (res.data.code === 0) {
           if (res.data.data.length) {
-            vm.servers = [].concat(res.data)
+            vm.servers = [].concat(res.data.data)
             if (brokerId) {
               res.data.data.forEach(e => {
                 if (e.id === Number(brokerId)) {
