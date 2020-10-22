@@ -115,7 +115,7 @@ export default {
       const vm = this
       API.getServer('').then(res => {
       debugger
-        if (res.status === 200) {
+        if (res.data.code === 0) {
           if (res.data.data.length) {
             vm.servers = [].concat(res.data.data)
             if (brokerId) {
