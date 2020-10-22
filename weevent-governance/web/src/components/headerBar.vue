@@ -114,7 +114,6 @@ export default {
       const brokerId = localStorage.getItem('brokerId')
       const vm = this
       API.getServer('').then(res => {
-      debugger
         if (res.data.code === 0) {
           if (res.data.data.length) {
             vm.servers = [].concat(res.data.data)
