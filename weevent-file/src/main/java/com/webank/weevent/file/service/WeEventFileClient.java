@@ -191,8 +191,7 @@ public class WeEventFileClient implements IWeEventFileClient {
     }
 
     public void openTransport4Receiver(String topic, FileListener fileListener, InputStream privatePem) throws BrokerException {
-        // get AMOPChannel, fileTransportService and amopChannel is One-to-one
-        // correspondence
+        // get AMOPChannel, fileTransportService and amopChannel is One-to-one correspondence
         AMOPChannel amopChannel = this.fileTransportService.getChannel();
 
         FileEventListener fileEventListener = new FileEventListener(this.localReceivePath, this.ftpInfo, fileListener);
