@@ -27,7 +27,6 @@ import com.webank.weevent.core.FiscoBcosInstance;
 import com.webank.weevent.core.IConsumer;
 import com.webank.weevent.core.IProducer;
 import com.webank.weevent.core.config.FiscoConfig;
-import com.webank.weevent.core.fisco.web3sdk.v2.Web3SDKConnector;
 import com.webank.weevent.file.IWeEventFileClient;
 import com.webank.weevent.file.dto.FileChunksMetaPlus;
 import com.webank.weevent.file.dto.FileChunksMetaStatus;
