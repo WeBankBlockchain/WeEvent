@@ -26,6 +26,7 @@ import org.fisco.bcos.sdk.BcosSDKException;
 import org.fisco.bcos.sdk.amop.Amop;
 import org.fisco.bcos.sdk.amop.AmopCallback;
 import org.fisco.bcos.sdk.amop.AmopMsgOut;
+import org.fisco.bcos.sdk.amop.AmopResponse;
 import org.fisco.bcos.sdk.amop.topic.AmopMsgIn;
 import org.fisco.bcos.sdk.amop.topic.TopicType;
 import org.fisco.bcos.sdk.crypto.keystore.KeyTool;
@@ -175,7 +176,7 @@ public class AMOPChannel extends AmopCallback {
         FileEvent fileEvent = new FileEvent(FileEvent.EventType.FileChannelStart, fileChunksMeta.getFileId());
         fileEvent.setFileChunksMeta(fileChunksMeta);
         try {
-            Response rsp = this.sendEvent(fileChunksMeta.getTopic(), fileEvent);
+            AmopResponse rsp = this.sendEvent(fileChunksMeta.getTopic(), fileEvent);
             if (rsp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
                 log.error("receive create remote file context from amop failed, rsp:{}", rsp.getErrorMessage());
                 throw toBrokerException(rsp);
@@ -204,7 +205,7 @@ public class AMOPChannel extends AmopCallback {
 
         FileEvent fileEvent = new FileEvent(FileEvent.EventType.FileChannelEnd, fileId);
         try {
-            Response rsp = this.sendEvent(topic, fileEvent);
+            AmopResponse rsp = this.sendEvent(topic, fileEvent);
             if (rsp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
                 log.error("receive clean up receiver file context from amop failed, rsp:{}", rsp.getErrorMessage());
                 throw toBrokerException(rsp);
@@ -228,7 +229,7 @@ public class AMOPChannel extends AmopCallback {
     public FileChunksMeta getReceiverFileContext(String topic, String fileId) throws BrokerException {
         log.info("send AMOP message to get receiver file context");
         try {
-            Response rsp = this.sendEvent(topic, new FileEvent(FileEvent.EventType.FileChannelStatus, fileId));
+            AmopResponse rsp = this.sendEvent(topic, new FileEvent(FileEvent.EventType.FileChannelStatus, fileId));
             if (rsp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
                 log.error("receive file context from amop failed, rsp:{}", rsp.getErrorMessage());
                 throw toBrokerException(rsp);
@@ -255,7 +256,7 @@ public class AMOPChannel extends AmopCallback {
         fileEvent.setFileChunksMeta(fileChunksMeta);
 
         try {
-            Response rsp = this.sendEvent(fileChunksMeta.getTopic(), fileEvent);
+            AmopResponse rsp = this.sendEvent(fileChunksMeta.getTopic(), fileEvent);
             if (rsp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
                 log.error("receive check file existence from amop failed, rsp:{}", rsp.getErrorMessage());
                 throw toBrokerException(rsp);
@@ -276,7 +277,7 @@ public class AMOPChannel extends AmopCallback {
         }
     }
 
-    public Response sendEvent(String topic, FileEvent fileEvent) throws BrokerException, InterruptedException, TimeoutException {
+    public AmopResponse sendEvent(String topic, FileEvent fileEvent) throws BrokerException, InterruptedException, TimeoutException {
         if (this.subTopics.contains(topic) || this.subVerifyTopics.contains(topic)) {
             log.error("this is already receiver side for topic: {}", topic);
             throw new BrokerException(ErrorCode.FILE_SENDER_RECEIVER_CONFLICT);
@@ -296,16 +297,16 @@ public class AMOPChannel extends AmopCallback {
 
         log.info("send channel request, topic: {} {}", topic, fileEvent.getEventType());
         StopWatch sw = StopWatch.createStarted();
-        AmopResponseCallback callback = new AmopResponseCallback();
+        FileAmopResponseCallback callback = new FileAmopResponseCallback();
         this.amop.sendAmopMsg(msgOut, callback);
-        Response response = callback.get(msgOut.getTimeout(), TimeUnit.MINUTES);
+        AmopResponse response = callback.get(msgOut.getTimeout(), TimeUnit.MINUTES);
         sw.stop();
         log.info("receive channel response, id: {} result: {}-{} cost: {}", response.getMessageID(), response.getErrorCode(), response.getErrorMessage(), sw.getTime());
         return response;
 
     }
 
-    public static BrokerException toBrokerException(Response reply) {
+    public static BrokerException toBrokerException(AmopResponse reply) {
         if (reply.getErrorCode() < 100000) {
             return new BrokerException(reply.getErrorCode(), reply.getErrorMessage());
         } else {
@@ -441,14 +442,14 @@ public class AMOPChannel extends AmopCallback {
      * @param rsp send amop msg response
      * @return amop msg
      */
-    public static AmopMsg response2AmopMsg(Response rsp) {
+    public static AmopMsg response2AmopMsg(AmopResponse rsp) {
         Message msg = new Message();
         msg.setResult(rsp.getErrorCode());
         msg.setType((short) MsgType.AMOP_RESPONSE.getType());
-        msg.setData(rsp.getContentBytes());
+        msg.setData(rsp.getAmopMsgIn().getContent());
         msg.setSeq(rsp.getMessageID());
         AmopMsg amopMsg = new AmopMsg(msg);
-        amopMsg.decodeAmopBody(rsp.getContentBytes());
+        amopMsg.decodeAmopBody(rsp.getAmopMsgIn().getContent());
         return amopMsg;
     }
 }
