@@ -182,8 +182,8 @@ public class AMOPChannel extends AmopCallback {
                 throw toBrokerException(rsp);
             }
 
-            AmopMsg amopMsg = response2AmopMsg(rsp);
-            AmopMsgResponse amopMsgResponse = JsonHelper.json2Object(amopMsg.getData(), AmopMsgResponse.class);
+            // AmopMsg amopMsg = response2AmopMsg(rsp);
+            AmopMsgResponse amopMsgResponse = JsonHelper.json2Object(rsp.getAmopMsgIn().getContent(), AmopMsgResponse.class);
             if (amopMsgResponse.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
                 log.error("create remote file context failed, rsp:{}", amopMsgResponse.getErrorMessage());
                 throw toBrokerException(amopMsgResponse);
@@ -211,8 +211,8 @@ public class AMOPChannel extends AmopCallback {
                 throw toBrokerException(rsp);
             }
 
-            AmopMsg amopMsg = response2AmopMsg(rsp);
-            AmopMsgResponse amopMsgResponse = JsonHelper.json2Object(amopMsg.getData(), AmopMsgResponse.class);
+            // AmopMsg amopMsg = response2AmopMsg(rsp);
+            AmopMsgResponse amopMsgResponse = JsonHelper.json2Object(rsp.getAmopMsgIn().getContent(), AmopMsgResponse.class);
             if (amopMsgResponse.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
                 log.error("clean up receiver file context failed, rsp:{}", amopMsgResponse.getErrorMessage());
                 throw toBrokerException(amopMsgResponse);
@@ -235,8 +235,8 @@ public class AMOPChannel extends AmopCallback {
                 throw toBrokerException(rsp);
             }
 
-            AmopMsg amopMsg = response2AmopMsg(rsp);
-            AmopMsgResponse amopMsgResponse = JsonHelper.json2Object(amopMsg.getData(), AmopMsgResponse.class);
+            // AmopMsg amopMsg = response2AmopMsg(rsp);
+            AmopMsgResponse amopMsgResponse = JsonHelper.json2Object(rsp.getAmopMsgIn().getContent(), AmopMsgResponse.class);
             if (amopMsgResponse.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
                 log.error("check if the file exists failed, rsp:{}", amopMsgResponse.getErrorMessage());
                 throw toBrokerException(amopMsgResponse);
@@ -262,8 +262,8 @@ public class AMOPChannel extends AmopCallback {
                 throw toBrokerException(rsp);
             }
 
-            AmopMsg amopMsg = response2AmopMsg(rsp);
-            AmopMsgResponse amopMsgResponse = JsonHelper.json2Object(amopMsg.getData(), AmopMsgResponse.class);
+            // AmopMsg amopMsg = response2AmopMsg(rsp);
+            AmopMsgResponse amopMsgResponse = JsonHelper.json2Object(rsp.getAmopMsgIn().getContent(), AmopMsgResponse.class);
             if (amopMsgResponse.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
                 log.error("check file existence failed, rsp:{}", amopMsgResponse.getErrorMessage());
                 throw toBrokerException(amopMsgResponse);

@@ -243,8 +243,8 @@ public class FileTransportService {
                 throw AMOPChannel.toBrokerException(rsp);
             }
 
-            AmopMsg amopMsg = AMOPChannel.response2AmopMsg(rsp);
-            AmopMsgResponse amopMsgResponse = JsonHelper.json2Object(amopMsg.getData(), AmopMsgResponse.class);
+            //AmopMsg amopMsg = AMOPChannel.response2AmopMsg(rsp);
+            AmopMsgResponse amopMsgResponse = JsonHelper.json2Object(rsp.getAmopMsgIn().getContent(), AmopMsgResponse.class);
             if (amopMsgResponse.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
                 log.error("sender chunk data to remote failed, rsp:{}", amopMsgResponse.getErrorMessage());
                 throw AMOPChannel.toBrokerException(amopMsgResponse);
