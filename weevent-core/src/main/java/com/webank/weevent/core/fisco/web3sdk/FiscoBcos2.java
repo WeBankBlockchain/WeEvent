@@ -48,6 +48,8 @@ import org.fisco.bcos.sdk.abi.datatypes.generated.tuples.generated.Tuple3;
 import org.fisco.bcos.sdk.abi.datatypes.generated.tuples.generated.Tuple8;
 import org.fisco.bcos.sdk.amop.Amop;
 import org.fisco.bcos.sdk.amop.AmopMsgOut;
+import org.fisco.bcos.sdk.amop.AmopResponse;
+import org.fisco.bcos.sdk.amop.AmopResponseCallback;
 import org.fisco.bcos.sdk.channel.ResponseCallback;
 import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.client.protocol.response.SendTransaction;
@@ -527,9 +529,9 @@ public class FiscoBcos2 {
 
         StopWatch sw = StopWatch.createStarted();
         CompletableFuture<SendResult> future = new CompletableFuture<>();
-        ResponseCallback callback = new ResponseCallback() {
+        AmopResponseCallback callback = new AmopResponseCallback() {
             @Override
-            public void onResponse(Response response) {
+            public void onResponse(AmopResponse response) {
                 sw.stop();
                 log.info("receive amop response, id: {} result: {}-{} cost: {}", response.getMessageID(), response.getErrorCode(), response.getErrorMessage(), sw.getTime());
                 SendResult sendResult = new SendResult();
