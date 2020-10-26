@@ -156,20 +156,31 @@ public class WeEventFileClient implements IWeEventFileClient {
 
     @Override
     public FileChunksMeta publishFile(String topic, String filePath, boolean overwrite) throws BrokerException, IOException {
+        // check if topic is exist
+        IProducer iProducer = this.fileTransportService.getProducer();
+        if (!iProducer.exist(topic, this.groupId)) {
+            log.info("topic: " + topic + " not exist in group: " + groupId + ", open topic: " + topic + " groupID: " + groupId);
+            boolean resOpen = iProducer.open(topic, this.groupId);
+            if (!resOpen) {
+                log.error("create topic: {} failed.", topic);
+                throw new BrokerException(ErrorCode.TOPIC_CREATE_FAILED);
+            }
+        }
+
+        String newTopic = this.fileTransportService.getChannel().switchTopic(topic);
+        boolean resOpen = iProducer.open(newTopic, this.groupId);
+        if (!resOpen) {
+            log.error("create topic: {} failed.", newTopic);
+            throw new BrokerException(ErrorCode.TOPIC_CREATE_FAILED);
+        }
+
         FileChunksMeta fileChunksMeta;
         if (this.ftpInfo == null) {
             // publish local file
             validateLocalFile(filePath);
 
-            // check if topic is exist
-            IProducer iProducer = this.fileTransportService.getProducer();
-            if (!iProducer.exist(topic, this.groupId)) {
-                log.info("topic: " + topic + " not exist in group: " + groupId + ", open topic: " + topic + " groupID: " + groupId);
-                iProducer.open(topic, this.groupId);
-            }
-
             FileChunksTransport fileChunksTransport = new FileChunksTransport(this.fileTransportService);
-            fileChunksMeta = fileChunksTransport.upload(filePath, topic, this.groupId, overwrite);
+            fileChunksMeta = fileChunksTransport.upload(filePath, newTopic, this.groupId, overwrite);
         } else {
             // publish ftp file
             FtpClientService ftpClientService = new FtpClientService();
@@ -177,7 +188,7 @@ public class WeEventFileClient implements IWeEventFileClient {
             ftpClientService.downLoadFile(filePath, this.localReceivePath);
 
             FileChunksTransport fileChunksTransport = new FileChunksTransport(this.fileTransportService);
-            fileChunksMeta = fileChunksTransport.upload(this.localReceivePath + filePath.substring(filePath.indexOf('/')), topic, this.groupId, overwrite);
+            fileChunksMeta = fileChunksTransport.upload(this.localReceivePath + filePath.substring(filePath.indexOf('/')), newTopic, this.groupId, overwrite);
         }
         return fileChunksMeta;
     }
