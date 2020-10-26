@@ -162,15 +162,15 @@ export default {
       }
       this.tableData = []
       API.timerList(data).then(res => {
-        if (res.data.status === 200 && res.data.data) {
+        if (res.data.code === 0 && res.data.data) {
           this.tableData = [].concat(res.data.data)
-          this.total = res.data.totalCount
+          this.total = res.data.data.totalCount
         }
       })
     },
     getDBLsit () {
       API.dbList({}).then(res => {
-        if (res.data.status === 200) {
+        if (res.data.code === 0) {
           this.dbList = [].concat(res.data.data)
         }
       })
@@ -188,7 +188,7 @@ export default {
           if (vm.type === 1) {
             data.brokerId = localStorage.getItem('brokerId')
             API.addTimer(data).then(res => {
-              if (res.data.status === 200) {
+              if (res.data.code === 0) {
                 vm.$message({
                   type: 'success',
                   message: this.$t('rule.creatSuccess')
@@ -197,7 +197,7 @@ export default {
               } else {
                 vm.$store.commit('set_Msg', vm.$message({
                   type: 'warning',
-                  message: res.data.message,
+                  message: res.data.data.message,
                   duration: 0,
                   showClose: true
                 }))
@@ -208,7 +208,7 @@ export default {
             data.id = vm.id
             data.brokerId = localStorage.getItem('brokerId')
             API.updateTimer(data).then(res => {
-              if (res.data.status === 200) {
+              if (res.data.code === 0) {
                 vm.$message({
                   type: 'success',
                   message: this.$t('common.editSuccess')
@@ -217,7 +217,7 @@ export default {
               } else {
                 vm.$store.commit('set_Msg', vm.$message({
                   type: 'warning',
-                  message: res.data.message,
+                  message: res.data.data.message,
                   duration: 0,
                   showClose: true
                 }))
@@ -250,7 +250,7 @@ export default {
           brokerId: localStorage.getItem('brokerId')
         }
         API.deleteTimer(data).then(res => {
-          if (res.data.status === 200) {
+          if (res.data.code === 0) {
             vm.$message({
               type: 'success',
               message: vm.$t('common.deleteSuccess')
@@ -259,7 +259,7 @@ export default {
           } else {
             vm.$store.commit('set_Msg', vm.$message({
               type: 'warning',
-              message: res.data.message,
+              message: res.data.data.message,
               duration: 0,
               showClose: true
             }))
