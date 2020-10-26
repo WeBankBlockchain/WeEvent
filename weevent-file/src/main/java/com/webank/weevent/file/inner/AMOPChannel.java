@@ -274,7 +274,9 @@ public class AMOPChannel extends AmopCallback {
 
     public String switchTopic(String topic) throws BrokerException {
         log.info("send AMOP message to switch topic.");
-        FileEvent fileEvent = new FileEvent(FileEvent.EventType.FileChannelSwitch, null);
+        FileEvent fileEvent = new FileEvent(FileEvent.EventType.FileChannelSwitch, "");
+        FileChunksMeta fileChunksMeta = new FileChunksMeta("", "", 0L, "", topic, "", true);
+        fileEvent.setFileChunksMeta(fileChunksMeta);
 
         try {
             AmopResponse rsp = this.sendEvent(topic, fileEvent);
