@@ -344,6 +344,7 @@ module.exports = {
     downloadList: '下载列表',
     fileuploadList: '当前传输列表',
     fileCover: '该通道已设置覆盖同文件',
-    generatePPK: '生成公私钥'
+    generatePPK: '生成公私钥',
+    createFileTopic: '请先创建文件通道'
   }
 }
