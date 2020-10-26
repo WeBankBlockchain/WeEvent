@@ -343,6 +343,8 @@ module.exports = {
     downloadFile: 'Download',
     downloadList: 'Download List',
     fileuploadList: 'File Upload List',
-    fileCover: 'Cover File'
+    fileCover: 'Cover File',
+    generatePPK: 'Generate public and private keys',
+    createFileTopic: 'Please create a file channel first'
   }
 }
