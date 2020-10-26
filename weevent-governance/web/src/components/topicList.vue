@@ -201,10 +201,12 @@ export default {
       var vm = this
       const url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topic=' + e.topicName
       API.topicState(url).then(res => {
-        const time = getDateDetail(res.data.data.createdTimestamp)
-        res.data.createdTimestamp = time
-        res.data.lastTimestamp = getDateDetail(res.data.data.lastTimestamp)
-        vm.$set(e, 'detail', res.data)
+      	if(res.data.code === 0){
+    	  const time = getDateDetail(res.data.data.createdTimestamp)
+       	  res.data.data.createdTimestamp = time
+          res.data.data.lastTimestamp = getDateDetail(res.data.data.lastTimestamp)
+          vm.$set(e, 'detail', res.data.data)
+      	}
       })
     },
     indexChange (e) {
@@ -295,7 +297,7 @@ export default {
           res.data.createdTimestamp = time
           const item = {
             topicName: res.data.data.topicName,
-            creater: '——',
+            creater: res.data.data.creater,
             createdTimestamp: time,
             detail: {}
           }
@@ -318,11 +320,11 @@ export default {
       vm.tableData = []
       const url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topic=' + sessionStorage.getItem('topic')
       API.topicInfo(url).then(res => {
-        const time = getDateDetail(res.data.createdTimestamp)
-        res.data.createdTimestamp = time
+        const time = getDateDetail(res.data.data.createdTimestamp)
+        res.data.data.createdTimestamp = time
         const item = {
-          topicName: res.data.topicName,
-          creater: '——',
+          topicName: res.data.data.topicName,
+          creater: res.data.data.creater,
           createdTimestamp: time,
           detail: {}
         }
