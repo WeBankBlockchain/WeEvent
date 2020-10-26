@@ -31,10 +31,6 @@ import org.fisco.bcos.sdk.amop.topic.AmopMsgIn;
 import org.fisco.bcos.sdk.amop.topic.TopicType;
 import org.fisco.bcos.sdk.crypto.keystore.KeyTool;
 import org.fisco.bcos.sdk.crypto.keystore.PEMKeyStore;
-import org.fisco.bcos.sdk.model.AmopMsg;
-import org.fisco.bcos.sdk.model.Message;
-import org.fisco.bcos.sdk.model.MsgType;
-import org.fisco.bcos.sdk.model.Response;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /**
