@@ -6,17 +6,18 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.sdk.channel.ResponseCallback;
+import org.fisco.bcos.sdk.amop.AmopResponse;
+import org.fisco.bcos.sdk.amop.AmopResponseCallback;
 import org.fisco.bcos.sdk.model.Response;
 
 @Slf4j
-public class AmopResponseCallback extends ResponseCallback implements Future<Response> {
+public class FileAmopResponseCallback extends AmopResponseCallback implements Future<AmopResponse> {
 
     private final CountDownLatch latch = new CountDownLatch(1);
-    private Response rsp;
+    private AmopResponse rsp;
 
     @Override
-    public void onResponse(Response response) {
+    public void onResponse(AmopResponse response) {
         this.rsp = response;
         this.latch.countDown();
     }
@@ -38,13 +39,13 @@ public class AmopResponseCallback extends ResponseCallback implements Future<Res
         return this.latch.getCount() == 0;
     }
 
-    public Response get() throws InterruptedException {
+    public AmopResponse get() throws InterruptedException {
         this.latch.await();
         return this.rsp;
     }
 
     @Override
-    public Response get(long timeout, TimeUnit unit) throws InterruptedException, TimeoutException {
+    public AmopResponse get(long timeout, TimeUnit unit) throws InterruptedException, TimeoutException {
         if (latch.await(timeout, unit)) {
             if (this.rsp != null) {
                 return this.rsp;
