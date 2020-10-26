@@ -333,7 +333,7 @@ export default {
           groupId: localStorage.getItem('groupId')
         }
         API.deleteTransport(data).then(res => {
-          if (res.data.status === 200) {
+          if (res.data.code === 0) {
             vm.$message({
               type: 'success',
               message: vm.$t('rule.hasDelete')
@@ -342,7 +342,7 @@ export default {
           } else {
             this.$store.commit('set_Msg', this.$message({
               type: 'warning',
-              message: res.data.message,
+              message: res.data.data.message,
               duration: 0,
               showClose: true
             }))
@@ -609,7 +609,9 @@ export default {
           if("null" === filename){
           	vm.$message({
               type: 'warning',
-              message: '请先创建文件通道'
+              message: vm.$t('file.createFileTopic'),
+              duration: 0,
+              showClose: true
             })
           	return;
           }
