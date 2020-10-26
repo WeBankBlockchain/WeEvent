@@ -268,7 +268,7 @@ export default {
         brokerId: e.brokerId
       }
       API.ruleStart(data).then(res => {
-        if (res.data.status === 200) {
+        if (res.data.code === 0) {
           this.getRuleList()
           this.$message({
             type: 'success',
@@ -291,7 +291,7 @@ export default {
         status: 0
       }
       API.ruleStop(data).then(res => {
-        if (res.data.status === 200) {
+        if (res.data.code === 0) {
           this.getRuleList()
           this.$message({
             type: 'success',
@@ -300,7 +300,7 @@ export default {
         } else {
           this.$store.commit('set_Msg', this.$message({
             type: 'warning',
-            message: res.data.message,
+            message: res.data.data.message,
             duration: 0,
             showClose: true
           }))
@@ -319,7 +319,7 @@ export default {
           brokerId: e.brokerId
         }
         API.ruleDelete(data).then(res => {
-          if (res.data.status === 200) {
+          if (res.data.code === 0) {
             vm.getRuleList()
             vm.$message({
               type: 'success',
@@ -328,7 +328,7 @@ export default {
           } else {
             this.$store.commit('set_Msg', this.$message({
               type: 'warning',
-              message: res.data.message,
+              message: res.data.data.message,
               duration: 0,
               showClose: true
             }))
@@ -354,7 +354,7 @@ export default {
             ruleDescription: vm.rule.ruleDescription
           }
           API.ruleAdd(data).then(res => {
-            if (res.data.status === 200) {
+            if (res.data.code === 0) {
               // this.getRuleList()
               this.$message({
                 type: 'success',
