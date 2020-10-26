@@ -379,15 +379,24 @@ public class AMOPChannel extends AmopCallback {
                 log.info("get {}, try to switch topic.", fileEvent.getEventType());
                 try {
                     FileChunksMeta fileChunksMeta = fileEvent.getFileChunksMeta();
-
                     WeEventFileClient.EventListener eventListener = this.topicListenerMap.get(fileChunksMeta.getTopic());
-                    KeyTool keyTool = this.amop.getTopicManager().getPrivateKeyByTopic(fileChunksMeta.getTopic());
-
-                    this.unSubTopic(fileChunksMeta.getTopic());
-
                     String newTopic = fileChunksMeta.getTopic() + "-" +new Date().getTime();
-                    this.subTopic(newTopic, keyTool, eventListener);
-                    log.info("unsubscribe old topic: {}, subscribe new topic: {}.", fileChunksMeta.getTopic(), newTopic);
+
+                    if (subVerifyTopics.contains(fileChunksMeta.getTopic())) {
+                        KeyTool keyTool = this.amop.getTopicManager().getPrivateKeyByTopic(fileChunksMeta.getTopic());
+
+                        this.unSubTopic(fileChunksMeta.getTopic());
+
+                        this.subTopic(newTopic, keyTool, eventListener);
+                        log.info("unsubscribe old verify topic: {}, subscribe new verify topic: {}.", fileChunksMeta.getTopic(), newTopic);
+                    } else if (subTopics.contains(fileChunksMeta.getTopic())) {
+                        this.unSubTopic(fileChunksMeta.getTopic());
+
+                        this.subTopic(newTopic, eventListener);
+                    } else {
+                        log.error("not subscribed to this topic: {}.", fileChunksMeta.getTopic());
+                        throw new BrokerException("not subscribed to this topic.");
+                    }
 
                     channelResponseData = DataTypeUtils.toChannelResponse(ErrorCode.SUCCESS, JsonHelper.object2JsonBytes(newTopic));
                 } catch (BrokerException e) {
