@@ -216,7 +216,7 @@ export default {
                 tableName: value
               }
               API.checkJDBC(data).then(res => {
-                if (res.data.status === 200) {
+                if (res.data.code === 0) {
                   callback()
                 } else {
                   this.crrentTable = false
