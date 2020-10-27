@@ -61,6 +61,8 @@ public class WeEventFileClient implements IWeEventFileClient {
     private static final String ALGORITHM = "ECDSA";
     private static final String CURVE_TYPE = "SECP256k1";
 
+    public static final String topicNeedVerifyPrefix = "#!$TopicNeedVerify_";
+
     private final String groupId;
     private String localReceivePath = "";
     private FiscoConfig config;
@@ -117,7 +119,7 @@ public class WeEventFileClient implements IWeEventFileClient {
         AMOPChannel amopChannel = this.fileTransportService.getChannel();
 
         // service is exist
-        if (amopChannel.getSenderTopics().contains(topic) || amopChannel.senderVerifyTopics.contains(topic)) {
+        if (amopChannel.getSenderTopics().contains(topic)) {
             log.error("this is already sender side for topic: {}", topic);
             throw new BrokerException(ErrorCode.FILE_SENDER_RECEIVER_CONFLICT);
         }
@@ -172,6 +174,20 @@ public class WeEventFileClient implements IWeEventFileClient {
         if (!resOpen) {
             log.error("create topic: {} failed.", newTopic);
             throw new BrokerException(ErrorCode.TOPIC_CREATE_FAILED);
+        }
+
+        AMOPChannel amopChannel = this.fileTransportService.getChannel();
+        if (amopChannel.senderTopics.contains(topic)) {
+            this.fileTransportService.getChannel().senderTopics.add(topic);
+        } else if (amopChannel.senderVerifyTopics.contains(topic)) {
+            Amop amop = amopChannel.amop;
+            List<KeyTool> keyToolList = amop.getTopicManager().getPublicKeysByTopic(topicNeedVerifyPrefix + topic);
+
+            amop.publishPrivateTopic(newTopic, keyToolList);
+            amopChannel.senderVerifyTopics.add(newTopic);
+        } else {
+            log.error("not a sender topic: {}.", topic);
+            throw new BrokerException("not a sender topic.");
         }
 
         FileChunksMeta fileChunksMeta;
