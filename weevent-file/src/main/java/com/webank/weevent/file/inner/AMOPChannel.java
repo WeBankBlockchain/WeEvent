@@ -380,19 +380,16 @@ public class AMOPChannel extends AmopCallback {
                 try {
                     FileChunksMeta fileChunksMeta = fileEvent.getFileChunksMeta();
                     WeEventFileClient.EventListener eventListener = this.topicListenerMap.get(fileChunksMeta.getTopic());
-                    String newTopic = fileChunksMeta.getTopic() + "-" +new Date().getTime();
+                    String newTopic = fileChunksMeta.getTopic() + "-" + new Date().getTime();
 
                     if (subVerifyTopics.contains(fileChunksMeta.getTopic())) {
                         KeyTool keyTool = this.amop.getTopicManager().getPrivateKeyByTopic(fileChunksMeta.getTopic());
 
-                        this.unSubTopic(fileChunksMeta.getTopic());
-
                         this.subTopic(newTopic, keyTool, eventListener);
-                        log.info("unsubscribe old verify topic: {}, subscribe new verify topic: {}.", fileChunksMeta.getTopic(), newTopic);
+                        log.info("subscribe new verify topic: {}", newTopic);
                     } else if (subTopics.contains(fileChunksMeta.getTopic())) {
-                        this.unSubTopic(fileChunksMeta.getTopic());
-
                         this.subTopic(newTopic, eventListener);
+                        log.info("subscribe new normal topic: {}", newTopic);
                     } else {
                         log.error("not subscribed to this topic: {}.", fileChunksMeta.getTopic());
                         throw new BrokerException("not subscribed to this topic.");
