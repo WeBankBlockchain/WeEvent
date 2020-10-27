@@ -60,6 +60,8 @@ public class AMOPChannel extends AmopCallback {
 
     public Map<String, WeEventFileClient.EventListener> topicListenerMap = new ConcurrentHashMap<>();
 
+    public static final String topicNeedVerifyPrefix = "#!$TopicNeedVerify_";
+
     /**
      * Create a AMOP channel on service for subscribe topic
      *
@@ -130,7 +132,7 @@ public class AMOPChannel extends AmopCallback {
         subTopic(topic, kt, eventListener);
     }
 
-    public void subTopic(String topic, KeyTool keyTool, WeEventFileClient.EventListener eventListener) throws BrokerException {
+    public void subTopic(String topic, KeyTool keyTool, WeEventFileClient.EventListener eventListener) {
         this.amop.subscribePrivateTopics(topic, keyTool, this);
         log.info("subscribe verify topic on AMOP channel, {}", topic);
         this.topicListenerMap.put(topic, eventListener);
@@ -383,7 +385,7 @@ public class AMOPChannel extends AmopCallback {
                     String newTopic = fileChunksMeta.getTopic() + "-" + new Date().getTime();
 
                     if (subVerifyTopics.contains(fileChunksMeta.getTopic())) {
-                        KeyTool keyTool = this.amop.getTopicManager().getPrivateKeyByTopic(fileChunksMeta.getTopic());
+                        KeyTool keyTool = this.amop.getTopicManager().getPrivateKeyByTopic(topicNeedVerifyPrefix + fileChunksMeta.getTopic());
 
                         this.subTopic(newTopic, keyTool, eventListener);
                         log.info("subscribe new verify topic: {}", newTopic);
