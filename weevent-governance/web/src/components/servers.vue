@@ -195,6 +195,7 @@ export default {
       API.addServer(data).then(res => {
         if (res.status === 200) {
           if (res.data.code === 0) {
+          localStorage.setItem('brokerId', res.data.data)
             this.$message({
               type: 'success',
               message: this.$t('common.addSuccess')
