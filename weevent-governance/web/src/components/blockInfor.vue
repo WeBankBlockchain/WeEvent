@@ -107,7 +107,10 @@ export default {
     }
   },
   mounted () {
-    this.getLastData()
+  	const vm = this
+  	setTimeout(fun => {
+    	vm.getLastData()
+    }, 500)
   },
   computed: {
     brokerId () {
