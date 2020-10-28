@@ -163,7 +163,7 @@ export default {
       this.tableData = []
       API.timerList(data).then(res => {
         if (res.data.code === 0 && res.data.data) {
-          this.tableData = [].concat(res.data.data)
+          this.tableData = [].concat(res.data.data.timerSchedulerEntityList)
           this.total = res.data.data.totalCount
         }
       })
@@ -197,7 +197,7 @@ export default {
               } else {
                 vm.$store.commit('set_Msg', vm.$message({
                   type: 'warning',
-                  message: res.data.data.message,
+                  message: res.data.message,
                   duration: 0,
                   showClose: true
                 }))
@@ -217,7 +217,7 @@ export default {
               } else {
                 vm.$store.commit('set_Msg', vm.$message({
                   type: 'warning',
-                  message: res.data.data.message,
+                  message: res.data.message,
                   duration: 0,
                   showClose: true
                 }))
@@ -259,7 +259,7 @@ export default {
           } else {
             vm.$store.commit('set_Msg', vm.$message({
               type: 'warning',
-              message: res.data.data.message,
+              message: res.data.message,
               duration: 0,
               showClose: true
             }))
