@@ -300,7 +300,7 @@ export default {
         } else {
           this.$store.commit('set_Msg', this.$message({
             type: 'warning',
-            message: res.data.data.message,
+            message: res.data.message,
             duration: 0,
             showClose: true
           }))
