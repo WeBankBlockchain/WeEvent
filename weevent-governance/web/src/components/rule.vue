@@ -257,7 +257,7 @@ export default {
     },
     payloadMap (e) {
       if (JSON.stringify(e.payloadMap) === '{}') {
-        return '-'
+        return '—'
       } else {
         return JSON.stringify(e.payloadMap)
       }
