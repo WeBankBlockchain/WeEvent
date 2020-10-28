@@ -223,7 +223,6 @@ export default {
   },
   methods: {
     getRuleList () {
-    debugger
       const data = {
         ruleName: this.ruleName,
         brokerId: localStorage.getItem('brokerId'),
@@ -258,7 +257,7 @@ export default {
     },
     payloadMap (e) {
       if (JSON.stringify(e.payloadMap) === '{}') {
-        return '—'
+        return '-'
       } else {
         return JSON.stringify(e.payloadMap)
       }
@@ -329,7 +328,7 @@ export default {
           } else {
             this.$store.commit('set_Msg', this.$message({
               type: 'warning',
-              message: res.data.data.message,
+              message: res.data.message,
               duration: 0,
               showClose: true
             }))
