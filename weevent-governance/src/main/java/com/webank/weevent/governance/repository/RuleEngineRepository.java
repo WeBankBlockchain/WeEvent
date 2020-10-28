@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.webank.weevent.governance.entity.RuleEngineEntity;
 
-import org.apache.ibatis.annotations.Param;
+import org.springframework.data.repository.query.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
