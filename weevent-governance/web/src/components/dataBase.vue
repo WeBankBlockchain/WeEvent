@@ -237,7 +237,7 @@ export default {
               } else {
                 vm.$store.commit('set_Msg', vm.$message({
                   type: 'warning',
-                  message: res.data.data.message,
+                  message: res.data.message,
                   duration: 0,
                   showClose: true
                 }))
@@ -256,7 +256,7 @@ export default {
               } else {
                 vm.$store.commit('set_Msg', vm.$message({
                   type: 'warning',
-                  message: res.data.data.message,
+                  message: res.data.message,
                   duration: 0,
                   showClose: true
                 }))
@@ -301,7 +301,7 @@ export default {
           } else {
             vm.$store.commit('set_Msg', vm.$message({
               type: 'warning',
-              message: res.data.data.message,
+              message: res.data.message,
               duration: 0,
               showClose: true
             }))
