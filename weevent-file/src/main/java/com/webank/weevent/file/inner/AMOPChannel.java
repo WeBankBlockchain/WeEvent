@@ -60,6 +60,10 @@ public class AMOPChannel extends AmopCallback {
 
     public Map<String, WeEventFileClient.EventListener> topicListenerMap = new ConcurrentHashMap<>();
 
+    // store privateKey and publicKey for switch topic
+    public Map<String, KeyTool> topic2PrivateKey = new ConcurrentHashMap<>();
+    public Map<String, List<KeyTool>> topic2PublicKeys = new ConcurrentHashMap<>();
+
     public static final String topicNeedVerifyPrefix = "#!$TopicNeedVerify_";
 
     /**
@@ -130,6 +134,7 @@ public class AMOPChannel extends AmopCallback {
             throw new BrokerException(ErrorCode.FILE_PEM_KEY_INVALID);
         }
         subTopic(topic, kt, eventListener);
+        this.topic2PrivateKey.put(topic, kt);
     }
 
     public void subTopic(String topic, KeyTool keyTool, WeEventFileClient.EventListener eventListener) {
@@ -385,7 +390,7 @@ public class AMOPChannel extends AmopCallback {
                     String newTopic = fileChunksMeta.getTopic() + "-" + new Date().getTime();
 
                     if (subVerifyTopics.contains(fileChunksMeta.getTopic())) {
-                        KeyTool keyTool = this.amop.getTopicManager().getPrivateKeyByTopic(topicNeedVerifyPrefix + fileChunksMeta.getTopic());
+                        KeyTool keyTool = this.topic2PrivateKey.get(fileChunksMeta.getTopic());
 
                         this.subTopic(newTopic, keyTool, eventListener);
                         log.info("subscribe new verify topic: {}", newTopic);

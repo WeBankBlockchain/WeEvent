@@ -136,6 +136,7 @@ public class WeEventFileClient implements IWeEventFileClient {
         }
 
         amop.publishPrivateTopic(topic, keyToolList);
+        this.fileTransportService.getChannel().topic2PublicKeys.put(topic, keyToolList);
 
         // put <topic-service> to map in AMOPChannel
         amopChannel.senderVerifyTopics.add(topic);
@@ -181,7 +182,7 @@ public class WeEventFileClient implements IWeEventFileClient {
             this.fileTransportService.getChannel().senderTopics.add(topic);
         } else if (amopChannel.senderVerifyTopics.contains(topic)) {
             Amop amop = amopChannel.amop;
-            List<KeyTool> keyToolList = amop.getTopicManager().getPublicKeysByTopic(topicNeedVerifyPrefix + topic);
+            List<KeyTool> keyToolList = this.fileTransportService.getChannel().topic2PublicKeys.get(topic);
 
             amop.publishPrivateTopic(newTopic, keyToolList);
             amopChannel.senderVerifyTopics.add(newTopic);
