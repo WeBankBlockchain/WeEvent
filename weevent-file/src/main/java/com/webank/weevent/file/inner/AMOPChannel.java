@@ -391,6 +391,10 @@ public class AMOPChannel extends AmopCallback {
 
                     if (subVerifyTopics.contains(fileChunksMeta.getTopic())) {
                         KeyTool keyTool = this.topic2PrivateKey.get(fileChunksMeta.getTopic());
+                        if (keyTool == null) {
+                            log.error("no private key corresponding to topic: {}.", fileChunksMeta.getTopic());
+                            throw new BrokerException("unable to get private key after switching topics.");
+                        }
 
                         this.subTopic(newTopic, keyTool, eventListener);
                         log.info("subscribe new verify topic: {}", newTopic);

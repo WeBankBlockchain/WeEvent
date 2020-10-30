@@ -177,12 +177,22 @@ public class WeEventFileClient implements IWeEventFileClient {
             throw new BrokerException(ErrorCode.TOPIC_CREATE_FAILED);
         }
 
+        try {
+            Thread.sleep(1000 * 10);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
         AMOPChannel amopChannel = this.fileTransportService.getChannel();
         if (amopChannel.senderTopics.contains(topic)) {
             this.fileTransportService.getChannel().senderTopics.add(topic);
         } else if (amopChannel.senderVerifyTopics.contains(topic)) {
             Amop amop = amopChannel.amop;
             List<KeyTool> keyToolList = this.fileTransportService.getChannel().topic2PublicKeys.get(topic);
+            if (keyToolList.size() == 0) {
+                log.error("no public key corresponding to topic: {}.", topic);
+                throw new BrokerException("unable to get public key after switching topics.");
+            }
 
             amop.publishPrivateTopic(newTopic, keyToolList);
             amopChannel.senderVerifyTopics.add(newTopic);
