@@ -51,11 +51,11 @@
       prop="topicName"
       :formatter="checkName">
     </el-table-column>
-    <el-table-column
+    <!--<el-table-column
       :label="$t('tableCont.creater')"
       prop="creater"
       :formatter="checkCreater">
-    </el-table-column>
+    </el-table-column>-->
      <el-table-column
       :label="$t('tableCont.timestamp')"
       prop="createdTimestamp"
