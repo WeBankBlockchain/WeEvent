@@ -80,7 +80,7 @@ public class WeEventFileClientTest {
     }
 
     @Test
-//    @Ignore
+    @Ignore
     public void testPublishFileWithVerify() throws Exception {
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
         Resource resource = resolver.getResource("classpath:" + "0x2809a9902e47d6fcaabe6d0183855d9201c93af1.public.pem");
@@ -134,7 +134,7 @@ public class WeEventFileClientTest {
     public void testListFile() {
         WeEventFileClient weEventFileClient = new WeEventFileClient(this.groupId, this.localReceivePath, this.fileChunkSize, this.fiscoConfig);
         try {
-            weEventFileClient.listFiles(this.topicName);
+            weEventFileClient.listFiles(this.groupId, this.topicName);
         } catch (BrokerException e) {
             e.printStackTrace();
         }

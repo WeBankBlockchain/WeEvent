@@ -294,10 +294,10 @@ public class WeEventFileClient implements IWeEventFileClient {
         return retFileTransportStats;
     }
 
-    public List<FileChunksMeta> listFiles(String topic) throws BrokerException {
+    public List<FileChunksMeta> listFiles(String group, String topic) throws BrokerException {
         // get json from disk
         List<File> fileList = new ArrayList<>();
-        String filePath = this.localReceivePath + PATH_SEPARATOR + topic;
+        String filePath = this.localReceivePath + PATH_SEPARATOR + group + PATH_SEPARATOR + topic;
         File file = new File(filePath);
         if (!file.exists()) {
             file.mkdirs();
