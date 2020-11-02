@@ -177,12 +177,6 @@ public class WeEventFileClient implements IWeEventFileClient {
             throw new BrokerException(ErrorCode.TOPIC_CREATE_FAILED);
         }
 
-        try {
-            Thread.sleep(1000 * 10);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
         AMOPChannel amopChannel = this.fileTransportService.getChannel();
         if (amopChannel.senderTopics.contains(topic)) {
             this.fileTransportService.getChannel().senderTopics.add(topic);
@@ -199,6 +193,12 @@ public class WeEventFileClient implements IWeEventFileClient {
         } else {
             log.error("not a sender topic: {}.", topic);
             throw new BrokerException("not a sender topic.");
+        }
+
+        try {
+            Thread.sleep(1000 * 5);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
 
         FileChunksMeta fileChunksMeta;
