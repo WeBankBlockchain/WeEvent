@@ -64,8 +64,6 @@ public class AMOPChannel extends AmopCallback {
     public Map<String, KeyTool> topic2PrivateKey = new ConcurrentHashMap<>();
     public Map<String, List<KeyTool>> topic2PublicKeys = new ConcurrentHashMap<>();
 
-    public static final String topicNeedVerifyPrefix = "#!$TopicNeedVerify_";
-
     /**
      * Create a AMOP channel on service for subscribe topic
      *

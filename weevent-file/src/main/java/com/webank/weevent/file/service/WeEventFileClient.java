@@ -61,8 +61,6 @@ public class WeEventFileClient implements IWeEventFileClient {
     private static final String ALGORITHM = "ECDSA";
     private static final String CURVE_TYPE = "SECP256k1";
 
-    public static final String topicNeedVerifyPrefix = "#!$TopicNeedVerify_";
-
     private final String groupId;
     private String localReceivePath = "";
     private FiscoConfig config;
