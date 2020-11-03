@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.webank.weevent.governance.entity.FileTransportStatusEntity;
 
-import org.apache.ibatis.annotations.Param;
+import org.springframework.data.repository.query.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -21,12 +21,12 @@ public interface TransportStatusRepository extends JpaRepository<FileTransportSt
 
 	@Transactional
 	@Modifying
-	@Query(value = "update t_file_transport_status set transport_status=:status where id =:id", nativeQuery = true)
-	void updateTransportStatus(@Param("transport_status") String status, @Param("id") Long id);
+	@Query(value = "update t_file_transport_status set transport_status=?1 where id =?2", nativeQuery = true)
+	void updateTransportStatus(String status, Long id);
 
 	@Transactional
 	@Modifying
-	@Query(value = "update t_file_transport_status set speed=:speed where id =:id", nativeQuery = true)
-	void updateTransportSpeed(@Param("speed") String speed, @Param("id") Long id);
+	@Query(value = "update t_file_transport_status set speed=?1 where id =?2", nativeQuery = true)
+	void updateTransportSpeed(String speed, Long id);
 	
 }
