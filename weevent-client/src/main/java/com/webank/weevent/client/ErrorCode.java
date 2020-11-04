@@ -20,6 +20,7 @@ public enum ErrorCode {
     TOPIC_NOT_MATCH(100108, "topic name not match with last subscribe"),
     PATTERN_INVALID(100109, "invalid topic pattern"),
     TOPIC_TAG_NOT_MATCH(100110, "topic tag not match with last subscribe"),
+    TOPIC_CREATE_FAILED(100111, "create topic failed."),
 
     EVENT_CONTENT_IS_BLANK(100200, "event content is blank"),
     EVENT_CONTENT_EXCEEDS_MAX_LENGTH(100201, "event content exceeds max length[10k bytes]"),
