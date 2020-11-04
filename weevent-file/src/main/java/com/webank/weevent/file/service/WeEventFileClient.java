@@ -117,7 +117,7 @@ public class WeEventFileClient implements IWeEventFileClient {
         AMOPChannel amopChannel = this.fileTransportService.getChannel();
 
         // service is exist
-        if (amopChannel.getSenderTopics().contains(topic) || amopChannel.senderVerifyTopics.contains(topic)) {
+        if (amopChannel.getSenderTopics().contains(topic)) {
             log.error("this is already sender side for topic: {}", topic);
             throw new BrokerException(ErrorCode.FILE_SENDER_RECEIVER_CONFLICT);
         }
@@ -134,6 +134,7 @@ public class WeEventFileClient implements IWeEventFileClient {
         }
 
         amop.publishPrivateTopic(topic, keyToolList);
+        this.fileTransportService.getChannel().topic2PublicKeys.put(topic, keyToolList);
 
         // put <topic-service> to map in AMOPChannel
         amopChannel.senderVerifyTopics.add(topic);
@@ -156,20 +157,49 @@ public class WeEventFileClient implements IWeEventFileClient {
 
     @Override
     public FileChunksMeta publishFile(String topic, String filePath, boolean overwrite) throws BrokerException, IOException {
+        // check if topic is exist
+        IProducer iProducer = this.fileTransportService.getProducer();
+        if (!iProducer.exist(topic, this.groupId)) {
+            log.info("topic: " + topic + " not exist in group: " + groupId + ", open topic: " + topic + " groupID: " + groupId);
+            boolean resOpen = iProducer.open(topic, this.groupId);
+            if (!resOpen) {
+                log.error("create topic: {} failed.", topic);
+                throw new BrokerException(ErrorCode.TOPIC_CREATE_FAILED);
+            }
+        }
+
+        String newTopic = this.fileTransportService.getChannel().switchTopic(topic);
+        boolean resOpen = iProducer.open(newTopic, this.groupId);
+        if (!resOpen) {
+            log.error("create topic: {} failed.", newTopic);
+            throw new BrokerException(ErrorCode.TOPIC_CREATE_FAILED);
+        }
+
+        AMOPChannel amopChannel = this.fileTransportService.getChannel();
+        if (amopChannel.senderTopics.contains(topic)) {
+            this.fileTransportService.getChannel().senderTopics.add(topic);
+        } else if (amopChannel.senderVerifyTopics.contains(topic)) {
+            Amop amop = amopChannel.amop;
+            List<KeyTool> keyToolList = this.fileTransportService.getChannel().topic2PublicKeys.get(topic);
+            if (keyToolList.size() == 0) {
+                log.error("no public key corresponding to topic: {}.", topic);
+                throw new BrokerException("unable to get public key after switching topics.");
+            }
+
+            amop.publishPrivateTopic(newTopic, keyToolList);
+            amopChannel.senderVerifyTopics.add(newTopic);
+        } else {
+            log.error("not a sender topic: {}.", topic);
+            throw new BrokerException("not a sender topic.");
+        }
+
         FileChunksMeta fileChunksMeta;
         if (this.ftpInfo == null) {
             // publish local file
             validateLocalFile(filePath);
 
-            // check if topic is exist
-            IProducer iProducer = this.fileTransportService.getProducer();
-            if (!iProducer.exist(topic, this.groupId)) {
-                log.info("topic: " + topic + " not exist in group: " + groupId + ", open topic: " + topic + " groupID: " + groupId);
-                iProducer.open(topic, this.groupId);
-            }
-
             FileChunksTransport fileChunksTransport = new FileChunksTransport(this.fileTransportService);
-            fileChunksMeta = fileChunksTransport.upload(filePath, topic, this.groupId, overwrite);
+            fileChunksMeta = fileChunksTransport.upload(filePath, newTopic, this.groupId, overwrite);
         } else {
             // publish ftp file
             FtpClientService ftpClientService = new FtpClientService();
@@ -177,7 +207,7 @@ public class WeEventFileClient implements IWeEventFileClient {
             ftpClientService.downLoadFile(filePath, this.localReceivePath);
 
             FileChunksTransport fileChunksTransport = new FileChunksTransport(this.fileTransportService);
-            fileChunksMeta = fileChunksTransport.upload(this.localReceivePath + filePath.substring(filePath.indexOf('/')), topic, this.groupId, overwrite);
+            fileChunksMeta = fileChunksTransport.upload(this.localReceivePath + filePath.substring(filePath.indexOf('/')), newTopic, this.groupId, overwrite);
         }
         return fileChunksMeta;
     }
@@ -256,10 +286,10 @@ public class WeEventFileClient implements IWeEventFileClient {
         return retFileTransportStats;
     }
 
-    public List<FileChunksMeta> listFiles(String topic) throws BrokerException {
+    public List<FileChunksMeta> listFiles(String group, String topic) throws BrokerException {
         // get json from disk
         List<File> fileList = new ArrayList<>();
-        String filePath = this.localReceivePath + PATH_SEPARATOR + topic;
+        String filePath = this.localReceivePath + PATH_SEPARATOR + group + PATH_SEPARATOR + topic;
         File file = new File(filePath);
         if (!file.exists()) {
             file.mkdirs();
