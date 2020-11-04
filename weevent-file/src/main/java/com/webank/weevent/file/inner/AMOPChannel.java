@@ -1,14 +1,11 @@
 package com.webank.weevent.file.inner;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -49,6 +46,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 @Slf4j
 public class AMOPChannel extends AmopCallback {
     private static final int SEND_RETRY_COUNT = 10;
+    private static final String TOPIC_SEPARATOR = "-";
     private final FileTransportService fileTransportService;
     //    public Service service;
     public Amop amop;
@@ -121,7 +119,7 @@ public class AMOPChannel extends AmopCallback {
             this.amop.subscribeTopic(topic, this);
 
             log.info("subscribe new topic on AMOP channel, {}", topic);
-            String newTopic = topic + "-" + Math.random();
+            String newTopic = topic + TOPIC_SEPARATOR + Math.random();
             this.topicListenerMap.put(newTopic, eventListener);
             this.subTopics.add(newTopic);
             this.amop.subscribeTopic(newTopic, this);
@@ -146,8 +144,8 @@ public class AMOPChannel extends AmopCallback {
         subTopic(topic, kt, eventListener);
 
         // gen new topic and subscribe this topic(files can also be transferred when multiple subscribers are listening)
-        String newTopic = topic + Math.random();
-        subTopic(topic + new Random(124), kt, eventListener);
+        String newTopic = topic + TOPIC_SEPARATOR + Math.random();
+        subTopic(topic + newTopic, kt, eventListener);
         subTopic(newTopic, kt, eventListener);
         log.info("subscribe new verify topic: {}", newTopic);
         old2NewTopic.put(topic, newTopic);
