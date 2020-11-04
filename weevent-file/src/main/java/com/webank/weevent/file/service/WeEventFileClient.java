@@ -193,12 +193,6 @@ public class WeEventFileClient implements IWeEventFileClient {
             throw new BrokerException("not a sender topic.");
         }
 
-        try {
-            Thread.sleep(1000 * 5);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
         FileChunksMeta fileChunksMeta;
         if (this.ftpInfo == null) {
             // publish local file

@@ -48,7 +48,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
  */
 @Slf4j
 public class AMOPChannel extends AmopCallback {
-    private static final int SEND_RETRY_COUNT = 5;
+    private static final int SEND_RETRY_COUNT = 10;
     private final FileTransportService fileTransportService;
     //    public Service service;
     public Amop amop;
@@ -64,9 +64,9 @@ public class AMOPChannel extends AmopCallback {
 
     public Map<String, WeEventFileClient.EventListener> topicListenerMap = new ConcurrentHashMap<>();
 
-    // store privateKey and publicKey for switch topic
-    public Map<String, KeyTool> topic2PrivateKey = new ConcurrentHashMap<>();
+    // store publicKey for switch topic
     public Map<String, List<KeyTool>> topic2PublicKeys = new ConcurrentHashMap<>();
+    // topic before and after switching
     public Map<String, String> old2NewTopic = new HashMap<>();
 
     /**
@@ -348,12 +348,13 @@ public class AMOPChannel extends AmopCallback {
         FileAmopResponseCallback callback = new FileAmopResponseCallback();
 
         AmopResponse response = null;
-        for (int i = 0; i <= SEND_RETRY_COUNT; i++) {
+        for (int i = 0; i < SEND_RETRY_COUNT; i++) {
             this.amop.sendAmopMsg(msgOut, callback);
             response = callback.get(msgOut.getTimeout(), TimeUnit.MINUTES);
             if (response.getErrorCode() == ErrorCode.SUCCESS.getCode()) {
                 break;
             }
+            Thread.sleep(1000);
             log.warn("send amop message failed, retry count: {}.", i+1);
         }
 
@@ -413,27 +414,7 @@ public class AMOPChannel extends AmopCallback {
                 log.info("get {}, try to switch topic.", fileEvent.getEventType());
                 try {
                     FileChunksMeta fileChunksMeta = fileEvent.getFileChunksMeta();
-                    /*
-                    WeEventFileClient.EventListener eventListener = this.topicListenerMap.get(fileChunksMeta.getTopic());
-                    String newTopic = fileChunksMeta.getTopic() + "-" + Math.random();
 
-                    if (subVerifyTopics.contains(fileChunksMeta.getTopic())) {
-                        KeyTool keyTool = this.topic2PrivateKey.get(fileChunksMeta.getTopic());
-                        if (keyTool == null) {
-                            log.error("no private key corresponding to topic: {}.", fileChunksMeta.getTopic());
-                            throw new BrokerException("unable to get private key after switching topics.");
-                        }
-
-                        this.subTopic(newTopic, keyTool, eventListener);
-                        log.info("subscribe new verify topic: {}", newTopic);
-                    } else if (subTopics.contains(fileChunksMeta.getTopic())) {
-                        this.subTopic(newTopic, eventListener);
-                        log.info("subscribe new normal topic: {}", newTopic);
-                    } else {
-                        log.error("not subscribed to this topic: {}.", fileChunksMeta.getTopic());
-                        throw new BrokerException("not subscribed to this topic.");
-                    }
-                     */
                     String newTopic = old2NewTopic.get(fileChunksMeta.getTopic());
 
                     channelResponseData = DataTypeUtils.toChannelResponse(ErrorCode.SUCCESS, JsonHelper.object2JsonBytes(newTopic));
