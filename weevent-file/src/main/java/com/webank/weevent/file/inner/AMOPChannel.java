@@ -149,8 +149,6 @@ public class AMOPChannel extends AmopCallback {
         subTopic(newTopic, kt, eventListener);
         log.info("subscribe new verify topic: {}", newTopic);
         old2NewTopic.put(topic, newTopic);
-
-        //this.topic2PrivateKey.put(topic, kt);
     }
 
     public void subTopic(String topic, KeyTool keyTool, WeEventFileClient.EventListener eventListener) {
