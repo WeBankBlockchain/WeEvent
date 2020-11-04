@@ -134,7 +134,7 @@ public class WeEventFileClientTest {
     public void testListFile() {
         WeEventFileClient weEventFileClient = new WeEventFileClient(this.groupId, this.localReceivePath, this.fileChunkSize, this.fiscoConfig);
         try {
-            weEventFileClient.listFiles(this.topicName);
+            weEventFileClient.listFiles(this.groupId, this.topicName);
         } catch (BrokerException e) {
             e.printStackTrace();
         }

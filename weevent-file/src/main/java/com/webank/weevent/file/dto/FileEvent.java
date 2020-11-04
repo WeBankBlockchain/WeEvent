@@ -30,6 +30,8 @@ public class FileEvent {
         FileChannelEnd(13),
 
         FileChannelExist(14),
+
+        FileChannelSwitch(15),
         ;
 
         private final int code;
