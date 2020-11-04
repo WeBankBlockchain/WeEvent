@@ -1,5 +1,6 @@
 package com.webank.weevent.file.inner;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
@@ -47,6 +48,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
  */
 @Slf4j
 public class AMOPChannel extends AmopCallback {
+    private static final int SEND_RETRY_COUNT = 5;
     private final FileTransportService fileTransportService;
     //    public Service service;
     public Amop amop;
@@ -344,8 +346,17 @@ public class AMOPChannel extends AmopCallback {
         log.info("send channel request, topic: {} {}", topic, fileEvent.getEventType());
         StopWatch sw = StopWatch.createStarted();
         FileAmopResponseCallback callback = new FileAmopResponseCallback();
-        this.amop.sendAmopMsg(msgOut, callback);
-        AmopResponse response = callback.get(msgOut.getTimeout(), TimeUnit.MINUTES);
+
+        AmopResponse response = null;
+        for (int i = 0; i <= SEND_RETRY_COUNT; i++) {
+            this.amop.sendAmopMsg(msgOut, callback);
+            response = callback.get(msgOut.getTimeout(), TimeUnit.MINUTES);
+            if (response.getErrorCode() == ErrorCode.SUCCESS.getCode()) {
+                break;
+            }
+            log.warn("send amop message failed, retry count: {}.", i+1);
+        }
+
         sw.stop();
         log.info("receive channel response, id: {} result: {}-{} cost: {}", response.getMessageID(), response.getErrorCode(), response.getErrorMessage(), sw.getTime());
         return response;
