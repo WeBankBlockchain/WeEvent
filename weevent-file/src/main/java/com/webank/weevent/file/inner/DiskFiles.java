@@ -54,7 +54,8 @@ public class DiskFiles {
             log.error("the fileChunksMeta corresponding to fieldId not exist, {}", fileId);
             throw new BrokerException(ErrorCode.FILE_GEN_LOCAL_FILE_NAME_FAILED);
         }
-        return this.path + "/" + fileChunksMeta.getTopic() + "/" + fileChunksMeta.getFileName();
+        return this.path + PATH_SEPARATOR + fileChunksMeta.getGroupId()+ PATH_SEPARATOR
+                + fileChunksMeta.getTopic() + PATH_SEPARATOR + fileChunksMeta.getFileName();
     }
 
     private String genLocalMetaFileName(String fileId) throws BrokerException {
@@ -110,7 +111,7 @@ public class DiskFiles {
 
     public void createFixedLengthFile(FileChunksMeta fileChunksMeta) throws BrokerException {
         // ensure path exist and disk space
-        String filePath = this.path + "/" + fileChunksMeta.getTopic();
+        String filePath = this.path + PATH_SEPARATOR + fileChunksMeta.getGroupId() + PATH_SEPARATOR+ fileChunksMeta.getTopic();
         File path = new File(filePath);
         path.mkdirs();
         if (!path.exists()) {
@@ -230,10 +231,10 @@ public class DiskFiles {
         this.deleteFile(this.genLocalMetaFileName(fileId));
     }
 
-    public List<FileChunksMeta> listNotCompleteFiles(boolean all, String topicName) {
+    public List<FileChunksMeta> listNotCompleteFiles(boolean all, String groupId, String topicName) {
         List<FileChunksMeta> fileChunksMetas = new ArrayList<>();
 
-        String filePath = this.path + "/" + topicName;
+        String filePath = this.path + PATH_SEPARATOR + groupId + PATH_SEPARATOR + topicName;
         File topPath = new File(filePath);
         topPath.mkdirs();
         if (!topPath.exists()) {

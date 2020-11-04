@@ -135,7 +135,7 @@ public interface IWeEventFileClient {
      * @return FileChunksMeta list
      * @throws BrokerException broker exception
      */
-    List<FileChunksMeta> listFiles(String topic) throws BrokerException;
+    List<FileChunksMeta> listFiles(String group, String topic) throws BrokerException;
 
     /**
      * sign a file transport event.
