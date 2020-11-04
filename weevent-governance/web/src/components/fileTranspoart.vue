@@ -567,7 +567,7 @@ export default {
       })
     },
     dFile (e) {
-      const url = con.ROOT + 'file/download?topic=' + e.topic + '&fileName=' + e.fileName
+      const url = con.ROOT + 'file/download?topic=' + e.topic + '&fileName=' + e.fileName + '&groupId=' + e.groupId
       var xhr = new XMLHttpRequest()
       var formData = new FormData()
       xhr.open('get', url)
