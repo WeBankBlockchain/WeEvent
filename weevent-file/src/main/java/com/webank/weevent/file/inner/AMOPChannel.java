@@ -3,9 +3,11 @@ package com.webank.weevent.file.inner;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -63,6 +65,7 @@ public class AMOPChannel extends AmopCallback {
     // store privateKey and publicKey for switch topic
     public Map<String, KeyTool> topic2PrivateKey = new ConcurrentHashMap<>();
     public Map<String, List<KeyTool>> topic2PublicKeys = new ConcurrentHashMap<>();
+    public Map<String, String> old2NewTopic = new HashMap<>();
 
     /**
      * Create a AMOP channel on service for subscribe topic
@@ -114,6 +117,13 @@ public class AMOPChannel extends AmopCallback {
             this.topicListenerMap.put(topic, eventListener);
             this.subTopics.add(topic);
             this.amop.subscribeTopic(topic, this);
+
+            log.info("subscribe new topic on AMOP channel, {}", topic);
+            String newTopic = topic + "-" + Math.random();
+            this.topicListenerMap.put(newTopic, eventListener);
+            this.subTopics.add(newTopic);
+            this.amop.subscribeTopic(newTopic, this);
+            old2NewTopic.put(topic, newTopic);
         }
     }
 
@@ -132,7 +142,15 @@ public class AMOPChannel extends AmopCallback {
             throw new BrokerException(ErrorCode.FILE_PEM_KEY_INVALID);
         }
         subTopic(topic, kt, eventListener);
-        this.topic2PrivateKey.put(topic, kt);
+
+        // gen new topic and subscribe this topic(files can also be transferred when multiple subscribers are listening)
+        String newTopic = topic + Math.random();
+        subTopic(topic + new Random(124), kt, eventListener);
+        subTopic(newTopic, kt, eventListener);
+        log.info("subscribe new verify topic: {}", newTopic);
+        old2NewTopic.put(topic, newTopic);
+
+        //this.topic2PrivateKey.put(topic, kt);
     }
 
     public void subTopic(String topic, KeyTool keyTool, WeEventFileClient.EventListener eventListener) {
@@ -384,8 +402,9 @@ public class AMOPChannel extends AmopCallback {
                 log.info("get {}, try to switch topic.", fileEvent.getEventType());
                 try {
                     FileChunksMeta fileChunksMeta = fileEvent.getFileChunksMeta();
+                    /*
                     WeEventFileClient.EventListener eventListener = this.topicListenerMap.get(fileChunksMeta.getTopic());
-                    String newTopic = fileChunksMeta.getTopic() + "-" + new Date().getTime();
+                    String newTopic = fileChunksMeta.getTopic() + "-" + Math.random();
 
                     if (subVerifyTopics.contains(fileChunksMeta.getTopic())) {
                         KeyTool keyTool = this.topic2PrivateKey.get(fileChunksMeta.getTopic());
@@ -403,6 +422,8 @@ public class AMOPChannel extends AmopCallback {
                         log.error("not subscribed to this topic: {}.", fileChunksMeta.getTopic());
                         throw new BrokerException("not subscribed to this topic.");
                     }
+                     */
+                    String newTopic = old2NewTopic.get(fileChunksMeta.getTopic());
 
                     channelResponseData = DataTypeUtils.toChannelResponse(ErrorCode.SUCCESS, JsonHelper.object2JsonBytes(newTopic));
                 } catch (BrokerException e) {
