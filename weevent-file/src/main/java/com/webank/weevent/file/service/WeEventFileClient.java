@@ -289,7 +289,8 @@ public class WeEventFileClient implements IWeEventFileClient {
     public List<FileChunksMeta> listFiles(String group, String topic) throws BrokerException {
         // get json from disk
         List<File> fileList = new ArrayList<>();
-        String filePath = this.localReceivePath + PATH_SEPARATOR + group + PATH_SEPARATOR + topic;
+        String newTopic = this.fileTransportService.getChannel().old2NewTopic.get(topic);
+        String filePath = this.localReceivePath + PATH_SEPARATOR + group + PATH_SEPARATOR + newTopic;
         File file = new File(filePath);
         if (!file.exists()) {
             file.mkdirs();
@@ -310,7 +311,7 @@ public class WeEventFileClient implements IWeEventFileClient {
         DiskFiles diskFiles = new DiskFiles(filePath);
         for (File f : fileList) {
             FileChunksMeta fileChunksMeta = diskFiles.loadFileMeta(f);
-            if (fileChunksMeta.getTopic().equals(topic) && fileChunksMeta.checkChunkFull()) {
+            if (fileChunksMeta.getTopic().equals(newTopic) && fileChunksMeta.checkChunkFull()) {
                 fileChunksMetaList.add(fileChunksMeta);
             }
         }
