@@ -268,8 +268,8 @@ public class FileService {
         return chunkParam;
     }
 
-    public String downloadFile(String group, String topic, String fileName) throws GovernanceException {
-        String filePath = this.downloadPath.concat(File.separator).concat(group).concat(File.separator)
+    public String downloadFile(String groupId, String topic, String fileName) throws GovernanceException {
+        String filePath = this.downloadPath.concat(File.separator).concat(groupId).concat(File.separator)
                 .concat(topic).concat(File.separator).concat(fileName);
         if (!new File(filePath).exists()) {
             log.error("file not exist, topic:{}, fileName:{}", topic, fileName);
