@@ -259,7 +259,8 @@ public class WeEventFileClient implements IWeEventFileClient {
 
     @Override
     public FileTransportStats status(String topicName) {
-        FileTransportStats fileTransportStats = this.fileTransportService.stats(true, this.groupId, topicName);
+        String newTopic = this.fileTransportService.getChannel().old2NewTopic.get(topicName);
+        FileTransportStats fileTransportStats = this.fileTransportService.stats(true, this.groupId, newTopic);
         if (fileTransportStats == null) {
             log.error("get status error");
             return null;
@@ -267,15 +268,15 @@ public class WeEventFileClient implements IWeEventFileClient {
 
         // sender
         Map<String, List<FileChunksMetaStatus>> senderTopicStatusMap = new HashMap<>();
-        List<FileChunksMetaStatus> senderFileChunksMetaStatusList = fileTransportStats.getSender().get(groupId).get(topicName);
-        senderTopicStatusMap.put(topicName, senderFileChunksMetaStatusList);
+        List<FileChunksMetaStatus> senderFileChunksMetaStatusList = fileTransportStats.getSender().get(groupId).get(newTopic);
+        senderTopicStatusMap.put(newTopic, senderFileChunksMetaStatusList);
         Map<String, Map<String, List<FileChunksMetaStatus>>> sender = new HashMap<>();
         sender.put(groupId, senderTopicStatusMap);
 
         // receiver
         Map<String, List<FileChunksMetaStatus>> receiverTopicStatusMap = new HashMap<>();
-        List<FileChunksMetaStatus> receiverFileChunksMetaStatusList = fileTransportStats.getReceiver().get(groupId).get(topicName);
-        receiverTopicStatusMap.put(topicName, receiverFileChunksMetaStatusList);
+        List<FileChunksMetaStatus> receiverFileChunksMetaStatusList = fileTransportStats.getReceiver().get(groupId).get(newTopic);
+        receiverTopicStatusMap.put(newTopic, receiverFileChunksMetaStatusList);
         Map<String, Map<String, List<FileChunksMetaStatus>>> receiver = new HashMap<>();
         receiver.put(groupId, receiverTopicStatusMap);
 

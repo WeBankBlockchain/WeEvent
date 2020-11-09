@@ -128,8 +128,7 @@ public class FileTransportService {
         fileTransportStats.getSender().put(groupId, senders);
 
         // receiver
-        String newTopic  = this.channel.old2NewTopic.get(topicName);
-        List<FileChunksMeta> localFiles = this.diskFiles.listNotCompleteFiles(all, groupId, newTopic);
+        List<FileChunksMeta> localFiles = this.diskFiles.listNotCompleteFiles(all, groupId, topicName);
         Map<String, List<FileChunksMetaStatus>> receivers = new HashMap<>();
         for (String topic : channel.getSubTopics()) {
             List<FileChunksMetaStatus> filePlus = localFiles.stream()
