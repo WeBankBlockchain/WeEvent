@@ -82,7 +82,7 @@ public class FileController {
     }
 
     @RequestMapping(path = "/download")
-    public void download(@RequestParam(name = "group") String group,
+    public void download(@RequestParam(name = "groupId") String groupId,
                          @RequestParam(name = "topic") String topic,
                          @RequestParam(name = "fileName") String fileName,
                          HttpServletResponse response) throws GovernanceException {
@@ -91,7 +91,7 @@ public class FileController {
         response.setContentType("application/octet-stream; charset=UTF-8");
 
         ParamCheckUtils.validateFileName(fileName);
-        String downloadFile = this.fileService.downloadFile(group, topic, fileName);
+        String downloadFile = this.fileService.downloadFile(groupId, topic, fileName);
         if (StringUtils.isBlank(downloadFile)) {
             throw new GovernanceException("download file not exist");
         }
