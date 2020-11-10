@@ -145,7 +145,6 @@ public class AMOPChannel extends AmopCallback {
 
         // gen new topic and subscribe this topic(files can also be transferred when multiple subscribers are listening)
         String newTopic = topic + TOPIC_SEPARATOR + Math.random();
-        subTopic(topic + newTopic, kt, eventListener);
         subTopic(newTopic, kt, eventListener);
         log.info("subscribe new verify topic: {}", newTopic);
         old2NewTopic.put(topic, newTopic);
