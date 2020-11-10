@@ -177,7 +177,7 @@ public class WeEventFileClient implements IWeEventFileClient {
 
         AMOPChannel amopChannel = this.fileTransportService.getChannel();
         if (amopChannel.senderTopics.contains(topic)) {
-            this.fileTransportService.getChannel().senderTopics.add(topic);
+            this.fileTransportService.getChannel().senderTopics.add(newTopic);
         } else if (amopChannel.senderVerifyTopics.contains(topic)) {
             Amop amop = amopChannel.amop;
             List<KeyTool> keyToolList = this.fileTransportService.getChannel().topic2PublicKeys.get(topic);
@@ -259,8 +259,7 @@ public class WeEventFileClient implements IWeEventFileClient {
 
     @Override
     public FileTransportStats status(String topicName) {
-        String newTopic = this.fileTransportService.getChannel().old2NewTopic.get(topicName);
-        FileTransportStats fileTransportStats = this.fileTransportService.stats(true, this.groupId, newTopic);
+        FileTransportStats fileTransportStats = this.fileTransportService.stats(true, this.groupId, topicName);
         if (fileTransportStats == null) {
             log.error("get status error");
             return null;
@@ -268,15 +267,15 @@ public class WeEventFileClient implements IWeEventFileClient {
 
         // sender
         Map<String, List<FileChunksMetaStatus>> senderTopicStatusMap = new HashMap<>();
-        List<FileChunksMetaStatus> senderFileChunksMetaStatusList = fileTransportStats.getSender().get(groupId).get(newTopic);
-        senderTopicStatusMap.put(newTopic, senderFileChunksMetaStatusList);
+        List<FileChunksMetaStatus> senderFileChunksMetaStatusList = fileTransportStats.getSender().get(groupId).get(topicName);
+        senderTopicStatusMap.put(topicName, senderFileChunksMetaStatusList);
         Map<String, Map<String, List<FileChunksMetaStatus>>> sender = new HashMap<>();
         sender.put(groupId, senderTopicStatusMap);
 
         // receiver
         Map<String, List<FileChunksMetaStatus>> receiverTopicStatusMap = new HashMap<>();
-        List<FileChunksMetaStatus> receiverFileChunksMetaStatusList = fileTransportStats.getReceiver().get(groupId).get(newTopic);
-        receiverTopicStatusMap.put(newTopic, receiverFileChunksMetaStatusList);
+        List<FileChunksMetaStatus> receiverFileChunksMetaStatusList = fileTransportStats.getReceiver().get(groupId).get(topicName);
+        receiverTopicStatusMap.put(topicName, receiverFileChunksMetaStatusList);
         Map<String, Map<String, List<FileChunksMetaStatus>>> receiver = new HashMap<>();
         receiver.put(groupId, receiverTopicStatusMap);
 
@@ -290,8 +289,7 @@ public class WeEventFileClient implements IWeEventFileClient {
     public List<FileChunksMeta> listFiles(String group, String topic) throws BrokerException {
         // get json from disk
         List<File> fileList = new ArrayList<>();
-        String newTopic = this.fileTransportService.getChannel().old2NewTopic.get(topic);
-        String filePath = this.localReceivePath + PATH_SEPARATOR + group + PATH_SEPARATOR + newTopic;
+        String filePath = this.localReceivePath + PATH_SEPARATOR + group + PATH_SEPARATOR + topic;
         File file = new File(filePath);
         if (!file.exists()) {
             file.mkdirs();
@@ -312,7 +310,7 @@ public class WeEventFileClient implements IWeEventFileClient {
         DiskFiles diskFiles = new DiskFiles(filePath);
         for (File f : fileList) {
             FileChunksMeta fileChunksMeta = diskFiles.loadFileMeta(f);
-            if (fileChunksMeta.getTopic().equals(newTopic) && fileChunksMeta.checkChunkFull()) {
+            if (fileChunksMeta.getTopic().equals(topic) && fileChunksMeta.checkChunkFull()) {
                 fileChunksMetaList.add(fileChunksMeta);
             }
         }

@@ -1,6 +1,9 @@
 package com.webank.weevent.file.inner;
 
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -16,6 +19,7 @@ import com.webank.weevent.client.ErrorCode;
 import com.webank.weevent.client.JsonHelper;
 import com.webank.weevent.core.dto.AmopMsgResponse;
 import com.webank.weevent.core.fisco.util.DataTypeUtils;
+import com.webank.weevent.core.fisco.util.WeEventUtils;
 import com.webank.weevent.core.fisco.web3sdk.v2.Web3SDKConnector;
 import com.webank.weevent.file.dto.FileEvent;
 import com.webank.weevent.file.service.FileChunksMeta;
@@ -120,8 +124,6 @@ public class AMOPChannel extends AmopCallback {
 
             log.info("subscribe new topic on AMOP channel, {}", topic);
             String newTopic = topic + TOPIC_SEPARATOR + Math.random();
-            this.topicListenerMap.put(newTopic, eventListener);
-            this.subTopics.add(newTopic);
             this.amop.subscribeTopic(newTopic, this);
             old2NewTopic.put(topic, newTopic);
         }
@@ -141,22 +143,19 @@ public class AMOPChannel extends AmopCallback {
             log.error("load private key in pem format failed.", e);
             throw new BrokerException(ErrorCode.FILE_PEM_KEY_INVALID);
         }
-        subTopic(topic, kt, eventListener);
+        // sub verify topic and store topic-Listener and subVerifyTopic in AMOPChannel
+        this.amop.subscribePrivateTopics(topic, kt, this);
+        log.info("subscribe verify topic on AMOP channel, {}", topic);
+        this.topicListenerMap.put(topic, eventListener);
+        this.subVerifyTopics.add(topic);
 
         // gen new topic and subscribe this topic(files can also be transferred when multiple subscribers are listening)
         String newTopic = topic + TOPIC_SEPARATOR + Math.random();
-        subTopic(newTopic, kt, eventListener);
+        this.amop.subscribePrivateTopics(topic, kt, this);
         log.info("subscribe new verify topic: {}", newTopic);
+
+        // store topic-newTopic relationship
         old2NewTopic.put(topic, newTopic);
-    }
-
-    public void subTopic(String topic, KeyTool keyTool, WeEventFileClient.EventListener eventListener) {
-        this.amop.subscribePrivateTopics(topic, keyTool, this);
-        log.info("subscribe verify topic on AMOP channel, {}", topic);
-        this.topicListenerMap.put(topic, eventListener);
-
-        // put <topic-service> to map in AMOPChannel
-        this.subVerifyTopics.add(topic);
     }
 
     public void unSubTopic(String topic) {
@@ -319,6 +318,30 @@ public class AMOPChannel extends AmopCallback {
         }
     }
 
+    public FileChunksMeta getNewFileChunksMeta(FileChunksMeta fileChunksMeta) throws BrokerException {
+        // get old topic from new topic
+        String topic = null;
+        for(Map.Entry<String, String> entry : this.old2NewTopic.entrySet()) {
+            if (entry.getValue().equals(fileChunksMeta.getTopic())) {
+                topic = entry.getKey();
+            }
+        }
+        if (topic == null) {
+            log.error("get topic from old2NewTopic error");
+            throw new BrokerException(ErrorCode.DECODE_FILE_NAME_ERROR);
+        }
+
+        FileChunksMeta newFileChunksMeta;
+        newFileChunksMeta = new FileChunksMeta(WeEventUtils.generateUuid(),
+                fileChunksMeta.getFileName(),
+                fileChunksMeta.getFileSize(),
+                fileChunksMeta.getFileMd5(),
+                topic,
+                fileChunksMeta.getGroupId(), fileChunksMeta.isOverwrite());
+
+        return newFileChunksMeta;
+    }
+
 
     public AmopResponse sendEvent(String topic, FileEvent fileEvent) throws BrokerException, InterruptedException, TimeoutException {
         if (this.subTopics.contains(topic) || this.subVerifyTopics.contains(topic)) {
@@ -423,10 +446,12 @@ public class AMOPChannel extends AmopCallback {
             case FileChannelStart: {
                 log.info("get {}, try to initialize context for receiving file", fileEvent.getEventType());
                 try {
-                    FileChunksMeta fileChunksMeta = this.fileTransportService.prepareReceiveFile(fileEvent.getFileChunksMeta());
+                    FileChunksMeta fileChunksMeta = fileEvent.getFileChunksMeta();
+
+                    FileChunksMeta retFileChunksMeta = this.fileTransportService.prepareReceiveFile(getNewFileChunksMeta(fileChunksMeta));
                     log.info("create file context success, fileName: {}", fileEvent.getFileChunksMeta().getFileName());
 
-                    channelResponseData = DataTypeUtils.toChannelResponse(ErrorCode.SUCCESS, JsonHelper.object2JsonBytes(fileChunksMeta));
+                    channelResponseData = DataTypeUtils.toChannelResponse(ErrorCode.SUCCESS, JsonHelper.object2JsonBytes(retFileChunksMeta));
                 } catch (BrokerException e) {
                     log.error("create file context failed, fileId: {}", fileEvent.getFileId());
                     channelResponseData = DataTypeUtils.toChannelResponse(e);
@@ -481,12 +506,15 @@ public class AMOPChannel extends AmopCallback {
                 log.info("get {}, check if the file exists", fileEvent.getEventType());
                 try {
                     FileChunksMeta fileChunksMeta = fileEvent.getFileChunksMeta();
-                    boolean fileExistLocal = this.fileTransportService.checkFileExist(fileChunksMeta);
-                    log.info("check if the file exists success, fileName: {}, local file existence: {}", fileChunksMeta.getFileName(), fileExistLocal);
 
-                    WeEventFileClient.EventListener eventListener = this.topicListenerMap.get(fileChunksMeta.getTopic());
-                    boolean fileExistFtp = eventListener.checkFile(fileChunksMeta.getFileName());
-                    log.info("check if the file exists success, fileName: {}, ftp file existence: {}", fileChunksMeta.getFileName(), fileExistFtp);
+                    FileChunksMeta newFileChunksMeta = getNewFileChunksMeta(fileChunksMeta);
+
+                    boolean fileExistLocal = this.fileTransportService.checkFileExist(newFileChunksMeta);
+                    log.info("check if the file exists success, fileName: {}, local file existence: {}", newFileChunksMeta.getFileName(), fileExistLocal);
+
+                    WeEventFileClient.EventListener eventListener = this.topicListenerMap.get(newFileChunksMeta.getTopic());
+                    boolean fileExistFtp = eventListener.checkFile(newFileChunksMeta.getFileName());
+                    log.info("check if the file exists success, fileName: {}, ftp file existence: {}", newFileChunksMeta.getFileName(), fileExistFtp);
 
                     channelResponseData = DataTypeUtils.toChannelResponse(ErrorCode.SUCCESS, JsonHelper.object2JsonBytes(fileExistLocal || fileExistFtp));
                     log.info("channelResponseData:{}", channelResponseData.length);
