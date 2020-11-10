@@ -1,9 +1,6 @@
 package com.webank.weevent.file.inner;
 
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -104,7 +101,7 @@ public class AMOPChannel extends AmopCallback {
         return topicMap;
     }
 
-    public Set<String> getVerifyTopics() {
+    public Set<String> getSubVerifyTopics() {
         return new HashSet<>(subVerifyTopics);
     }
 
@@ -125,6 +122,8 @@ public class AMOPChannel extends AmopCallback {
             log.info("subscribe new topic on AMOP channel, {}", topic);
             String newTopic = topic + TOPIC_SEPARATOR + Math.random();
             this.amop.subscribeTopic(newTopic, this);
+            this.subTopics.add(newTopic);
+
             old2NewTopic.put(topic, newTopic);
         }
     }
@@ -151,7 +150,8 @@ public class AMOPChannel extends AmopCallback {
 
         // gen new topic and subscribe this topic(files can also be transferred when multiple subscribers are listening)
         String newTopic = topic + TOPIC_SEPARATOR + Math.random();
-        this.amop.subscribePrivateTopics(topic, kt, this);
+        this.amop.subscribePrivateTopics(newTopic, kt, this);
+        this.subVerifyTopics.add(newTopic);
         log.info("subscribe new verify topic: {}", newTopic);
 
         // store topic-newTopic relationship
@@ -412,7 +412,7 @@ public class AMOPChannel extends AmopCallback {
 
     @Override
     public byte[] receiveAmopMsg(AmopMsgIn msg) {
-        if (!(this.getVerifyTopics().contains(msg.getTopic()) || this.subTopics.contains(msg.getTopic()))) {
+        if (!(this.getSubVerifyTopics().contains(msg.getTopic()) || this.subTopics.contains(msg.getTopic()))) {
             log.error("unknown topic on channel, {} -> {}", msg.getTopic(), this.subTopics.addAll(this.subVerifyTopics));
             return DataTypeUtils.toChannelResponse(ErrorCode.UNKNOWN_AMOP_SUB_TOPIC);
         }
