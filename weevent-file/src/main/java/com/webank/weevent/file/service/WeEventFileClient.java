@@ -177,7 +177,7 @@ public class WeEventFileClient implements IWeEventFileClient {
 
         AMOPChannel amopChannel = this.fileTransportService.getChannel();
         if (amopChannel.senderTopics.contains(topic)) {
-            this.fileTransportService.getChannel().senderTopics.add(topic);
+            this.fileTransportService.getChannel().senderTopics.add(newTopic);
         } else if (amopChannel.senderVerifyTopics.contains(topic)) {
             Amop amop = amopChannel.amop;
             List<KeyTool> keyToolList = this.fileTransportService.getChannel().topic2PublicKeys.get(topic);

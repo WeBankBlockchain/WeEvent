@@ -134,7 +134,12 @@ public class WeEventFileClientTest {
     public void testListFile() {
         WeEventFileClient weEventFileClient = new WeEventFileClient(this.groupId, this.localReceivePath, this.fileChunkSize, this.fiscoConfig);
         try {
-            weEventFileClient.listFiles(this.groupId, this.topicName);
+            List<FileChunksMeta> fileChunksMetas = weEventFileClient.listFiles(this.groupId, this.topicName);
+            if (fileChunksMetas != null && fileChunksMetas.size()!=0) {
+                for (FileChunksMeta fileChunksMeta : fileChunksMetas) {
+                    System.out.println(fileChunksMeta.getFileName() + "  "+ fileChunksMeta.getTopic() + "  " + fileChunksMeta.getGroupId());
+                }
+            }
         } catch (BrokerException e) {
             e.printStackTrace();
         }
