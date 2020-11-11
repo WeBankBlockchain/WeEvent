@@ -80,7 +80,7 @@ public class WeEventFileClientTest {
     }
 
     @Test
-//    @Ignore
+    @Ignore
     public void testPublishFileWithVerify() throws Exception {
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
         Resource resource = resolver.getResource("classpath:" + "0x2809a9902e47d6fcaabe6d0183855d9201c93af1.public.pem");
@@ -119,7 +119,7 @@ public class WeEventFileClientTest {
         WeEventFileClient weEventFileClient = new WeEventFileClient(this.groupId, this.localReceivePath, this.fileChunkSize, this.fiscoConfig);
         weEventFileClient.openTransport4Receiver(this.topicName, fileListener, resource.getInputStream());
 
-        Thread.sleep(1000 * 60 * 30);
+        Thread.sleep(1000);
         Assert.assertTrue(true);
     }
 
@@ -134,7 +134,12 @@ public class WeEventFileClientTest {
     public void testListFile() {
         WeEventFileClient weEventFileClient = new WeEventFileClient(this.groupId, this.localReceivePath, this.fileChunkSize, this.fiscoConfig);
         try {
-            weEventFileClient.listFiles(this.groupId, this.topicName);
+            List<FileChunksMeta> fileChunksMetas = weEventFileClient.listFiles(this.groupId, this.topicName);
+            if (fileChunksMetas != null && fileChunksMetas.size()!=0) {
+                for (FileChunksMeta fileChunksMeta : fileChunksMetas) {
+                    System.out.println(fileChunksMeta.getFileName() + "  "+ fileChunksMeta.getTopic() + "  " + fileChunksMeta.getGroupId());
+                }
+            }
         } catch (BrokerException e) {
             e.printStackTrace();
         }
@@ -158,7 +163,7 @@ public class WeEventFileClientTest {
             weEventFileClient.openTransport4Sender(this.topic);
             try {
                 weEventFileClient.publishFile(topic,
-                        new File("src/main/resources/bigfile.zip").getAbsolutePath(), true);
+                        new File("src/main/resources/resources.zip").getAbsolutePath(), true);
             } catch (Exception e) {
                 e.printStackTrace();
             }
