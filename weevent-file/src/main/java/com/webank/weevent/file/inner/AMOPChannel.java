@@ -24,6 +24,7 @@ import com.webank.weevent.file.service.WeEventFileClient;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.StopWatch;
+import org.bouncycastle.crypto.prng.RandomGenerator;
 import org.fisco.bcos.sdk.BcosSDKException;
 import org.fisco.bcos.sdk.amop.Amop;
 import org.fisco.bcos.sdk.amop.AmopCallback;
@@ -120,7 +121,9 @@ public class AMOPChannel extends AmopCallback {
             this.amop.subscribeTopic(topic, this);
 
             log.info("subscribe new topic on AMOP channel, {}", topic);
-            String newTopic = topic + TOPIC_SEPARATOR + Math.random();
+
+            String newTopic = topic + TOPIC_SEPARATOR + Double.toString(Math.random()).substring(2);
+
             this.amop.subscribeTopic(newTopic, this);
             this.subTopics.add(newTopic);
 
@@ -149,7 +152,7 @@ public class AMOPChannel extends AmopCallback {
         this.subVerifyTopics.add(topic);
 
         // gen new topic and subscribe this topic(files can also be transferred when multiple subscribers are listening)
-        String newTopic = topic + TOPIC_SEPARATOR + Math.random();
+        String newTopic = topic + TOPIC_SEPARATOR + Double.toString(Math.random()).substring(2);
         this.amop.subscribePrivateTopics(newTopic, kt, this);
         this.subVerifyTopics.add(newTopic);
         log.info("subscribe new verify topic: {}", newTopic);
