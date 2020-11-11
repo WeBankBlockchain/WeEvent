@@ -333,7 +333,7 @@ export default {
           groupId: localStorage.getItem('groupId')
         }
         API.deleteTransport(data).then(res => {
-          if (res.data.status === 200) {
+          if (res.data.code === 0) {
             vm.$message({
               type: 'success',
               message: vm.$t('rule.hasDelete')
@@ -567,7 +567,7 @@ export default {
       })
     },
     dFile (e) {
-      const url = con.ROOT + 'file/download?topic=' + e.topic + '&fileName=' + e.fileName
+      const url = con.ROOT + 'file/download?topic=' + e.topic + '&fileName=' + e.fileName + '&groupId=' + e.groupId
       var xhr = new XMLHttpRequest()
       var formData = new FormData()
       xhr.open('get', url)
@@ -594,6 +594,7 @@ export default {
       xhr.send(formData)
     },
     generatePPK (e) {
+      const vm = this
       const url = con.ROOT + 'file/genPemFile?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&filePath=' + "./logs"
       var xhr = new XMLHttpRequest()
       var formData = new FormData()
@@ -605,6 +606,15 @@ export default {
           const blob = this.response
           const f = this.getResponseHeader('filename')
           const filename = decodeURI(f)
+          if("null" === filename){
+          	vm.$message({
+              type: 'warning',
+              message: vm.$t('file.createFileTopic'),
+              duration: 0,
+              showClose: true
+            })
+          	return;
+          }
           if (window.navigator.msSaveOrOpenBlob) {
             navigator.msSaveBlob(blob, filename)
           } else {
@@ -649,6 +659,12 @@ export default {
     },
     groupId (nVal) {
       if (nVal !== '-1') {
+      	this.getData()
+      }
+    },
+    brokerId (nVal) {
+      if (nVal !== '-1') {
+      	this.getData()
       }
     }
   },

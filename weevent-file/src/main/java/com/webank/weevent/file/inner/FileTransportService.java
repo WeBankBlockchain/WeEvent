@@ -23,9 +23,7 @@ import com.webank.weevent.file.dto.FileTransportStats;
 import com.webank.weevent.file.service.FileChunksMeta;
 
 import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.sdk.model.AmopMsg;
-import org.fisco.bcos.sdk.model.Response;
-
+import org.fisco.bcos.sdk.amop.AmopResponse;
 /**
  * File transport service base on AMOP.
  *
@@ -127,7 +125,7 @@ public class FileTransportService {
         fileTransportStats.getSender().put(groupId, senders);
 
         // receiver
-        List<FileChunksMeta> localFiles = this.diskFiles.listNotCompleteFiles(all, topicName);
+        List<FileChunksMeta> localFiles = this.diskFiles.listNotCompleteFiles(all, groupId, topicName);
         Map<String, List<FileChunksMetaStatus>> receivers = new HashMap<>();
         for (String topic : channel.getSubTopics()) {
             List<FileChunksMetaStatus> filePlus = localFiles.stream()
@@ -236,14 +234,13 @@ public class FileTransportService {
         fileEvent.setChunkData(data);
 
         try {
-            Response rsp = channel.sendEvent(topic, fileEvent);
+            AmopResponse rsp = channel.sendEvent(topic, fileEvent);
             if (rsp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
                 log.error("receive sender chunk data to remote failed, rsp:{}", rsp.getErrorMessage());
                 throw AMOPChannel.toBrokerException(rsp);
             }
 
-            AmopMsg amopMsg = AMOPChannel.response2AmopMsg(rsp);
-            AmopMsgResponse amopMsgResponse = JsonHelper.json2Object(amopMsg.getData(), AmopMsgResponse.class);
+            AmopMsgResponse amopMsgResponse = JsonHelper.json2Object(rsp.getAmopMsgIn().getContent(), AmopMsgResponse.class);
             if (amopMsgResponse.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
                 log.error("sender chunk data to remote failed, rsp:{}", amopMsgResponse.getErrorMessage());
                 throw AMOPChannel.toBrokerException(amopMsgResponse);

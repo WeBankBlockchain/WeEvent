@@ -2,6 +2,7 @@ package com.webank.weevent.file.inner;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,7 @@ import com.webank.weevent.client.ErrorCode;
 import com.webank.weevent.client.JsonHelper;
 import com.webank.weevent.core.dto.AmopMsgResponse;
 import com.webank.weevent.core.fisco.util.DataTypeUtils;
+import com.webank.weevent.core.fisco.util.WeEventUtils;
 import com.webank.weevent.core.fisco.web3sdk.v2.Web3SDKConnector;
 import com.webank.weevent.file.dto.FileEvent;
 import com.webank.weevent.file.service.FileChunksMeta;
@@ -22,18 +24,16 @@ import com.webank.weevent.file.service.WeEventFileClient;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.StopWatch;
+import org.bouncycastle.crypto.prng.RandomGenerator;
 import org.fisco.bcos.sdk.BcosSDKException;
 import org.fisco.bcos.sdk.amop.Amop;
 import org.fisco.bcos.sdk.amop.AmopCallback;
 import org.fisco.bcos.sdk.amop.AmopMsgOut;
+import org.fisco.bcos.sdk.amop.AmopResponse;
 import org.fisco.bcos.sdk.amop.topic.AmopMsgIn;
 import org.fisco.bcos.sdk.amop.topic.TopicType;
 import org.fisco.bcos.sdk.crypto.keystore.KeyTool;
 import org.fisco.bcos.sdk.crypto.keystore.PEMKeyStore;
-import org.fisco.bcos.sdk.model.AmopMsg;
-import org.fisco.bcos.sdk.model.Message;
-import org.fisco.bcos.sdk.model.MsgType;
-import org.fisco.bcos.sdk.model.Response;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /**
@@ -47,23 +47,27 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
  */
 @Slf4j
 public class AMOPChannel extends AmopCallback {
+    private static final int SEND_RETRY_COUNT = 10;
+    private static final String TOPIC_SEPARATOR = "-";
     private final FileTransportService fileTransportService;
     //    public Service service;
     public Amop amop;
     public ThreadPoolTaskExecutor threadPool;
 
-    // verify topic in AMOP(WeEvent's topic hash) <-> service correspond to topic
-    public Map<String, Amop> senderVerifyTopics = new ConcurrentHashMap<>();
+    public List<String> senderVerifyTopics = new ArrayList<>();
     // topic not verify
     public List<String> senderTopics = new ArrayList<>();
 
-    //public Map<String, Service> subVerifyTopics = new ConcurrentHashMap<>();
-    //  verify topic in AMOP(WeEvent's topic hash) <-> service correspond to topic
-    public Map<String, Amop> subVerifyTopics = new ConcurrentHashMap<>();
+    public List<String> subVerifyTopics = new ArrayList<>();
     // topic not verify
     public List<String> subTopics = new ArrayList<>();
 
     public Map<String, WeEventFileClient.EventListener> topicListenerMap = new ConcurrentHashMap<>();
+
+    // store publicKey for switch topic
+    public Map<String, List<KeyTool>> topic2PublicKeys = new ConcurrentHashMap<>();
+    // topic before and after switching
+    public Map<String, String> old2NewTopic = new HashMap<>();
 
     /**
      * Create a AMOP channel on service for subscribe topic
@@ -87,31 +91,25 @@ public class AMOPChannel extends AmopCallback {
     public Set<String> getSenderTopics() {
         Set<String> topicMap = new HashSet<>();
         topicMap.addAll(senderTopics);
-        topicMap.addAll(senderVerifyTopics.keySet());
+        topicMap.addAll(senderVerifyTopics);
         return topicMap;
     }
 
     public Set<String> getSubTopics() {
         Set<String> topicMap = new HashSet<>();
         topicMap.addAll(subTopics);
-        topicMap.addAll(subVerifyTopics.keySet());
-
+        topicMap.addAll(subVerifyTopics);
         return topicMap;
     }
 
-    public Set<String> getVerifyTopics() {
-        Set<String> topics = new HashSet<>();
-        for (String topicVerify : subVerifyTopics.keySet()) {
-            topics.addAll(this.subVerifyTopics.get(topicVerify).getSubTopics());
-        }
-
-        return topics;
+    public Set<String> getSubVerifyTopics() {
+        return new HashSet<>(subVerifyTopics);
     }
 
 
     // Receiver call subscribe topic
     public void subTopic(String topic, WeEventFileClient.EventListener eventListener) throws BrokerException {
-        if (this.senderTopics.contains(topic) || senderVerifyTopics.containsKey(topic)) {
+        if (this.senderTopics.contains(topic) || senderVerifyTopics.contains(topic)) {
             log.error("this is already sender side for topic: {}", topic);
             throw new BrokerException(ErrorCode.FILE_SENDER_RECEIVER_CONFLICT);
         }
@@ -121,17 +119,24 @@ public class AMOPChannel extends AmopCallback {
             this.topicListenerMap.put(topic, eventListener);
             this.subTopics.add(topic);
             this.amop.subscribeTopic(topic, this);
+
+            log.info("subscribe new topic on AMOP channel, {}", topic);
+
+            String newTopic = topic + TOPIC_SEPARATOR + Double.toString(Math.random()).substring(2);
+
+            this.amop.subscribeTopic(newTopic, this);
+            this.subTopics.add(newTopic);
+
+            old2NewTopic.put(topic, newTopic);
         }
     }
 
     // Receiver call subscribe verify topic
     public void subTopic(String topic, InputStream privatePem, WeEventFileClient.EventListener eventListener) throws BrokerException {
-        if (this.senderTopics.contains(topic) || senderVerifyTopics.containsKey(topic)) {
+        if (this.senderTopics.contains(topic) || senderVerifyTopics.contains(topic)) {
             log.error("this is already sender side for topic: {}", topic);
             throw new BrokerException(ErrorCode.FILE_SENDER_RECEIVER_CONFLICT);
         }
-
-        Amop amop = Web3SDKConnector.buidBcosSDK(this.fileTransportService.getFiscoConfig()).getAmop();
 
         KeyTool kt;
         try {
@@ -140,20 +145,26 @@ public class AMOPChannel extends AmopCallback {
             log.error("load private key in pem format failed.", e);
             throw new BrokerException(ErrorCode.FILE_PEM_KEY_INVALID);
         }
-
-        amop.subscribePrivateTopics(topic, kt, this);
+        // sub verify topic and store topic-Listener and subVerifyTopic in AMOPChannel
+        this.amop.subscribePrivateTopics(topic, kt, this);
         log.info("subscribe verify topic on AMOP channel, {}", topic);
         this.topicListenerMap.put(topic, eventListener);
+        this.subVerifyTopics.add(topic);
 
-        // put <topic-service> to map in AMOPChannel
-        this.subVerifyTopics.put(topic, amop);
+        // gen new topic and subscribe this topic(files can also be transferred when multiple subscribers are listening)
+        String newTopic = topic + TOPIC_SEPARATOR + Double.toString(Math.random()).substring(2);
+        this.amop.subscribePrivateTopics(newTopic, kt, this);
+        this.subVerifyTopics.add(newTopic);
+        log.info("subscribe new verify topic: {}", newTopic);
 
+        // store topic-newTopic relationship
+        old2NewTopic.put(topic, newTopic);
     }
 
     public void unSubTopic(String topic) {
-        if (subVerifyTopics.containsKey(topic)) {
+        if (subVerifyTopics.contains(topic)) {
             log.info("unSubscribe verify topic on AMOP channel, {}", topic);
-            this.subVerifyTopics.get(topic).unsubscribeTopic(topic);
+            this.amop.unsubscribeTopic(topic);
             this.subVerifyTopics.remove(topic);
             this.topicListenerMap.remove(topic);
         } else {
@@ -167,9 +178,9 @@ public class AMOPChannel extends AmopCallback {
     }
 
     public void deleteTransport(String topic) {
-        if (senderVerifyTopics.containsKey(topic)) {
+        if (senderVerifyTopics.contains(topic)) {
             log.info("delete verify topic on AMOP channel, {}", topic);
-            this.subVerifyTopics.get(topic).unsubscribeTopic(topic);
+            this.amop.unsubscribeTopic(topic);
             this.subVerifyTopics.remove(topic);
             this.topicListenerMap.remove(topic);
         } else {
@@ -186,14 +197,13 @@ public class AMOPChannel extends AmopCallback {
         FileEvent fileEvent = new FileEvent(FileEvent.EventType.FileChannelStart, fileChunksMeta.getFileId());
         fileEvent.setFileChunksMeta(fileChunksMeta);
         try {
-            Response rsp = this.sendEvent(fileChunksMeta.getTopic(), fileEvent);
+            AmopResponse rsp = this.sendEvent(fileChunksMeta.getTopic(), fileEvent);
             if (rsp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
                 log.error("receive create remote file context from amop failed, rsp:{}", rsp.getErrorMessage());
                 throw toBrokerException(rsp);
             }
 
-            AmopMsg amopMsg = response2AmopMsg(rsp);
-            AmopMsgResponse amopMsgResponse = JsonHelper.json2Object(amopMsg.getData(), AmopMsgResponse.class);
+            AmopMsgResponse amopMsgResponse = JsonHelper.json2Object(rsp.getAmopMsgIn().getContent(), AmopMsgResponse.class);
             if (amopMsgResponse.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
                 log.error("create remote file context failed, rsp:{}", amopMsgResponse.getErrorMessage());
                 throw toBrokerException(amopMsgResponse);
@@ -215,14 +225,13 @@ public class AMOPChannel extends AmopCallback {
 
         FileEvent fileEvent = new FileEvent(FileEvent.EventType.FileChannelEnd, fileId);
         try {
-            Response rsp = this.sendEvent(topic, fileEvent);
+            AmopResponse rsp = this.sendEvent(topic, fileEvent);
             if (rsp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
                 log.error("receive clean up receiver file context from amop failed, rsp:{}", rsp.getErrorMessage());
                 throw toBrokerException(rsp);
             }
 
-            AmopMsg amopMsg = response2AmopMsg(rsp);
-            AmopMsgResponse amopMsgResponse = JsonHelper.json2Object(amopMsg.getData(), AmopMsgResponse.class);
+            AmopMsgResponse amopMsgResponse = JsonHelper.json2Object(rsp.getAmopMsgIn().getContent(), AmopMsgResponse.class);
             if (amopMsgResponse.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
                 log.error("clean up receiver file context failed, rsp:{}", amopMsgResponse.getErrorMessage());
                 throw toBrokerException(amopMsgResponse);
@@ -239,14 +248,13 @@ public class AMOPChannel extends AmopCallback {
     public FileChunksMeta getReceiverFileContext(String topic, String fileId) throws BrokerException {
         log.info("send AMOP message to get receiver file context");
         try {
-            Response rsp = this.sendEvent(topic, new FileEvent(FileEvent.EventType.FileChannelStatus, fileId));
+            AmopResponse rsp = this.sendEvent(topic, new FileEvent(FileEvent.EventType.FileChannelStatus, fileId));
             if (rsp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
                 log.error("receive file context from amop failed, rsp:{}", rsp.getErrorMessage());
                 throw toBrokerException(rsp);
             }
 
-            AmopMsg amopMsg = response2AmopMsg(rsp);
-            AmopMsgResponse amopMsgResponse = JsonHelper.json2Object(amopMsg.getData(), AmopMsgResponse.class);
+            AmopMsgResponse amopMsgResponse = JsonHelper.json2Object(rsp.getAmopMsgIn().getContent(), AmopMsgResponse.class);
             if (amopMsgResponse.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
                 log.error("check if the file exists failed, rsp:{}", amopMsgResponse.getErrorMessage());
                 throw toBrokerException(amopMsgResponse);
@@ -266,14 +274,13 @@ public class AMOPChannel extends AmopCallback {
         fileEvent.setFileChunksMeta(fileChunksMeta);
 
         try {
-            Response rsp = this.sendEvent(fileChunksMeta.getTopic(), fileEvent);
+            AmopResponse rsp = this.sendEvent(fileChunksMeta.getTopic(), fileEvent);
             if (rsp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
                 log.error("receive check file existence from amop failed, rsp:{}", rsp.getErrorMessage());
                 throw toBrokerException(rsp);
             }
 
-            AmopMsg amopMsg = response2AmopMsg(rsp);
-            AmopMsgResponse amopMsgResponse = JsonHelper.json2Object(amopMsg.getData(), AmopMsgResponse.class);
+            AmopMsgResponse amopMsgResponse = JsonHelper.json2Object(rsp.getAmopMsgIn().getContent(), AmopMsgResponse.class);
             if (amopMsgResponse.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
                 log.error("check file existence failed, rsp:{}", amopMsgResponse.getErrorMessage());
                 throw toBrokerException(amopMsgResponse);
@@ -287,8 +294,60 @@ public class AMOPChannel extends AmopCallback {
         }
     }
 
-    public Response sendEvent(String topic, FileEvent fileEvent) throws BrokerException, InterruptedException, TimeoutException {
-        if (this.subTopics.contains(topic) || this.subVerifyTopics.containsKey(topic)) {
+    public String switchTopic(String topic) throws BrokerException {
+        log.info("send AMOP message to switch topic.");
+        FileEvent fileEvent = new FileEvent(FileEvent.EventType.FileChannelSwitch, "");
+        FileChunksMeta fileChunksMeta = new FileChunksMeta("", "", 0L, "", topic, "", true);
+        fileEvent.setFileChunksMeta(fileChunksMeta);
+
+        try {
+            AmopResponse rsp = this.sendEvent(topic, fileEvent);
+            if (rsp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+                log.error("receive switch topic from amop failed, rsp:{}", rsp.getErrorMessage());
+                throw toBrokerException(rsp);
+            }
+
+            AmopMsgResponse amopMsgResponse = JsonHelper.json2Object(rsp.getAmopMsgIn().getContent(), AmopMsgResponse.class);
+            if (amopMsgResponse.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+                log.error("switch topic failed, rsp:{}", amopMsgResponse.getErrorMessage());
+                throw toBrokerException(amopMsgResponse);
+            }
+
+            log.info("switch topic success.");
+            return JsonHelper.json2Object(amopMsgResponse.getContent(), String.class);
+        } catch (InterruptedException | TimeoutException e) {
+            log.error("InterruptedException | TimeoutException while send amop request");
+            throw new BrokerException(ErrorCode.SEND_AMOP_MESSAGE_FAILED);
+        }
+    }
+
+    public FileChunksMeta getNewFileChunksMeta(FileChunksMeta fileChunksMeta) throws BrokerException {
+        // get old topic from new topic
+        String topic = null;
+        for(Map.Entry<String, String> entry : this.old2NewTopic.entrySet()) {
+            if (entry.getValue().equals(fileChunksMeta.getTopic())) {
+                topic = entry.getKey();
+            }
+        }
+        if (topic == null) {
+            log.error("get topic from old2NewTopic error");
+            throw new BrokerException(ErrorCode.DECODE_FILE_NAME_ERROR);
+        }
+
+        FileChunksMeta newFileChunksMeta;
+        newFileChunksMeta = new FileChunksMeta(WeEventUtils.generateUuid(),
+                fileChunksMeta.getFileName(),
+                fileChunksMeta.getFileSize(),
+                fileChunksMeta.getFileMd5(),
+                topic,
+                fileChunksMeta.getGroupId(), fileChunksMeta.isOverwrite());
+
+        return newFileChunksMeta;
+    }
+
+
+    public AmopResponse sendEvent(String topic, FileEvent fileEvent) throws BrokerException, InterruptedException, TimeoutException {
+        if (this.subTopics.contains(topic) || this.subVerifyTopics.contains(topic)) {
             log.error("this is already receiver side for topic: {}", topic);
             throw new BrokerException(ErrorCode.FILE_SENDER_RECEIVER_CONFLICT);
         }
@@ -298,7 +357,7 @@ public class AMOPChannel extends AmopCallback {
         msgOut.setContent(json);
         msgOut.setTopic(topic);
         msgOut.setTimeout(6000L);
-        if (this.senderVerifyTopics.containsKey(topic)) {
+        if (this.senderVerifyTopics.contains(topic)) {
             log.info("over verified AMOP channel");
             msgOut.setType(TopicType.PRIVATE_TOPIC);
         } else {
@@ -307,16 +366,25 @@ public class AMOPChannel extends AmopCallback {
 
         log.info("send channel request, topic: {} {}", topic, fileEvent.getEventType());
         StopWatch sw = StopWatch.createStarted();
-        AmopResponseCallback callback = new AmopResponseCallback();
-        this.amop.sendAmopMsg(msgOut, callback);
-        Response response = callback.get(msgOut.getTimeout(), TimeUnit.MINUTES);
+        FileAmopResponseCallback callback = new FileAmopResponseCallback();
+
+        AmopResponse response = null;
+        for (int i = 0; i < SEND_RETRY_COUNT; i++) {
+            this.amop.sendAmopMsg(msgOut, callback);
+            response = callback.get(msgOut.getTimeout(), TimeUnit.MINUTES);
+            if (response.getErrorCode() == ErrorCode.SUCCESS.getCode()) {
+                break;
+            }
+            Thread.sleep(1000);
+            log.warn("send amop message failed, retry count: {}.", i+1);
+        }
+
         sw.stop();
         log.info("receive channel response, id: {} result: {}-{} cost: {}", response.getMessageID(), response.getErrorCode(), response.getErrorMessage(), sw.getTime());
         return response;
-
     }
 
-    public static BrokerException toBrokerException(Response reply) {
+    public static BrokerException toBrokerException(AmopResponse reply) {
         if (reply.getErrorCode() < 100000) {
             return new BrokerException(reply.getErrorCode(), reply.getErrorMessage());
         } else {
@@ -347,8 +415,8 @@ public class AMOPChannel extends AmopCallback {
 
     @Override
     public byte[] receiveAmopMsg(AmopMsgIn msg) {
-        if (!(this.getVerifyTopics().contains(msg.getTopic()) || this.subTopics.contains(msg.getTopic()))) {
-            log.error("unknown topic on channel, {} -> {}", msg.getTopic(), this.subTopics.addAll(this.subVerifyTopics.keySet()));
+        if (!(this.getSubVerifyTopics().contains(msg.getTopic()) || this.subTopics.contains(msg.getTopic()))) {
+            log.error("unknown topic on channel, {} -> {}", msg.getTopic(), this.subTopics.addAll(this.subVerifyTopics));
             return DataTypeUtils.toChannelResponse(ErrorCode.UNKNOWN_AMOP_SUB_TOPIC);
         }
 
@@ -363,13 +431,30 @@ public class AMOPChannel extends AmopCallback {
         byte[] channelResponseData;
         log.info("received file event on channel, {}", fileEvent);
         switch (fileEvent.getEventType()) {
+            case FileChannelSwitch: {
+                log.info("get {}, try to switch topic.", fileEvent.getEventType());
+                try {
+                    FileChunksMeta fileChunksMeta = fileEvent.getFileChunksMeta();
+
+                    String newTopic = old2NewTopic.get(fileChunksMeta.getTopic());
+
+                    channelResponseData = DataTypeUtils.toChannelResponse(ErrorCode.SUCCESS, JsonHelper.object2JsonBytes(newTopic));
+                } catch (BrokerException e) {
+                    log.error("switch topic failed, fileId: {}", fileEvent.getFileId());
+                    channelResponseData = DataTypeUtils.toChannelResponse(e);
+                }
+                return channelResponseData;
+            }
+
             case FileChannelStart: {
                 log.info("get {}, try to initialize context for receiving file", fileEvent.getEventType());
                 try {
-                    FileChunksMeta fileChunksMeta = this.fileTransportService.prepareReceiveFile(fileEvent.getFileChunksMeta());
+                    FileChunksMeta fileChunksMeta = fileEvent.getFileChunksMeta();
+
+                    FileChunksMeta retFileChunksMeta = this.fileTransportService.prepareReceiveFile(getNewFileChunksMeta(fileChunksMeta));
                     log.info("create file context success, fileName: {}", fileEvent.getFileChunksMeta().getFileName());
 
-                    channelResponseData = DataTypeUtils.toChannelResponse(ErrorCode.SUCCESS, JsonHelper.object2JsonBytes(fileChunksMeta));
+                    channelResponseData = DataTypeUtils.toChannelResponse(ErrorCode.SUCCESS, JsonHelper.object2JsonBytes(retFileChunksMeta));
                 } catch (BrokerException e) {
                     log.error("create file context failed, fileId: {}", fileEvent.getFileId());
                     channelResponseData = DataTypeUtils.toChannelResponse(e);
@@ -424,12 +509,15 @@ public class AMOPChannel extends AmopCallback {
                 log.info("get {}, check if the file exists", fileEvent.getEventType());
                 try {
                     FileChunksMeta fileChunksMeta = fileEvent.getFileChunksMeta();
-                    boolean fileExistLocal = this.fileTransportService.checkFileExist(fileChunksMeta);
-                    log.info("check if the file exists success, fileName: {}, local file existence: {}", fileChunksMeta.getFileName(), fileExistLocal);
 
-                    WeEventFileClient.EventListener eventListener = this.topicListenerMap.get(fileChunksMeta.getTopic());
-                    boolean fileExistFtp = eventListener.checkFile(fileChunksMeta.getFileName());
-                    log.info("check if the file exists success, fileName: {}, ftp file existence: {}", fileChunksMeta.getFileName(), fileExistFtp);
+                    FileChunksMeta newFileChunksMeta = getNewFileChunksMeta(fileChunksMeta);
+
+                    boolean fileExistLocal = this.fileTransportService.checkFileExist(newFileChunksMeta);
+                    log.info("check if the file exists success, fileName: {}, local file existence: {}", newFileChunksMeta.getFileName(), fileExistLocal);
+
+                    WeEventFileClient.EventListener eventListener = this.topicListenerMap.get(newFileChunksMeta.getTopic());
+                    boolean fileExistFtp = eventListener.checkFile(newFileChunksMeta.getFileName());
+                    log.info("check if the file exists success, fileName: {}, ftp file existence: {}", newFileChunksMeta.getFileName(), fileExistFtp);
 
                     channelResponseData = DataTypeUtils.toChannelResponse(ErrorCode.SUCCESS, JsonHelper.object2JsonBytes(fileExistLocal || fileExistFtp));
                     log.info("channelResponseData:{}", channelResponseData.length);
@@ -444,22 +532,5 @@ public class AMOPChannel extends AmopCallback {
                 log.error("unknown file event type on channel");
                 return DataTypeUtils.toChannelResponse(ErrorCode.UNKNOWN_ERROR);
         }
-    }
-
-    /**
-     * convert Response to AmopMsg
-     *
-     * @param rsp send amop msg response
-     * @return amop msg
-     */
-    public static AmopMsg response2AmopMsg(Response rsp) {
-        Message msg = new Message();
-        msg.setResult(rsp.getErrorCode());
-        msg.setType((short) MsgType.AMOP_RESPONSE.getType());
-        msg.setData(rsp.getContentBytes());
-        msg.setSeq(rsp.getMessageID());
-        AmopMsg amopMsg = new AmopMsg(msg);
-        amopMsg.decodeAmopBody(rsp.getContentBytes());
-        return amopMsg;
     }
 }

@@ -1,16 +1,13 @@
 package com.webank.weevent.governance.controller;
 
 import java.io.BufferedInputStream;
-import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -85,7 +82,8 @@ public class FileController {
     }
 
     @RequestMapping(path = "/download")
-    public void download(@RequestParam(name = "topic") String topic,
+    public void download(@RequestParam(name = "groupId") String groupId,
+                         @RequestParam(name = "topic") String topic,
                          @RequestParam(name = "fileName") String fileName,
                          HttpServletResponse response) throws GovernanceException {
         log.info("download file, topic:{}, fileName:{}.", topic, fileName);
@@ -93,7 +91,7 @@ public class FileController {
         response.setContentType("application/octet-stream; charset=UTF-8");
 
         ParamCheckUtils.validateFileName(fileName);
-        String downloadFile = this.fileService.downloadFile(topic, fileName);
+        String downloadFile = this.fileService.downloadFile(groupId, topic, fileName);
         if (StringUtils.isBlank(downloadFile)) {
             throw new GovernanceException("download file not exist");
         }
@@ -167,33 +165,23 @@ public class FileController {
     @RequestMapping(path = "/genPemFile")
     public void genPemFile(@RequestParam(name = "groupId") String groupId,
                            @RequestParam(name = "brokerId") Integer brokerId,
-                           @RequestParam(name = "filePath") String filePath,
                            HttpServletResponse response) throws GovernanceException {
-        log.info("download file, groupId:{}, brokerId:{}", groupId, brokerId);
+
+        log.info("genPemFile, groupId:{}, brokerId:{}.", groupId, brokerId);
+        List<FileTransportChannelEntity> list = this.fileService.listTransport(groupId, brokerId).getData();
+        if (list.size() == 0) {
+            throw new GovernanceException("please create file transport");
+        }
+
+        log.info("download file, groupId:{}, brokerId:{}.", groupId, brokerId);
         response.setHeader("content-type", "application/octet-stream");
         response.setContentType("application/octet-stream; charset=UTF-8");
-        Map<String, String> map = this.fileService.genPemFile(groupId, brokerId, filePath);
 
-        String fileName = "公私钥文件.txt";
-        String downloadFile = filePath + "/" + fileName;
-        FileWriter fwriter = null;
-        try {
-            // true表示不覆盖原来的内容，而是加到文件的后面。若要覆盖原来的内容，直接省略这个参数就好
-            fwriter = new FileWriter(downloadFile, true);
-            for (Map.Entry<String, String> entry : map.entrySet()) {
-                String fileContent = entry.getValue();
-                fwriter.write(fileContent);
-            }
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        } finally {
-            try {
-                fwriter.flush();
-                fwriter.close();
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
+        String downloadFile = this.fileService.genPemFile(groupId, brokerId);
+        if (StringUtils.isBlank(downloadFile)) {
+            throw new GovernanceException("download file not exist");
         }
+        String fileName = downloadFile.split("/")[2];
 
         try {
             response.setHeader("filename", URLEncoder.encode(fileName, StandardCharsets.UTF_8.toString()));
@@ -202,6 +190,7 @@ public class FileController {
         }
 
         byte[] buffer = new byte[1024];
+
         try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(downloadFile));
              OutputStream os = response.getOutputStream()) {
             int i = bis.read(buffer);
@@ -210,12 +199,11 @@ public class FileController {
                 os.flush();
                 i = bis.read(buffer);
             }
-            log.info("download file success, brokerId:{}, fileName:{}", brokerId, fileName);
+            log.info("download file success, groupId:{}, fileName:{}", groupId, fileName);
         } catch (IOException e) {
-            log.error("download file error, brokerId:{} fileName:{}", brokerId, fileName, e);
+            log.error("download file error, groupId:{} fileName:{}", groupId, fileName, e);
             throw new GovernanceException("download file error", e);
         }
-        new File(downloadFile).delete();
     }
 
     @RequestMapping(path = "/checkUploaded")

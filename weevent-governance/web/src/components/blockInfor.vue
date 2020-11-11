@@ -72,15 +72,15 @@ export default {
     },
     getLastData () {
       this.loading = true
-      const url = '?groupId=' + this.groupId + '&pageNumber=' + this.pageIndex + '&pageSize=10&brokerId=' + this.brokerId
+      const url = '?groupId=' + this.groupId + '&pageNumber=' + 1 + '&pageSize=10&brokerId=' + this.brokerId
       API.blockList(url).then(res => {
-        if (res.status === 200) {
+        if (res.data.code === 0) {
           this.total = res.data.data.total
           const last = Math.ceil(res.data.data.total / 10)
           this.pageIndex = last
           const url = '?groupId=' + this.groupId + '&pageNumber=' + last + '&pageSize=10&brokerId=' + this.brokerId
           API.blockList(url).then(res => {
-            if (res.status === 200) {
+            if (res.data.code === 0) {
               this.tableData = res.data.data.pageData.reverse()
             }
           })
@@ -92,7 +92,7 @@ export default {
       this.loading = true
       const url = '?groupId=' + this.groupId + '&pageNumber=' + this.pageIndex + '&pageSize=10&brokerId=' + this.brokerId
       API.blockList(url).then(res => {
-        if (res.status === 200) {
+        if (res.data.code === 0) {
           this.tableData = res.data.data.pageData.reverse()
           this.total = res.data.data.total
         }
@@ -107,7 +107,10 @@ export default {
     }
   },
   mounted () {
-    this.getLastData()
+  	const vm = this
+  	setTimeout(fun => {
+    	vm.getLastData()
+    }, 500)
   },
   computed: {
     brokerId () {

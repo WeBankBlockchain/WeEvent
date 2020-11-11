@@ -1,9 +1,9 @@
 package com.webank.weevent.file.service;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.InvalidAlgorithmParameterException;
@@ -17,6 +17,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.ErrorCode;
@@ -25,7 +27,6 @@ import com.webank.weevent.core.FiscoBcosInstance;
 import com.webank.weevent.core.IConsumer;
 import com.webank.weevent.core.IProducer;
 import com.webank.weevent.core.config.FiscoConfig;
-import com.webank.weevent.core.fisco.web3sdk.v2.Web3SDKConnector;
 import com.webank.weevent.file.IWeEventFileClient;
 import com.webank.weevent.file.dto.FileChunksMetaPlus;
 import com.webank.weevent.file.dto.FileChunksMetaStatus;
@@ -49,6 +50,8 @@ import org.fisco.bcos.sdk.crypto.keystore.PEMKeyStore;
 @Slf4j
 public class WeEventFileClient implements IWeEventFileClient {
 
+    private static final String ZIP_NAME = "PPK.zip";
+    private static final String FILE_PATH = "./logs";
     private static final String PATH_SEPARATOR = "/";
     private static final String PRIVATE_KEY_SUFFIX = ".pem";
     private static final String PUBLIC_KEY_SUFFIX = ".pub.pem";
@@ -114,13 +117,13 @@ public class WeEventFileClient implements IWeEventFileClient {
         AMOPChannel amopChannel = this.fileTransportService.getChannel();
 
         // service is exist
-        if (amopChannel.getSenderTopics().contains(topic) || amopChannel.senderVerifyTopics.containsKey(topic)) {
+        if (amopChannel.getSenderTopics().contains(topic)) {
             log.error("this is already sender side for topic: {}", topic);
             throw new BrokerException(ErrorCode.FILE_SENDER_RECEIVER_CONFLICT);
         }
 
         // service not exist, new service
-        Amop amop = Web3SDKConnector.buidBcosSDK(this.fileTransportService.getFiscoConfig()).getAmop();
+        Amop amop = amopChannel.amop;
 
         List<KeyTool> keyToolList = new ArrayList<>();
         try {
@@ -131,9 +134,10 @@ public class WeEventFileClient implements IWeEventFileClient {
         }
 
         amop.publishPrivateTopic(topic, keyToolList);
+        this.fileTransportService.getChannel().topic2PublicKeys.put(topic, keyToolList);
 
         // put <topic-service> to map in AMOPChannel
-        amopChannel.senderVerifyTopics.put(topic, amop);
+        amopChannel.senderVerifyTopics.add(topic);
     }
 
     public void openTransport4Sender(String topic, String publicPemPath) throws BrokerException, IOException {
@@ -153,20 +157,49 @@ public class WeEventFileClient implements IWeEventFileClient {
 
     @Override
     public FileChunksMeta publishFile(String topic, String filePath, boolean overwrite) throws BrokerException, IOException {
+        // check if topic is exist
+        IProducer iProducer = this.fileTransportService.getProducer();
+        if (!iProducer.exist(topic, this.groupId)) {
+            log.info("topic: " + topic + " not exist in group: " + groupId + ", open topic: " + topic + " groupID: " + groupId);
+            boolean resOpen = iProducer.open(topic, this.groupId);
+            if (!resOpen) {
+                log.error("create topic: {} failed.", topic);
+                throw new BrokerException(ErrorCode.TOPIC_CREATE_FAILED);
+            }
+        }
+
+        String newTopic = this.fileTransportService.getChannel().switchTopic(topic);
+        boolean resOpen = iProducer.open(newTopic, this.groupId);
+        if (!resOpen) {
+            log.error("create topic: {} failed.", newTopic);
+            throw new BrokerException(ErrorCode.TOPIC_CREATE_FAILED);
+        }
+
+        AMOPChannel amopChannel = this.fileTransportService.getChannel();
+        if (amopChannel.senderTopics.contains(topic)) {
+            this.fileTransportService.getChannel().senderTopics.add(newTopic);
+        } else if (amopChannel.senderVerifyTopics.contains(topic)) {
+            Amop amop = amopChannel.amop;
+            List<KeyTool> keyToolList = this.fileTransportService.getChannel().topic2PublicKeys.get(topic);
+            if (keyToolList.size() == 0) {
+                log.error("no public key corresponding to topic: {}.", topic);
+                throw new BrokerException("unable to get public key after switching topics.");
+            }
+
+            amop.publishPrivateTopic(newTopic, keyToolList);
+            amopChannel.senderVerifyTopics.add(newTopic);
+        } else {
+            log.error("not a sender topic: {}.", topic);
+            throw new BrokerException("not a sender topic.");
+        }
+
         FileChunksMeta fileChunksMeta;
         if (this.ftpInfo == null) {
             // publish local file
             validateLocalFile(filePath);
 
-            // check if topic is exist
-            IProducer iProducer = this.fileTransportService.getProducer();
-            if (!iProducer.exist(topic, this.groupId)) {
-                log.info("topic: " + topic + " not exist in group: " + groupId + ", open topic: " + topic + " groupID: " + groupId);
-                iProducer.open(topic, this.groupId);
-            }
-
             FileChunksTransport fileChunksTransport = new FileChunksTransport(this.fileTransportService);
-            fileChunksMeta = fileChunksTransport.upload(filePath, topic, this.groupId, overwrite);
+            fileChunksMeta = fileChunksTransport.upload(filePath, newTopic, this.groupId, overwrite);
         } else {
             // publish ftp file
             FtpClientService ftpClientService = new FtpClientService();
@@ -174,7 +207,7 @@ public class WeEventFileClient implements IWeEventFileClient {
             ftpClientService.downLoadFile(filePath, this.localReceivePath);
 
             FileChunksTransport fileChunksTransport = new FileChunksTransport(this.fileTransportService);
-            fileChunksMeta = fileChunksTransport.upload(this.localReceivePath + filePath.substring(filePath.indexOf('/')), topic, this.groupId, overwrite);
+            fileChunksMeta = fileChunksTransport.upload(this.localReceivePath + filePath.substring(filePath.indexOf('/')), newTopic, this.groupId, overwrite);
         }
         return fileChunksMeta;
     }
@@ -234,16 +267,14 @@ public class WeEventFileClient implements IWeEventFileClient {
 
         // sender
         Map<String, List<FileChunksMetaStatus>> senderTopicStatusMap = new HashMap<>();
-        List<FileChunksMetaStatus> senderFileChunksMetaStatusList =
-                fileTransportStats.getSender().get(groupId).get(topicName);
+        List<FileChunksMetaStatus> senderFileChunksMetaStatusList = fileTransportStats.getSender().get(groupId).get(topicName);
         senderTopicStatusMap.put(topicName, senderFileChunksMetaStatusList);
         Map<String, Map<String, List<FileChunksMetaStatus>>> sender = new HashMap<>();
         sender.put(groupId, senderTopicStatusMap);
 
         // receiver
         Map<String, List<FileChunksMetaStatus>> receiverTopicStatusMap = new HashMap<>();
-        List<FileChunksMetaStatus> receiverFileChunksMetaStatusList =
-                fileTransportStats.getReceiver().get(groupId).get(topicName);
+        List<FileChunksMetaStatus> receiverFileChunksMetaStatusList = fileTransportStats.getReceiver().get(groupId).get(topicName);
         receiverTopicStatusMap.put(topicName, receiverFileChunksMetaStatusList);
         Map<String, Map<String, List<FileChunksMetaStatus>>> receiver = new HashMap<>();
         receiver.put(groupId, receiverTopicStatusMap);
@@ -255,10 +286,11 @@ public class WeEventFileClient implements IWeEventFileClient {
         return retFileTransportStats;
     }
 
-    public List<FileChunksMeta> listFiles(String topic) throws BrokerException {
+    public List<FileChunksMeta> listFiles(String group, String topic) throws BrokerException {
         // get json from disk
         List<File> fileList = new ArrayList<>();
-        String filePath = this.localReceivePath + PATH_SEPARATOR + topic;
+        String newTopic = this.fileTransportService.getChannel().old2NewTopic.get(topic);
+        String filePath = this.localReceivePath + PATH_SEPARATOR + group + PATH_SEPARATOR + newTopic;
         File file = new File(filePath);
         if (!file.exists()) {
             file.mkdirs();
@@ -279,7 +311,7 @@ public class WeEventFileClient implements IWeEventFileClient {
         DiskFiles diskFiles = new DiskFiles(filePath);
         for (File f : fileList) {
             FileChunksMeta fileChunksMeta = diskFiles.loadFileMeta(f);
-            if (fileChunksMeta.getTopic().equals(topic) && fileChunksMeta.checkChunkFull()) {
+            if (fileChunksMeta.getTopic().equals(newTopic) && fileChunksMeta.checkChunkFull()) {
                 fileChunksMetaList.add(fileChunksMeta);
             }
         }
@@ -300,8 +332,7 @@ public class WeEventFileClient implements IWeEventFileClient {
         return this.fileTransportService.getDiskFiles();
     }
 
-    public Map<String, String> genPemFile(String filePath) throws BrokerException {
-        validateLocalFile(filePath);
+    public String genPemFile() throws BrokerException {
         try {
             BouncyCastleProvider prov = new BouncyCastleProvider();
             Security.addProvider(prov);
@@ -316,33 +347,60 @@ public class WeEventFileClient implements IWeEventFileClient {
             PemFile privatePemFile = new PemFile(pair.getPrivate(), PRIVATE_KEY_DESC);
             PemFile publicPemFile = new PemFile(pair.getPublic(), PUBLIC_KEY_DESC);
 
-            String privateKeyUrl = filePath + PATH_SEPARATOR + account + PRIVATE_KEY_SUFFIX;
-            String publicKeyUrl = filePath + PATH_SEPARATOR + account + PUBLIC_KEY_SUFFIX;
+            String privateKeyUrl = FILE_PATH + PATH_SEPARATOR + account + PRIVATE_KEY_SUFFIX;
+            String publicKeyUrl = FILE_PATH + PATH_SEPARATOR + account + PUBLIC_KEY_SUFFIX;
 
             privatePemFile.write(privateKeyUrl);
             publicPemFile.write(publicKeyUrl);
 
-            Map<String, String> ppkUrlMap = new HashMap<>();
-            ppkUrlMap.put("privateKeyUrl", getFileKyeInfo(privateKeyUrl));
-            ppkUrlMap.put("publicKeyUrl", getFileKyeInfo(publicKeyUrl));
-            return ppkUrlMap;
-        } catch (IOException | NoSuchProviderException | NoSuchAlgorithmException | InvalidAlgorithmParameterException e) {
+            File[] srcFiles = {new File(privateKeyUrl), new File(publicKeyUrl)};
+            String zipUrl = FILE_PATH + "/" + ZIP_NAME;
+            File zipFile = new File(zipUrl);
+
+            zipFiles(srcFiles, zipFile);
+            for (File file : srcFiles) {
+                file.delete();
+            }
+            return zipUrl;
+        } catch (IOException | NoSuchProviderException | NoSuchAlgorithmException
+                | InvalidAlgorithmParameterException e) {
             log.error("generate pem file error", e);
             throw new BrokerException(ErrorCode.FILE_GEN_PEM_BC_FAILED);
         }
     }
 
-    private String getFileKyeInfo(String url) throws IOException {
-        StringBuffer sb = new StringBuffer();
-        File file = new File(url);
-        try (FileInputStream fis = new FileInputStream(file);
-             BufferedInputStream bis = new BufferedInputStream(fis)) {
-            while (bis.available() > 0) {
-                sb.append((char) bis.read());
+    private static void zipFiles(File[] srcFiles, File zipFile) throws IOException {
+        if (!zipFile.exists()) {
+            try {
+                zipFile.createNewFile();
+            } catch (IOException e) {
+                throw new IOException();
             }
         }
-        file.delete();
-        return sb.toString();
+        FileOutputStream fileOutputStream = null;
+        ZipOutputStream zipOutputStream = null;
+        FileInputStream fileInputStream = null;
+        try {
+            fileOutputStream = new FileOutputStream(zipFile);
+            zipOutputStream = new ZipOutputStream(fileOutputStream);
+            ZipEntry zipEntry = null;
+            for (int i = 0; i < srcFiles.length; i++) {
+                fileInputStream = new FileInputStream(srcFiles[i]);
+                zipEntry = new ZipEntry(srcFiles[i].getName());
+                zipOutputStream.putNextEntry(zipEntry);
+                int len;
+                byte[] buffer = new byte[1024];
+                while ((len = fileInputStream.read(buffer)) > 0) {
+                    zipOutputStream.write(buffer, 0, len);
+                }
+            }
+            zipOutputStream.closeEntry();
+            zipOutputStream.close();
+            fileInputStream.close();
+            fileOutputStream.close();
+        } catch (IOException e) {
+            throw new IOException();
+        }
     }
 
     public boolean isFileExist(String fileName, String topic, String groupId) throws BrokerException {
@@ -402,7 +460,8 @@ public class WeEventFileClient implements IWeEventFileClient {
             if (this.ftpInfo != null) {
                 try {
                     FtpClientService ftpClientService = new FtpClientService();
-                    ftpClientService.connect(this.ftpInfo.getHost(), this.ftpInfo.getPort(), this.ftpInfo.getUserName(), this.ftpInfo.getPassWord());
+                    ftpClientService.connect(this.ftpInfo.getHost(), this.ftpInfo.getPort(), this.ftpInfo.getUserName(),
+                            this.ftpInfo.getPassWord());
 
                     // check file exist
                     if (StringUtils.isBlank(this.ftpInfo.getFtpReceivePath())) {
@@ -435,15 +494,19 @@ public class WeEventFileClient implements IWeEventFileClient {
             if (this.ftpInfo != null) {
                 try {
                     FtpClientService ftpClientService = new FtpClientService();
-                    ftpClientService.connect(this.ftpInfo.getHost(), this.ftpInfo.getPort(), this.ftpInfo.getUserName(), this.ftpInfo.getPassWord());
+                    ftpClientService.connect(this.ftpInfo.getHost(), this.ftpInfo.getPort(), this.ftpInfo.getUserName(),
+                            this.ftpInfo.getPassWord());
                     // upload file
                     if (StringUtils.isBlank(this.ftpInfo.getFtpReceivePath())) {
                         log.info("upload file to ftp server, file：{}", fileName);
-                        ftpClientService.upLoadFile(this.receivePath + PATH_SEPARATOR + topic + PATH_SEPARATOR + fileName);
+                        ftpClientService
+                                .upLoadFile(this.receivePath + PATH_SEPARATOR + topic + PATH_SEPARATOR + fileName);
                     } else {
                         // specify upload directory
-                        log.info("upload file to ftp server, to path: {}, file：{}", this.ftpInfo.getFtpReceivePath(), fileName);
-                        ftpClientService.upLoadFile(this.ftpInfo.getFtpReceivePath(), this.receivePath + PATH_SEPARATOR + topic + PATH_SEPARATOR + fileName);
+                        log.info("upload file to ftp server, to path: {}, file：{}", this.ftpInfo.getFtpReceivePath(),
+                                fileName);
+                        ftpClientService.upLoadFile(this.ftpInfo.getFtpReceivePath(),
+                                this.receivePath + PATH_SEPARATOR + topic + PATH_SEPARATOR + fileName);
                     }
                 } catch (BrokerException e) {
                     e.printStackTrace();

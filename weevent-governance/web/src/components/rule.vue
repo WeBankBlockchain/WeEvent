@@ -232,7 +232,7 @@ export default {
       }
       API.ruleList(data).then(res => {
         if (res.data.code === 0) {
-          if (res.data.data) {
+          if (res.data.data && res.data.data.totalCount > 0) {
             this.ruleList = [].concat(res.data.data.ruleEngines)
             this.total = res.data.data.totalCount
           } else {
@@ -268,7 +268,7 @@ export default {
         brokerId: e.brokerId
       }
       API.ruleStart(data).then(res => {
-        if (res.data.status === 200) {
+        if (res.data.code === 0) {
           this.getRuleList()
           this.$message({
             type: 'success',
@@ -291,7 +291,7 @@ export default {
         status: 0
       }
       API.ruleStop(data).then(res => {
-        if (res.data.status === 200) {
+        if (res.data.code === 0) {
           this.getRuleList()
           this.$message({
             type: 'success',
@@ -319,7 +319,7 @@ export default {
           brokerId: e.brokerId
         }
         API.ruleDelete(data).then(res => {
-          if (res.data.status === 200) {
+          if (res.data.code === 0) {
             vm.getRuleList()
             vm.$message({
               type: 'success',
@@ -354,7 +354,7 @@ export default {
             ruleDescription: vm.rule.ruleDescription
           }
           API.ruleAdd(data).then(res => {
-            if (res.data.status === 200) {
+            if (res.data.code === 0) {
               // this.getRuleList()
               this.$message({
                 type: 'success',

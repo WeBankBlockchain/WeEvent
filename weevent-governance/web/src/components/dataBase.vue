@@ -206,7 +206,7 @@ export default {
   methods: {
     getDBLsit () {
       API.dbList({}).then(res => {
-        if (res.data.status === 200) {
+        if (res.data.code === 0) {
           this.tableData = [].concat(res.data.data)
         }
       })
@@ -228,7 +228,7 @@ export default {
           if (vm.type === 1) {
             data.brokerId = localStorage.getItem('brokerId')
             API.dbAdd(data).then(res => {
-              if (res.data.status === 200) {
+              if (res.data.code === 0) {
                 vm.$message({
                   type: 'success',
                   message: this.$t('rule.creatSuccess')
@@ -247,7 +247,7 @@ export default {
           } else {
             data.id = vm.id
             API.dbUpdate(data).then(res => {
-              if (res.data.status === 200) {
+              if (res.data.status === 0) {
                 vm.$message({
                   type: 'success',
                   message: this.$t('common.editSuccess')
@@ -292,7 +292,7 @@ export default {
           id: e.id
         }
         API.dbDelete(data).then(res => {
-          if (res.data.status === 200) {
+          if (res.data.code === 0) {
             vm.$message({
               type: 'success',
               message: vm.$t('common.deleteSuccess')
@@ -329,7 +329,7 @@ export default {
         if (valid) {
           API.checkJDBC(data).then(res => {
             try {
-              if (res.data.status === 200) {
+              if (res.data.code === 0) {
                 this.connectSuccess = true
                 this.connectFailed = false
               } else {

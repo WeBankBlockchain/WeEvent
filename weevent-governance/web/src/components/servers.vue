@@ -161,7 +161,7 @@ export default {
           this.title = this.$t('serverSet.addServer')
         }
         API.accountList('').then(res => {
-          if (res.data.status === 200) {
+          if (res.data.code === 0) {
             this.accountList = [].concat(res.data.data)
           }
         })
@@ -195,6 +195,7 @@ export default {
       API.addServer(data).then(res => {
         if (res.status === 200) {
           if (res.data.code === 0) {
+          localStorage.setItem('brokerId', res.data.data)
             this.$message({
               type: 'success',
               message: this.$t('common.addSuccess')

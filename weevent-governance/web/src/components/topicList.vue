@@ -51,11 +51,11 @@
       prop="topicName"
       :formatter="checkName">
     </el-table-column>
-    <el-table-column
+    <!--<el-table-column
       :label="$t('tableCont.creater')"
       prop="creater"
       :formatter="checkCreater">
-    </el-table-column>
+    </el-table-column>-->
      <el-table-column
       :label="$t('tableCont.timestamp')"
       prop="createdTimestamp"
@@ -130,7 +130,7 @@ export default {
         groupId: Number(localStorage.getItem('groupId'))
       }
       API.topicList(data).then(res => {
-        if (res.status === 200) {
+        if (res.data.code === 0) {
           vm.total = res.data.data.total
           const last = Math.ceil(res.data.data.total / vm.pageSize)
           this.pageIndex = last
@@ -141,7 +141,7 @@ export default {
             groupId: Number(localStorage.getItem('groupId'))
           }
           API.topicList(data).then(res => {
-            if (res.status === 200) {
+            if (res.data.code === 0) {
               const listData = res.data.data.topicInfoList.reverse()
               const det = {
                 topicName: '',
@@ -172,8 +172,8 @@ export default {
       }
       API.topicList(data).then(res => {
         if (res.status === 200) {
-          vm.total = res.data.total
-          const listData = res.data.topicInfoList.reverse()
+          vm.total = res.data.data.total
+          const listData = res.data.data.topicInfoList.reverse()
           const det = {
             topicName: '',
             createdTimestamp: '',
@@ -201,10 +201,12 @@ export default {
       var vm = this
       const url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topic=' + e.topicName
       API.topicState(url).then(res => {
-        const time = getDateDetail(res.data.data.createdTimestamp)
-        res.data.createdTimestamp = time
-        res.data.lastTimestamp = getDateDetail(res.data.data.lastTimestamp)
-        vm.$set(e, 'detail', res.data)
+      	if(res.data.code === 0){
+    	  const time = getDateDetail(res.data.data.createdTimestamp)
+       	  res.data.data.createdTimestamp = time
+          res.data.data.lastTimestamp = getDateDetail(res.data.data.lastTimestamp)
+          vm.$set(e, 'detail', res.data.data)
+      	}
       })
     },
     indexChange (e) {
@@ -249,7 +251,7 @@ export default {
             description: vm.form.describe
           }
           API.openTopic(data).then(res => {
-            if (res.data.status === 200) {
+            if (res.data.code === 0) {
               vm.$message({
                 type: 'success',
                 message: this.$t('common.addSuccess')
@@ -291,11 +293,11 @@ export default {
         vm.tableData = []
         const url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topic=' + vm.topicName
         API.topicInfo(url).then(res => {
-          const time = getDateDetail(res.data.createdTimestamp)
+          const time = getDateDetail(res.data.data.createdTimestamp)
           res.data.createdTimestamp = time
           const item = {
-            topicName: res.data.topicName,
-            creater: '——',
+            topicName: res.data.data.topicName,
+            creater: res.data.data.creater,
             createdTimestamp: time,
             detail: {}
           }
@@ -318,11 +320,11 @@ export default {
       vm.tableData = []
       const url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topic=' + sessionStorage.getItem('topic')
       API.topicInfo(url).then(res => {
-        const time = getDateDetail(res.data.createdTimestamp)
-        res.data.createdTimestamp = time
+        const time = getDateDetail(res.data.data.createdTimestamp)
+        res.data.data.createdTimestamp = time
         const item = {
-          topicName: res.data.topicName,
-          creater: '——',
+          topicName: res.data.data.topicName,
+          creater: res.data.data.creater,
           createdTimestamp: time,
           detail: {}
         }

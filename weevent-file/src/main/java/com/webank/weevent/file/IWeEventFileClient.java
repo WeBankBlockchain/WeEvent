@@ -3,7 +3,6 @@ package com.webank.weevent.file;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import java.util.Map;
 
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.SendResult;
@@ -136,7 +135,7 @@ public interface IWeEventFileClient {
      * @return FileChunksMeta list
      * @throws BrokerException broker exception
      */
-    List<FileChunksMeta> listFiles(String topic) throws BrokerException;
+    List<FileChunksMeta> listFiles(String group, String topic) throws BrokerException;
 
     /**
      * sign a file transport event.
@@ -166,12 +165,10 @@ public interface IWeEventFileClient {
 
     /**
      * generate pem key pair.
-     *
-     * @param filePath output pem file path
-     * @return Map<String, String>
+     * @return genPemFile url
      * @throws BrokerException BrokerException
      */
-    Map<String, String> genPemFile(String filePath) throws BrokerException;
+    String genPemFile() throws BrokerException;
 
     /**
      * Check if the receiver end has a file.
