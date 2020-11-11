@@ -163,7 +163,7 @@ public class WeEventFileClientTest {
             weEventFileClient.openTransport4Sender(this.topic);
             try {
                 weEventFileClient.publishFile(topic,
-                        new File("src/main/resources/resources.zip").getAbsolutePath(), true);
+                        new File("src/main/resources/bigfile.zip").getAbsolutePath(), true);
             } catch (Exception e) {
                 e.printStackTrace();
             }
