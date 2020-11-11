@@ -167,12 +167,24 @@ public class AMOPChannel extends AmopCallback {
             this.amop.unsubscribeTopic(topic);
             this.subVerifyTopics.remove(topic);
             this.topicListenerMap.remove(topic);
+
+            String newTopic = old2NewTopic.get(topic);
+            log.info("unSubscribe verify topic on AMOP channel, {}", newTopic);
+            this.amop.unsubscribeTopic(newTopic);
+            this.subVerifyTopics.remove(newTopic);
+            this.old2NewTopic.remove(newTopic);
         } else {
             if (this.subTopics.contains(topic)) {
                 log.info("unSubscribe topic on AMOP channel, {}", topic);
                 this.subTopics.remove(topic);
                 this.topicListenerMap.remove(topic);
                 this.amop.unsubscribeTopic(topic);
+
+                String newTopic = old2NewTopic.get(topic);
+                log.info("unSubscribe topic on AMOP channel, {}", newTopic);
+                this.subTopics.remove(newTopic);
+                this.amop.unsubscribeTopic(newTopic);
+                this.old2NewTopic.remove(newTopic);
             }
         }
     }
