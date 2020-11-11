@@ -24,9 +24,6 @@ import com.webank.weevent.file.service.FileChunksMeta;
 
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.sdk.amop.AmopResponse;
-import org.fisco.bcos.sdk.model.AmopMsg;
-import org.fisco.bcos.sdk.model.Response;
-
 /**
  * File transport service base on AMOP.
  *
