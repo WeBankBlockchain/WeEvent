@@ -1,6 +1,9 @@
 package com.webank.weevent.file.inner;
 
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -343,16 +346,21 @@ public class AMOPChannel extends AmopCallback {
         }
         if (topic == null) {
             log.error("get topic from old2NewTopic error");
-            throw new BrokerException(ErrorCode.DECODE_FILE_NAME_ERROR);
+            throw new BrokerException(ErrorCode.FILE_GET_TOPIC_FROM_OLD2NEW_TOPIC_ERROR);
         }
 
         FileChunksMeta newFileChunksMeta;
-        newFileChunksMeta = new FileChunksMeta(WeEventUtils.generateUuid(),
-                fileChunksMeta.getFileName(),
-                fileChunksMeta.getFileSize(),
-                fileChunksMeta.getFileMd5(),
-                topic,
-                fileChunksMeta.getGroupId(), fileChunksMeta.isOverwrite());
+        try {
+            newFileChunksMeta = new FileChunksMeta(fileChunksMeta.getFileId(),
+                    URLDecoder.decode(fileChunksMeta.getFileName(), StandardCharsets.UTF_8.toString()),
+                    fileChunksMeta.getFileSize(),
+                    fileChunksMeta.getFileMd5(),
+                    topic,
+                    fileChunksMeta.getGroupId(), fileChunksMeta.isOverwrite());
+        } catch (UnsupportedEncodingException e) {
+            log.error("decode fileName error", e);
+            throw new BrokerException(ErrorCode.DECODE_FILE_NAME_ERROR);
+        }
 
         return newFileChunksMeta;
     }
