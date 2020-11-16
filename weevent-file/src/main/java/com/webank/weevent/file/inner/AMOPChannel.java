@@ -530,14 +530,12 @@ public class AMOPChannel extends AmopCallback {
                 try {
                     FileChunksMeta fileChunksMeta = fileEvent.getFileChunksMeta();
 
-                    FileChunksMeta newFileChunksMeta = getNewFileChunksMeta(fileChunksMeta);
+                    boolean fileExistLocal = this.fileTransportService.checkFileExist(fileChunksMeta);
+                    log.info("check if the file exists success, fileName: {}, local file existence: {}", fileChunksMeta.getFileName(), fileExistLocal);
 
-                    boolean fileExistLocal = this.fileTransportService.checkFileExist(newFileChunksMeta);
-                    log.info("check if the file exists success, fileName: {}, local file existence: {}", newFileChunksMeta.getFileName(), fileExistLocal);
-
-                    WeEventFileClient.EventListener eventListener = this.topicListenerMap.get(newFileChunksMeta.getTopic());
-                    boolean fileExistFtp = eventListener.checkFile(newFileChunksMeta.getFileName());
-                    log.info("check if the file exists success, fileName: {}, ftp file existence: {}", newFileChunksMeta.getFileName(), fileExistFtp);
+                    WeEventFileClient.EventListener eventListener = this.topicListenerMap.get(fileChunksMeta.getTopic());
+                    boolean fileExistFtp = eventListener.checkFile(fileChunksMeta.getFileName());
+                    log.info("check if the file exists success, fileName: {}, ftp file existence: {}", fileChunksMeta.getFileName(), fileExistFtp);
 
                     channelResponseData = DataTypeUtils.toChannelResponse(ErrorCode.SUCCESS, JsonHelper.object2JsonBytes(fileExistLocal || fileExistFtp));
                     log.info("channelResponseData:{}", channelResponseData.length);
