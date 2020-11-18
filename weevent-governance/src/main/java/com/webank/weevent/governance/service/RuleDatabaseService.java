@@ -85,8 +85,8 @@ public class RuleDatabaseService {
         }
         // 1 h2, 2 mysql
         if (DatabaseTypeEnum.H2_DATABASE.getCode().equals(ruleDatabaseEntity.getDatabaseType())) {
-            dataBaseUrl = "jdbc:h2:tcp://" + ruleDatabaseEntity.getDatabaseIp() + ":" + ruleDatabaseEntity.getDatabasePort()
-                    + "/" + ruleDatabaseEntity.getDatabaseName();
+            // dataBaseUrl = "jdbc:h2:tcp://" + ruleDatabaseEntity.getDatabaseIp() + ":" + ruleDatabaseEntity.getDatabasePort() + "/" + ruleDatabaseEntity.getDatabaseName();
+            dataBaseUrl = "jdbc:h2:." + "/" + ruleDatabaseEntity.getDatabaseName();
         } else {
             dataBaseUrl = "jdbc:mysql://" + ruleDatabaseEntity.getDatabaseIp() + ":" + ruleDatabaseEntity.getDatabasePort()
                     + "/" + ruleDatabaseEntity.getDatabaseName();
