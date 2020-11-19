@@ -86,7 +86,7 @@ export default {
       this.loading = true
       const url = '?groupId=' + localStorage.getItem('groupId') + '&pageNumber=1&pageSize=10&brokerId=' + localStorage.getItem('brokerId')
       API.nodeList(url).then(res => {
-        if (res.data.code === 0) {
+        if (res.status === 200 && res.data.code === 0) {
           this.tableData = res.data.data.pageData
           // this.total = res.data.totalCount
         } else {
