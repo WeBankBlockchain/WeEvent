@@ -47,34 +47,21 @@
             <el-radio label="1">H2</el-radio>
           </el-radio-group>
         </el-form-item>
-        <div v-if="form.databaseType=='2'">
-          <el-form-item label="ip" prop='databaseIp'>
-            <el-input v-model.trim="form.databaseIp"  autocomplete="off" placeholder="127.0.0.1"></el-input>
-          </el-form-item>
-          <el-form-item label="port" prop='databasePort'>
-            <el-input v-model.trim="form.databasePort"  autocomplete="off" :placeholder="3306"></el-input>
-          </el-form-item>
-          <el-form-item :label="$t('rule.JDBCDatabaseName')" prop='databaseName'>
-            <el-input v-model.trim="form.databaseName"  autocomplete="off"></el-input>
-          </el-form-item>
-          <el-form-item :label="$t('rule.JDBCusername')" prop='username'>
-            <el-input v-model.trim="form.username"  autocomplete="off"></el-input>
-          </el-form-item>
-          <el-form-item :label="$t('rule.JDBCpassword')" prop='password'>
-            <el-input v-model.trim="form.password"  type='password'  autocomplete="off"></el-input>
-          </el-form-item>
-        </div>
-        <div v-if="form.databaseType=='1'">
-          <el-form-item :label="$t('rule.JDBCDatabaseName')" prop='databaseName'>
-            <el-input v-model.trim="form.databaseName"  autocomplete="off"></el-input>
-          </el-form-item>
-          <el-form-item :label="$t('rule.JDBCusername')" prop='username'>
-            <el-input v-model.trim="form.username"  autocomplete="off"></el-input>
-          </el-form-item>
-          <el-form-item :label="$t('rule.JDBCpassword')" prop='password'>
-            <el-input v-model.trim="form.password"  type='password'  autocomplete="off"></el-input>
-          </el-form-item>
-        </div>
+        <el-form-item label="ip" prop='databaseIp'>
+          <el-input v-model.trim="form.databaseIp"  autocomplete="off" placeholder="127.0.0.1"></el-input>
+        </el-form-item>
+        <el-form-item label="port" prop='databasePort'>
+          <el-input v-model.trim="form.databasePort"  autocomplete="off" :placeholder="3306"></el-input>
+        </el-form-item>
+        <el-form-item :label="$t('rule.JDBCDatabaseName')" prop='databaseName'>
+          <el-input v-model.trim="form.databaseName"  autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item :label="$t('rule.JDBCusername')" prop='username'>
+          <el-input v-model.trim="form.username"  autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item :label="$t('rule.JDBCpassword')" prop='password'>
+          <el-input v-model.trim="form.password"  type='password'  autocomplete="off"></el-input>
+        </el-form-item>
         <el-form-item :label="$t('rule.optionalParameter')">
           <el-input v-model.trim="form.optionalParameter"  autocomplete="off"></el-input>
         </el-form-item>
