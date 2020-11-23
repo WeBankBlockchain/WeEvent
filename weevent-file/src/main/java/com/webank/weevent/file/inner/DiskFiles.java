@@ -261,7 +261,7 @@ public class DiskFiles {
 
     public boolean checkFileExist(FileChunksMeta fileChunksMeta) throws BrokerException {
         // ensure path exist and disk space
-        String filePath = this.path + PATH_SEPARATOR + fileChunksMeta.getTopic() + PATH_SEPARATOR + fileChunksMeta.getFileName();
+        String filePath = this.path + PATH_SEPARATOR + fileChunksMeta.getGroupId() + PATH_SEPARATOR+ fileChunksMeta.getTopic() + PATH_SEPARATOR + fileChunksMeta.getFileName();
         File file = new File(filePath);
         return file.exists();
     }
