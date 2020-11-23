@@ -144,6 +144,7 @@ public enum ErrorCode {
     FILE_GEN_PEM_BC_FAILED(200513,"generate pem file failed due to bouncy castle exception."),
     FILE_PEM_KEY_INVALID(200514, "public or private key pem file invalid."),
     FILE_GEN_LOCAL_FILE_NAME_FAILED(200515, "fileChunksMeta corresponding to fieldId not exist"),
+    FILE_GET_TOPIC_FROM_OLD2NEW_TOPIC_ERROR(200516, "get topic from old2NewTopic error"),
 
     MQTT_UNKNOWN_COMMAND(200600, "unknown mqtt command"),
     MQTT_ENCODE_FAILED(200601, "encode mqtt message failed"),
