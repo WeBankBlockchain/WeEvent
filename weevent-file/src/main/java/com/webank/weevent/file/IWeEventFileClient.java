@@ -131,6 +131,7 @@ public interface IWeEventFileClient {
     /**
      * list received files.
      *
+     * @param group group id
      * @param topic topic name
      * @return FileChunksMeta list
      * @throws BrokerException broker exception
