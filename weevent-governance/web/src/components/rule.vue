@@ -2,7 +2,7 @@
   <div class='rule'>
     <div class='step'>
         <p class='rule_title'>{{$t('rule.dataGuide')}}</p>
-        <p class='rule_descript'>{{$t('rule.creatRuleRemark')}}。</p>
+        <p class='rule_descript'>{{$t('rule.creatRuleRemark')}}</p>
         <div class='step_list'>
             <div class='step_list_item'>
                 <span class='num'>1</span>
