@@ -470,12 +470,16 @@ export default {
     },
     checkSpeed (e) {
       const b = 1024
+      const mb = 1024 * 1024
       if (!e.speed) {
-      	return (e.fileSize / b).toFixed(1) + ' KB / s'
+        const k = (e.fileSize / b).toFixed(1)
+        if(k > b){
+      	  return (k / b).toFixed(1) + ' MB / s'
+        }
+        return k + ' KB / s'
       }
       const nu = e.speed.split('B/s')
       const size = Number(nu[0])
-      const mb = 1024 * 1024
       if (size < b) {
         const v = (size / b).toFixed(1)
         if(v === '0.0') {
@@ -484,7 +488,11 @@ export default {
         return v + ' KB / s'
       }
       if (size >= b) {
-        return (size / mb).toFixed(1) + ' MB / s'
+        const m = (size / b).toFixed(1)
+        if(m > b){
+          return (m / b).toFixed(1) + ' MB / s'
+        }
+        return m + ' KB / s'
       }
     },
     checkProcess (e) {

@@ -66,7 +66,7 @@
         <el-input v-model="form.periodParams" autocomplete="off" placeholder="*/5 * * * * ?"></el-input>
       </el-form-item>
       <el-form-item :label="$t('timerSchedule.parsingSql') + ':'" prop='parsingSql'>
-        <el-input v-model.trim="form.parsingSql" autocomplete="off" type='textarea' :rows='5' placeholder="select count(1) from TIMER_SCHEDULER_JOB"></el-input>
+        <el-input v-model="form.parsingSql" autocomplete="off" type='textarea' :rows='5' placeholder="select count(1) from TIMER_SCHEDULER_JOB"></el-input>
       </el-form-item>
     </el-form>
     <div slot="footer" class="dialog-footer">
