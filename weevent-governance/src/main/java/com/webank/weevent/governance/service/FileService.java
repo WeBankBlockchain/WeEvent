@@ -297,6 +297,7 @@ public class FileService {
         FileTransportStats status = fileClient.status(topic);
         if (status.getReceiver().containsKey(groupId)) {
             fileChunksMetaStatusList = status.getReceiver().get(groupId).get(topic);
+            fileChunksMetaStatusList = null == fileChunksMetaStatusList ? new ArrayList<FileChunksMetaStatus>() : fileChunksMetaStatusList;
             for (FileChunksMetaStatus fileChunksMetaStatus : fileChunksMetaStatusList) {
                 FileChunksMeta chunksMeta = fileChunksMetaStatus.getFile();
                 FileChunksMetaEntity fileChunksMetaEntity = new FileChunksMetaEntity();
