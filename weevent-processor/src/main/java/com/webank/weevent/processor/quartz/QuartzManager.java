@@ -154,7 +154,7 @@ public class QuartzManager {
         Map<String, CEPRule> ruleMap = new HashMap<>();
         while (it.hasNext()) {
             JobKey jobKey = it.next();
-            CEPRule rule = JsonHelper.json2Object(scheduler.getJobDetail(jobKey).getJobDataMap().get("rule").toString(), CEPRule.class);
+            CEPRule rule = JsonHelper.json2Object(String.valueOf(scheduler.getJobDetail(jobKey).getJobDataMap().get("rule")), CEPRule.class);
             if (null != rule && RuleStatusEnum.RUNNING.getCode().equals(rule.getStatus())) {
                 ruleMap.put(rule.getId(), rule);
             }
