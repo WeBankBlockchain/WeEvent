@@ -129,7 +129,7 @@ public class FileTransportService {
         Map<String, List<FileChunksMetaStatus>> receivers = new HashMap<>();
         for (String topic : channel.getSubTopics()) {
             List<FileChunksMetaStatus> filePlus = localFiles.stream()
-                    .filter(item -> item.getTopic().equals(topic))
+                    .filter(item -> topic.equals(item.getTopic()))
                     .map(FileChunksMetaStatus::new)
                     .collect(Collectors.toList());
             receivers.put(topic, filePlus);
