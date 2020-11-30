@@ -302,9 +302,9 @@ public class CEPRuleMQ {
         String eventContent = new String(eventMessage.getContent());
         Map event = JsonHelper.json2Object(eventContent, Map.class);
         String[] strs = condition.split("=");
-        if (strs.length == 3) {
+        if (strs.length == 2) {
             // event contain left key
-            if (event.containsKey(strs[0]) && event.get(strs[0]).toString().equals(strs[2])) {
+            if (event.containsKey(strs[0]) && event.get(strs[0]).toString().equals(strs[1])) {
                 log.info("get the a=1 pattern {}", "true");
                 return true;
             } else {
@@ -336,8 +336,11 @@ public class CEPRuleMQ {
                 if (!StringUtils.isEmpty(rule.getFunctionArray())) {
                     String[][] systemFunctionDetail = SystemFunctionUtil.stringConvertArray(rule.getFunctionArray());
                     if (0 != systemFunctionDetail.length) {
-                        condition = SystemFunctionUtil.analysisSystemFunction(systemFunctionDetail, eventContent, condition);
-                        log.info("condition:{}", condition);
+                    	 String [] son = systemFunctionDetail[0];
+                    	 if(0 != son[0].length()) {
+                    		 condition = SystemFunctionUtil.analysisSystemFunction(systemFunctionDetail, eventContent, condition);
+                    		 log.info("condition:{}", condition);
+                    	 }
                     }
                 }
 
