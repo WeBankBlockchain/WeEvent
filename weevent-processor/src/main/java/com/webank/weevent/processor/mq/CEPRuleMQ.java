@@ -302,9 +302,9 @@ public class CEPRuleMQ {
         String eventContent = new String(eventMessage.getContent());
         Map event = JsonHelper.json2Object(eventContent, Map.class);
         String[] strs = condition.split("=");
-        if (strs.length == 2) {
+        if (strs.length == 3) {
             // event contain left key
-            if (event.containsKey(strs[0]) && event.get(strs[0]).toString().equals(strs[1])) {
+            if (event.containsKey(strs[0]) && event.get(strs[0]).toString().equals(strs[2])) {
                 log.info("get the a=1 pattern {}", "true");
                 return true;
             } else {
