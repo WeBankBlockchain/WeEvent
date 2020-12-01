@@ -33,7 +33,7 @@ public class StatisticRuleService {
         } else {
             for (String id : idList) {
                 // check the id
-                if (statisticWeEvent.getStatisticRuleMap().containsKey(id)) {
+                if (null != statisticWeEvent.getStatisticRuleMap() && statisticWeEvent.getStatisticRuleMap().containsKey(id)) {
                     statisticRuleMap.put(id, statisticWeEvent.getStatisticRuleMap().get(id));
                 }
             }
