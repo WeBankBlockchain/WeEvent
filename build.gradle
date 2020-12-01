@@ -34,7 +34,7 @@ ext {
     // org.fisco-bcos.web3sdk
     web3sdkVersion = [
             // fisco: "2.6.1.09271-rc1-SNAPSHOT"
-            fisco: "2.6.1-SNAPSHOT"
+            fisco: "2.7.0"
     ]
     // fabric
     fabricVersion = "1.4.4"
