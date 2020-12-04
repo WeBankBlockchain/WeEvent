@@ -229,8 +229,12 @@ public class AMOPChannel extends AmopCallback {
                 this.senderTopics.add(fileChunksMeta.getTopic());
             }
             return JsonHelper.json2Object(amopMsgResponse.getContent(), FileChunksMeta.class);
-        } catch (InterruptedException | TimeoutException e) {
-            log.error("InterruptedException | TimeoutException while send amop request");
+        } catch (TimeoutException e) {
+            log.error("TimeoutException while send amop request");
+            throw new BrokerException(ErrorCode.SEND_AMOP_MESSAGE_FAILED);
+        } catch (InterruptedException e) {
+            log.error("InterruptedException while send amop request");
+            Thread.currentThread().interrupt();
             throw new BrokerException(ErrorCode.SEND_AMOP_MESSAGE_FAILED);
         }
     }
@@ -254,8 +258,12 @@ public class AMOPChannel extends AmopCallback {
 
             log.info("clean up receiver file context success");
             return JsonHelper.json2Object(amopMsgResponse.getContent(), FileChunksMeta.class);
-        } catch (InterruptedException | TimeoutException e) {
-            log.error("InterruptedException | TimeoutException while send amop request");
+        } catch (TimeoutException e) {
+            log.error("TimeoutException while send amop request");
+            throw new BrokerException(ErrorCode.SEND_AMOP_MESSAGE_FAILED);
+        } catch (InterruptedException e) {
+            log.error("InterruptedException while send amop request");
+            Thread.currentThread().interrupt();
             throw new BrokerException(ErrorCode.SEND_AMOP_MESSAGE_FAILED);
         }
     }
@@ -277,8 +285,12 @@ public class AMOPChannel extends AmopCallback {
 
             log.info("receive file context is ready, go");
             return JsonHelper.json2Object(amopMsgResponse.getContent(), FileChunksMeta.class);
-        } catch (InterruptedException | TimeoutException e) {
-            log.error("InterruptedException | TimeoutException while send amop request");
+        } catch (TimeoutException e) {
+            log.error("TimeoutException while send amop request");
+            throw new BrokerException(ErrorCode.SEND_AMOP_MESSAGE_FAILED);
+        } catch (InterruptedException e) {
+            log.error("InterruptedException while send amop request");
+            Thread.currentThread().interrupt();
             throw new BrokerException(ErrorCode.SEND_AMOP_MESSAGE_FAILED);
         }
     }
@@ -303,8 +315,12 @@ public class AMOPChannel extends AmopCallback {
 
             log.info("check file existence success.");
             return JsonHelper.json2Object(amopMsgResponse.getContent(), Boolean.class);
-        } catch (InterruptedException | TimeoutException e) {
-            log.error("InterruptedException | TimeoutException while send amop request");
+        } catch (TimeoutException e) {
+            log.error("TimeoutException while send amop request");
+            throw new BrokerException(ErrorCode.SEND_AMOP_MESSAGE_FAILED);
+        } catch (InterruptedException e) {
+            log.error("InterruptedException while send amop request");
+            Thread.currentThread().interrupt();
             throw new BrokerException(ErrorCode.SEND_AMOP_MESSAGE_FAILED);
         }
     }
@@ -330,8 +346,12 @@ public class AMOPChannel extends AmopCallback {
 
             log.info("switch topic success.");
             return JsonHelper.json2Object(amopMsgResponse.getContent(), String.class);
-        } catch (InterruptedException | TimeoutException e) {
-            log.error("InterruptedException | TimeoutException while send amop request");
+        } catch (TimeoutException e) {
+            log.error("TimeoutException while send amop request");
+            throw new BrokerException(ErrorCode.SEND_AMOP_MESSAGE_FAILED);
+        } catch (InterruptedException e) {
+            log.error("InterruptedException while send amop request");
+            Thread.currentThread().interrupt();
             throw new BrokerException(ErrorCode.SEND_AMOP_MESSAGE_FAILED);
         }
     }
@@ -400,7 +420,9 @@ public class AMOPChannel extends AmopCallback {
         }
 
         sw.stop();
-        log.info("receive channel response, id: {} result: {}-{} cost: {}", response.getMessageID(), response.getErrorCode(), response.getErrorMessage(), sw.getTime());
+        if (null != response) {
+            log.info("receive channel response, id: {} result: {}-{} cost: {}", response.getMessageID(), response.getErrorCode(), response.getErrorMessage(), sw.getTime());
+        }
         return response;
     }
 
