@@ -55,7 +55,12 @@ public interface IProducer extends IEventTopic {
     default SendResult publish(WeEvent event, String groupId, int timeout) throws BrokerException {
         try {
             return this.publish(event, groupId).get(timeout, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (InterruptedException e) {
+            SendResult sendResult = new SendResult(SendResult.SendResultStatus.ERROR);
+            sendResult.setTopic(event.getTopic());
+            Thread.currentThread().interrupt();
+            return sendResult;
+        } catch (ExecutionException e) {
             SendResult sendResult = new SendResult(SendResult.SendResultStatus.ERROR);
             sendResult.setTopic(event.getTopic());
             return sendResult;

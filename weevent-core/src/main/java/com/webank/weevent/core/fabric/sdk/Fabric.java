@@ -91,10 +91,15 @@ public class Fabric {
 
             this.topicInfo.put(topicName, topicInfo);
             return topicInfo;
-        } catch (InterruptedException | ProposalException | ExecutionException | InvalidArgumentException exception) {
+        } catch (ProposalException | ExecutionException | InvalidArgumentException exception) {
             log.error("publish event failed due to transaction execution error.", exception);
             throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
-        } catch (TimeoutException timeout) {
+        }  catch (InterruptedException exception) {
+            log.error("publish event failed due to transaction execution error.", exception);
+            Thread.currentThread().interrupt();
+            throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
+        }
+        catch (TimeoutException timeout) {
             log.error("publish event failed due to transaction execution timeout.", timeout);
             throw new BrokerException(ErrorCode.TRANSACTION_TIMEOUT);
         }
@@ -111,8 +116,12 @@ public class Fabric {
                 throw new BrokerException(transactionInfo.getCode(), transactionInfo.getMessage());
             }
             return true;
-        } catch (InterruptedException | ProposalException | ExecutionException | InvalidArgumentException exception) {
+        } catch (ProposalException | ExecutionException | InvalidArgumentException exception) {
             log.error("create topic :{} failed due to transaction execution error.{}", topicName, exception);
+            throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
+        } catch (InterruptedException exception) {
+            log.error("create topic :{} failed due to transaction execution error.{}", topicName, exception);
+            Thread.currentThread().interrupt();
             throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
         } catch (TimeoutException timeout) {
             log.error("create topic :{} failed due to transaction execution timeout. {}", topicName, timeout);
@@ -126,8 +135,12 @@ public class Fabric {
                     "isTopicExist", fabricConfig.getTransactionTimeout(), topicName);
 
             return ErrorCode.SUCCESS.getCode() == transactionInfo.getCode();
-        } catch (InterruptedException | ProposalException | ExecutionException | InvalidArgumentException exception) {
+        } catch (ProposalException | ExecutionException | InvalidArgumentException exception) {
             log.error("create topic :{} failed due to transaction execution error.{}", topicName, exception);
+            throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
+        } catch (InterruptedException exception) {
+            log.error("create topic :{} failed due to transaction execution error.{}", topicName, exception);
+            Thread.currentThread().interrupt();
             throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
         } catch (TimeoutException timeout) {
             log.error("create topic :{} failed due to transaction execution timeout. {}", topicName, timeout);
@@ -154,8 +167,12 @@ public class Fabric {
             }
 
             return topicPage;
-        } catch (InterruptedException | ProposalException | ExecutionException | InvalidArgumentException exception) {
+        } catch (ProposalException | ExecutionException | InvalidArgumentException exception) {
             log.error("list topicName failed due to transaction execution error", exception);
+            throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
+        } catch (InterruptedException exception) {
+            log.error("list topicName failed due to transaction execution error", exception);
+            Thread.currentThread().interrupt();
             throw new BrokerException(ErrorCode.TRANSACTION_EXECUTE_ERROR);
         } catch (TimeoutException timeout) {
             log.error("list topicName failed due to transaction execution timeout", timeout);
@@ -262,8 +279,12 @@ public class Fabric {
 
         try {
             return FabricSDKWrapper.queryBlockList(fabricConfig, channel, blockNumber, blockHash, pageIndex, pageSize);
-        } catch (InvalidArgumentException | ProposalException | ExecutionException | InterruptedException | DecoderException | InvalidProtocolBufferException e) {
+        } catch (InvalidArgumentException | ProposalException | ExecutionException | DecoderException | InvalidProtocolBufferException e) {
             log.error("query block list by transHash and blockNum error", e);
+            throw new BrokerException(ErrorCode.FABRICSDK_GETBLOCKINFO_ERROR);
+        } catch (InterruptedException e) {
+            log.error("query block list by transHash and blockNum error", e);
+            Thread.currentThread().interrupt();
             throw new BrokerException(ErrorCode.FABRICSDK_GETBLOCKINFO_ERROR);
         }
     }
