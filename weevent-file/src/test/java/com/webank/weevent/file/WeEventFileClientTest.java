@@ -90,7 +90,7 @@ public class WeEventFileClientTest {
         weEventFileClient.openTransport4Sender(this.topicName, resource.getInputStream());
 
         // handshake time delay for web3sdk
-        Thread.sleep(1000 * 10);
+        Thread.sleep(1000 * 10L);
 
         FileChunksMeta fileChunksMeta = weEventFileClient.publishFile(this.topicName,
                 new File("src/main/resources/ca.crt").getAbsolutePath(), true);
@@ -196,7 +196,7 @@ public class WeEventFileClientTest {
             };
             try {
                 weEventFileClient.openTransport4Receiver(topic, fileListener);
-                Thread.sleep(1000 * 60 * 5);
+                Thread.sleep(1000 * 60 * 5L);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -251,11 +251,11 @@ public class WeEventFileClientTest {
         new Thread(new Runner4PublishFile(weEventFileClient, this.topicName), "thread publish").start();
         // thread delay for get sender status
         System.out.println("sender delay 10s:");
-        Thread.sleep(1000 * 10);
+        Thread.sleep(1000 * 10L);
 
         System.out.println("begin get sender status:");
         new Thread(new Runner4Status(this.groupId, this.topicName, weEventFileClient, true), "thread status").start();
-        Thread.sleep(1000 * 60 * 5);
+        Thread.sleep(1000 * 60 * 5L);
         Assert.assertTrue(true);
     }
 
@@ -266,13 +266,13 @@ public class WeEventFileClientTest {
         new Thread(new Runner4SubscribeFile(weEventFileClient, this.topicName), "thread publish").start();
         // thread delay for get receiver status
         System.out.println("receiver waiting sender publish file, delay 30s:");
-        Thread.sleep(1000 * 30);
+        Thread.sleep(1000 * 30L);
 
         System.out.println("begin get receiver status: ");
         new Thread(new Runner4Status(this.groupId, this.topicName, weEventFileClient, false), "thread status").start();
 
         // main thread sleep, waiting for subscribe file
-        Thread.sleep(1000 * 60 * 5);
+        Thread.sleep(1000 * 60 * 5L);
         Assert.assertTrue(true);
     }
 
@@ -349,7 +349,7 @@ public class WeEventFileClientTest {
         WeEventFileClient weEventFileClient = new WeEventFileClient(this.groupId, this.localReceivePath, ftpInfo, this.fileChunkSize, this.fiscoConfig);
         weEventFileClient.openTransport4Receiver(this.topicName, fileListener);
 
-        Thread.sleep(1000 * 60 * 5);
+        Thread.sleep(1000 * 60 * 5L);
         Assert.assertTrue(true);
     }
 

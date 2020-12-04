@@ -249,8 +249,12 @@ public class FileTransportService {
             log.info("sender chunk data to remote success");
             // local cached chunkStatus is not consistency, but show in stats and log only
             fileChunksMeta.getChunkStatus().set(chunkIndex);
-        } catch (InterruptedException | TimeoutException e) {
-            log.error("InterruptedException | TimeoutException while send amop request");
+        } catch (TimeoutException e) {
+            log.error("TimeoutException while send amop request");
+            throw new BrokerException(ErrorCode.SEND_AMOP_MESSAGE_FAILED);
+        } catch (InterruptedException e) {
+            log.error("InterruptedException while send amop request");
+            Thread.currentThread().interrupt();
             throw new BrokerException(ErrorCode.SEND_AMOP_MESSAGE_FAILED);
         }
     }

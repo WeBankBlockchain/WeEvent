@@ -195,7 +195,7 @@ public class FtpClientService {
      * @param localPath local path for download file
      * @throws BrokerException BrokerException
      */
-    public void downLoadFile(String remoteFilePath, String localPath) throws BrokerException {
+    public void downLoadFile(String remoteFilePath, String localPath) throws BrokerException, IOException {
         if (!this.ftpClient.isConnected() || !this.ftpClient.isAvailable()) {
             log.error("ftp client not connected to a server");
             throw new BrokerException(ErrorCode.FTP_CLIENT_NOT_CONNECT_TO_SERVER);
@@ -208,6 +208,8 @@ public class FtpClientService {
             log.error("local file path invalid, {}", localPath);
             throw new BrokerException(ErrorCode.FTP_NOT_EXIST_PATH);
         }
+
+        OutputStream outputStream = null;
 
         try {
             this.ftpClient.enterLocalPassiveMode();
@@ -240,7 +242,7 @@ public class FtpClientService {
                 }
 
                 // change ftpClient work path
-                OutputStream outputStream = new FileOutputStream(localFile);
+                outputStream = new FileOutputStream(localFile);
                 String workDir = remoteFilePath.substring(0, remoteFilePath.lastIndexOf(PATH_SEPARATOR));
                 if (StringUtils.isBlank(workDir)) {
                     workDir = PATH_SEPARATOR;
@@ -258,7 +260,6 @@ public class FtpClientService {
                 }
 
                 outputStream.flush();
-                outputStream.close();
                 log.info("file download success, {}", ftpFile.getName());
             } else {
                 log.error("remote file name error, {}", remoteFilePath);
@@ -266,6 +267,11 @@ public class FtpClientService {
             }
         } catch (IOException e) {
             throw new BrokerException(e.getMessage());
+        } finally {
+            if (outputStream != null) {
+                outputStream.close();
+            }
+
         }
     }
 
