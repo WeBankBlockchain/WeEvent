@@ -371,6 +371,7 @@ public class FiscoBcos2 {
             }
         } catch (InterruptedException e) {
             log.error("get transactionReceipt failed.", e);
+            Thread.currentThread().interrupt();
         }
         return receiptOptional;
     }
