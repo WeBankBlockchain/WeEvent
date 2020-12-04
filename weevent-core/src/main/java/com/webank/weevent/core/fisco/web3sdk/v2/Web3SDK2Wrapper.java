@@ -361,9 +361,14 @@ public class Web3SDK2Wrapper {
             tbBlockListPage.setTotal(blockCount);
             tbBlockListPage.setPageData(tbBlocks);
             return tbBlockListPage;
-        } catch (ExecutionException | NullPointerException | InterruptedException e) { // Web3sdk's rpc return null
+        } catch (ExecutionException | NullPointerException e) { // Web3sdk's rpc return null
             // Web3sdk send async will arise InterruptedException
             log.error("query transaction failed due to web3sdk rpc error", e);
+            throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
+        } catch (InterruptedException e) { // Web3sdk's rpc return null
+            // Web3sdk send async will arise InterruptedException
+            log.error("query transaction failed due to web3sdk rpc error", e);
+            Thread.currentThread().interrupt();
             throw new BrokerException(ErrorCode.WEB3SDK_RPC_ERROR);
         }
     }
