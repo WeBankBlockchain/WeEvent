@@ -2,6 +2,7 @@ package com.webank.weevent.processor.timer;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
@@ -48,20 +49,26 @@ public class TimerSchedulerJob implements Job {
         }
     }
 
-    public static void runTask(TimerScheduler timerScheduler) {
-        try (Connection dbcpConnection = CommonUtil.getDbcpConnection(timerScheduler.getDatabaseUrl(), timerScheduler.getDataBaseType())) {
+    public static void runTask(TimerScheduler timerScheduler) throws SQLException {
+        Connection dbcpConnection = null;
+        try {
+            dbcpConnection = CommonUtil.getDbcpConnection(timerScheduler.getDatabaseUrl(), timerScheduler.getDataBaseType());
             if (dbcpConnection == null) {
                 log.error("database connection fail,databaseUrl:{}", timerScheduler.getDatabaseUrl());
+                return;
             } else {
                 PreparedStatement preparedStmt = dbcpConnection.prepareStatement(timerScheduler.getParsingSql());
                 boolean execute = preparedStmt.execute();
                 if (execute) {
                     log.info("execute sql success");
                 }
-                dbcpConnection.close();
             }
         } catch (Exception e) {
             log.error("execute task fail,taskId:{}", timerScheduler.getId(), e);
+        } finally {
+            if (dbcpConnection != null) {
+                dbcpConnection.close();
+            }
         }
     }
 
