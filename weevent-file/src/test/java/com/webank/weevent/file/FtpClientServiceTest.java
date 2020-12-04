@@ -1,6 +1,7 @@
 package com.webank.weevent.file;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -73,7 +74,7 @@ public class FtpClientServiceTest {
 
     @Test
     @Ignore
-    public void testFtpDownLoadFile() throws BrokerException {
+    public void testFtpDownLoadFile() throws BrokerException, IOException {
         FtpClientService ftpClientService = new FtpClientService();
         ftpClientService.connect(this.ftpHost, this.ftpPort, this.ftpUser, this.ftpPassWord);
 
