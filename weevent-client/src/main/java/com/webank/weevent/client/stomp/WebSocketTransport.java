@@ -225,8 +225,12 @@ public class WebSocketTransport extends WebSocketClient {
                 sendResult.setStatus(SendResult.SendResultStatus.SUCCESS);
                 sendResult.setEventId(stompHeaderAccessor.getFirstNativeHeader("eventId"));
                 log.info("publish async success, event: {}, eventID: {}", event, sendResult.getEventId());
-            } catch (BrokerException | InterruptedException e) {
+            } catch (BrokerException e) {
                 log.error("stomp command invoke error, seq: " + asyncSeq, e);
+                sendResult.setStatus(SendResult.SendResultStatus.ERROR);
+            } catch (InterruptedException e) {
+                log.error("stomp command invoke error, seq: " + asyncSeq, e);
+                Thread.currentThread().interrupt();
                 sendResult.setStatus(SendResult.SendResultStatus.ERROR);
             }
             return sendResult;

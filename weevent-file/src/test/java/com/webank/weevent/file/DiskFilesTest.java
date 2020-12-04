@@ -43,9 +43,16 @@ public class DiskFilesTest {
     public void after() throws Exception {
         File file = new File("./logs/file");
         for (File f : file.listFiles()) {
-            f.delete();
+            boolean ret = f.delete();
+            if (!ret) {
+                System.out.println("delete file error, file name: " + f.getName());
+            }
         }
-        file.delete();
+        boolean deleteRet = file.delete();
+        if (!deleteRet) {
+            System.out.println("delete file error, file name: " + file.getName());
+        }
+
     }
 
     /**

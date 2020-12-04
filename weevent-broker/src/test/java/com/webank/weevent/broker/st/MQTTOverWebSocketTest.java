@@ -168,6 +168,7 @@ public class MQTTOverWebSocketTest extends JUnitTestBase {
             Assert.assertTrue(true);
         } catch (InterruptedException e) {
             log.error("exception", e);
+            Thread.currentThread().interrupt();
             Assert.fail();
             throw e;
         }
@@ -201,8 +202,12 @@ public class MQTTOverWebSocketTest extends JUnitTestBase {
 
             Thread.sleep(this.actionTimeout);
             Assert.assertTrue(listener.received > 0);
-        } catch (MqttException | InterruptedException e) {
+        } catch (MqttException e) {
             log.error("exception", e);
+            Assert.fail();
+        } catch (InterruptedException e){
+            log.error("exception", e);
+            Thread.currentThread().interrupt();
             Assert.fail();
         }
     }

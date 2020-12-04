@@ -146,6 +146,11 @@ public class CEPRuleMQ {
                 client = clientOld;
             }
 
+            if (client == null){
+                log.error("getClient null");
+                return;
+            }
+
             // subscribe topic
             String subscriptionId;
             String offSet;
@@ -177,7 +182,9 @@ public class CEPRuleMQ {
         try {
             IWeEventClient client = getClient(rule);
             log.info("id:{},sunid:{}", rule.getId(), subscriptionId);
-            client.unSubscribe(subscriptionId);
+            if (null != client){
+                client.unSubscribe(subscriptionId);
+            }
         } catch (BrokerException e) {
             log.info("BrokerException{}", e.toString());
         }
@@ -276,6 +283,9 @@ public class CEPRuleMQ {
                             WeEvent weEvent = new WeEvent(entry.getValue().getToDestination(), eventContent.getBytes(StandardCharsets.UTF_8), event.getExtensions());
                             log.info("after hitRuleEngine weEvent  groupId: {}, event:{}", groupId, weEvent.toString());
                             IWeEventClient toDestinationClient = getClient(entry.getValue());
+                            if (null == toDestinationClient){
+                                return new Pair<>(ConstantsHelper.PUBLISH_EVENT_FAIL, entry.getValue().getId());
+                            }
                             SendResult result = toDestinationClient.publish(weEvent);
 
                             // update the  statistic weevent
