@@ -76,8 +76,7 @@ public class WeEventFileClient implements IWeEventFileClient {
         init();
     }
 
-    public WeEventFileClient(String groupId, String localReceivePath, FtpInfo ftpInfo, int fileChunkSize,
-                             FiscoConfig fiscoConfig) {
+    public WeEventFileClient(String groupId, String localReceivePath, FtpInfo ftpInfo, int fileChunkSize, FiscoConfig fiscoConfig) {
         this.groupId = groupId;
         this.localReceivePath = localReceivePath;
         this.ftpInfo = ftpInfo;
@@ -100,8 +99,7 @@ public class WeEventFileClient implements IWeEventFileClient {
             iConsumer.startConsumer();
 
             // create FileTransportService instance
-            this.fileTransportService = new FileTransportService(this.config, iProducer, "", this.localReceivePath,
-                    this.fileChunkSize, this.groupId);
+            this.fileTransportService = new FileTransportService(this.config, iProducer, "", this.localReceivePath, this.fileChunkSize, this.groupId);
         } catch (BrokerException e) {
             log.error("init WeEventFileClient failed", e);
         }
@@ -115,8 +113,7 @@ public class WeEventFileClient implements IWeEventFileClient {
 
     public void openTransport4Sender(String topic, InputStream publicPem) throws BrokerException {
         // publicPem is public key
-        // get AMOPChannel, fileTransportService and amopChannel is One-to-one
-        // correspondence
+        // get AMOPChannel, fileTransportService and amopChannel is One-to-one correspondence
         AMOPChannel amopChannel = this.fileTransportService.getChannel();
 
         // service is exist
@@ -159,13 +156,11 @@ public class WeEventFileClient implements IWeEventFileClient {
     }
 
     @Override
-    public FileChunksMeta publishFile(String topic, String filePath, boolean overwrite)
-            throws BrokerException, IOException {
+    public FileChunksMeta publishFile(String topic, String filePath, boolean overwrite) throws BrokerException, IOException {
         // check if topic is exist
         IProducer iProducer = this.fileTransportService.getProducer();
         if (!iProducer.exist(topic, this.groupId)) {
-            log.info("topic: " + topic + " not exist in group: " + groupId + ", open topic: " + topic + " groupID: "
-                    + groupId);
+            log.info("topic: " + topic + " not exist in group: " + groupId + ", open topic: " + topic + " groupID: " + groupId);
             boolean resOpen = iProducer.open(topic, this.groupId);
             if (!resOpen) {
                 log.error("create topic: {} failed.", topic);
@@ -208,14 +203,11 @@ public class WeEventFileClient implements IWeEventFileClient {
         } else {
             // publish ftp file
             FtpClientService ftpClientService = new FtpClientService();
-            ftpClientService.connect(this.ftpInfo.getHost(), this.ftpInfo.getPort(), this.ftpInfo.getUserName(),
-                    this.ftpInfo.getPassWord());
+            ftpClientService.connect(this.ftpInfo.getHost(), this.ftpInfo.getPort(), this.ftpInfo.getUserName(), this.ftpInfo.getPassWord());
             ftpClientService.downLoadFile(filePath, this.localReceivePath);
 
             FileChunksTransport fileChunksTransport = new FileChunksTransport(this.fileTransportService);
-            fileChunksMeta = fileChunksTransport.upload(
-                    this.localReceivePath + filePath.substring(filePath.indexOf('/')), newTopic, this.groupId,
-                    overwrite);
+            fileChunksMeta = fileChunksTransport.upload(this.localReceivePath + filePath.substring(filePath.indexOf('/')), newTopic, this.groupId, overwrite);
         }
         return fileChunksMeta;
     }
@@ -228,10 +220,8 @@ public class WeEventFileClient implements IWeEventFileClient {
         amopChannel.subTopic(topic, fileEventListener);
     }
 
-    public void openTransport4Receiver(String topic, FileListener fileListener, InputStream privatePem)
-            throws BrokerException {
-        // get AMOPChannel, fileTransportService and amopChannel is One-to-one
-        // correspondence
+    public void openTransport4Receiver(String topic, FileListener fileListener, InputStream privatePem) throws BrokerException {
+        // get AMOPChannel, fileTransportService and amopChannel is One-to-one correspondence
         AMOPChannel amopChannel = this.fileTransportService.getChannel();
 
         FileEventListener fileEventListener = new FileEventListener(this.localReceivePath, this.ftpInfo, fileListener);
@@ -239,8 +229,7 @@ public class WeEventFileClient implements IWeEventFileClient {
         amopChannel.subTopic(topic, privatePem, fileEventListener);
     }
 
-    public void openTransport4Receiver(String topic, FileListener fileListener, String privatePemPath)
-            throws IOException, BrokerException {
+    public void openTransport4Receiver(String topic, FileListener fileListener, String privatePemPath) throws IOException, BrokerException {
         if (StringUtils.isBlank(privatePemPath)) {
             log.error("private key pem path is blank.");
             throw new BrokerException(ErrorCode.PARAM_ISNULL);
@@ -278,16 +267,14 @@ public class WeEventFileClient implements IWeEventFileClient {
 
         // sender
         Map<String, List<FileChunksMetaStatus>> senderTopicStatusMap = new HashMap<>();
-        List<FileChunksMetaStatus> senderFileChunksMetaStatusList = fileTransportStats.getSender().get(groupId)
-                .get(topicName);
+        List<FileChunksMetaStatus> senderFileChunksMetaStatusList = fileTransportStats.getSender().get(groupId).get(topicName);
         senderTopicStatusMap.put(topicName, senderFileChunksMetaStatusList);
         Map<String, Map<String, List<FileChunksMetaStatus>>> sender = new HashMap<>();
         sender.put(groupId, senderTopicStatusMap);
 
         // receiver
         Map<String, List<FileChunksMetaStatus>> receiverTopicStatusMap = new HashMap<>();
-        List<FileChunksMetaStatus> receiverFileChunksMetaStatusList = fileTransportStats.getReceiver().get(groupId)
-                .get(topicName);
+        List<FileChunksMetaStatus> receiverFileChunksMetaStatusList = fileTransportStats.getReceiver().get(groupId).get(topicName);
         receiverTopicStatusMap.put(topicName, receiverFileChunksMetaStatusList);
         Map<String, Map<String, List<FileChunksMetaStatus>>> receiver = new HashMap<>();
         receiver.put(groupId, receiverTopicStatusMap);
@@ -354,8 +341,7 @@ public class WeEventFileClient implements IWeEventFileClient {
             generator.initialize(ecSpec, new SecureRandom());
             KeyPair pair = generator.generateKeyPair();
             String pubKey = pair.getPublic().toString();
-            String account = HEX_HEADER
-                    + pubKey.substring(pubKey.indexOf("[") + 1, pubKey.indexOf("]")).replace(":", "");
+            String account = HEX_HEADER + pubKey.substring(pubKey.indexOf("[") + 1, pubKey.indexOf("]")).replace(":", "");
 
             PemFile privatePemFile = new PemFile(pair.getPrivate(), PRIVATE_KEY_DESC);
             PemFile publicPemFile = new PemFile(pair.getPublic(), PUBLIC_KEY_DESC);
