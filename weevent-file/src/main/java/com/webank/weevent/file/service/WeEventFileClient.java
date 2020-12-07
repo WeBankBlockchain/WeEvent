@@ -407,7 +407,7 @@ public class WeEventFileClient implements IWeEventFileClient {
                 fileOutputStream.close();
             }
             if (zipOutputStream != null) {
-                zipOutputStream.close();
+                zipOutputStream.closeEntry();
             }
 
         }
