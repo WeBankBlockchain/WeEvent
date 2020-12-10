@@ -1,4 +1,4 @@
-const url = 'http://127.0.0.1:7009'
+const url = ''
 
 let root
 if (process.env.NODE_ENV === 'development') {
