@@ -369,47 +369,20 @@ public class WeEventFileClient implements IWeEventFileClient {
     }
 
     private static void zipFiles(File[] srcFiles, File zipFile) throws IOException {
+        byte[] buf = new byte[1024];
         if (!zipFile.exists()) {
-            try {
-                zipFile.createNewFile();
-            } catch (IOException e) {
-                throw new IOException();
-            }
+            zipFile.createNewFile();
         }
-        FileOutputStream fileOutputStream = null;
-        ZipOutputStream zipOutputStream = null;
-        try {
-            fileOutputStream = new FileOutputStream(zipFile);
-            zipOutputStream = new ZipOutputStream(fileOutputStream);
+        try (ZipOutputStream zipOutPutStream = new ZipOutputStream(new FileOutputStream(zipFile))) {
             for (int i = 0; i < srcFiles.length; i++) {
-                FileInputStream fileInputStream = null;
-                ZipEntry zipEntry = null;
-                try {
-                    fileInputStream = new FileInputStream(srcFiles[i]);
-                    zipEntry = new ZipEntry(srcFiles[i].getName());
-                    zipOutputStream.putNextEntry(zipEntry);
+                try (FileInputStream fileInputStream = new FileInputStream(srcFiles[i])) {
+                    zipOutPutStream.putNextEntry(new ZipEntry(srcFiles[i].getName()));
                     int len;
-                    byte[] buffer = new byte[1024];
-                    while ((len = fileInputStream.read(buffer)) > 0) {
-                        zipOutputStream.write(buffer, 0, len);
-                    }
-                } finally {
-                    if (null != fileInputStream) {
-                        fileInputStream.close();
-                    }
-                    if (zipOutputStream != null){
-                        zipOutputStream.closeEntry();
+                    while ((len = fileInputStream.read(buf)) > 0) {
+                        zipOutPutStream.write(buf, 0, len);
                     }
                 }
             }
-        } finally {
-            if (fileOutputStream != null) {
-                fileOutputStream.close();
-            }
-            if (zipOutputStream != null) {
-                zipOutputStream.close();
-            }
-
         }
     }
 
