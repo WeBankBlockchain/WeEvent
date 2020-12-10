@@ -381,6 +381,7 @@ public class WeEventFileClient implements IWeEventFileClient {
                     while ((len = fileInputStream.read(buf)) > 0) {
                         zipOutPutStream.write(buf, 0, len);
                     }
+                    zipOutPutStream.closeEntry();
                 }
             }
         }
