@@ -373,7 +373,7 @@ public class WeEventFileClient implements IWeEventFileClient {
         if (!zipFile.exists()) {
             zipFile.createNewFile();
         }
-        try (ZipOutputStream zipOutPutStream = new ZipOutputStream(new FileOutputStream(zipFile))) {
+        try (FileOutputStream fileOutPutStream = new FileOutputStream(zipFile); ZipOutputStream zipOutPutStream = new ZipOutputStream(fileOutPutStream)) {
             for (int i = 0; i < srcFiles.length; i++) {
                 try (FileInputStream fileInputStream = new FileInputStream(srcFiles[i])) {
                     zipOutPutStream.putNextEntry(new ZipEntry(srcFiles[i].getName()));
