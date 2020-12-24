@@ -36,6 +36,7 @@ public class DiskFiles {
     private Map<String, FileChunksMeta> fileIdChunksMeta = new ConcurrentHashMap<>();
 
     public DiskFiles(String path) {
+    	path = path.replace("..", "");
         File localPath = new File(path);
         if (!localPath.exists()) {
             boolean result = localPath.mkdirs();

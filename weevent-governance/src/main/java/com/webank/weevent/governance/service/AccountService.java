@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 
+import com.webank.weevent.governance.common.GovernanceConfig;
 import com.webank.weevent.governance.common.GovernanceException;
 import com.webank.weevent.governance.common.GovernanceResult;
 import com.webank.weevent.governance.entity.AccountEntity;
@@ -26,7 +27,7 @@ public class AccountService {
 
     @Autowired
     private AccountRepository accountRepository;
-
+    
     @PostConstruct
     public void init() throws GovernanceException {
         try {
@@ -34,8 +35,8 @@ public class AccountService {
             AccountEntity accountEntity = this.queryByUsername("admin");
             if (accountEntity == null) {
                 accountEntity = new AccountEntity();
-                accountEntity.setUsername("admin");
-                accountEntity.setPassword("AC0E7D037817094E9E0B4441F9BAE3209D67B02FA484917065F71B16109A1A78");
+                accountEntity.setUsername(GovernanceConfig.acount_name);
+                accountEntity.setPassword(GovernanceConfig.acount_passwrod);
                 accountRepository.save(accountEntity);
             }
         } catch (Exception e) {

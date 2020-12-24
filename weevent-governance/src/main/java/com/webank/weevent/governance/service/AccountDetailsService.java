@@ -28,8 +28,9 @@ public class AccountDetailsService implements UserDetailsService {
             throw new UsernameNotFoundException("sql execute error!");
         }
         String password = accountEntity.getPassword();
+        String userName = accountEntity.getUsername();
 
-        log.info("password: {}", password);
+        log.info("userName: {}", userName);
 
         User user = new User(username, password, AuthorityUtils.commaSeparatedStringToAuthorityList("admin"));
         return user;
