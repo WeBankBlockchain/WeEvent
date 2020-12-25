@@ -49,9 +49,8 @@ public class AccountService {
     }
     
     private static String sha256(String pwd) throws GovernanceException {
-		MessageDigest messageDigest;
 		try {
-			messageDigest = MessageDigest.getInstance("SHA-256");
+			MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
 			byte[] hash = messageDigest.digest(pwd.getBytes("UTF-8"));
 			return Hex.encodeHexString(hash).toUpperCase();
 		} catch (Exception e) {
