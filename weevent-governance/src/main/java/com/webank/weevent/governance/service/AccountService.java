@@ -30,7 +30,7 @@ public class AccountService {
 
     @Autowired
     private AccountRepository accountRepository;
-    
+
     @PostConstruct
     public void init() throws GovernanceException {
         try {
@@ -47,17 +47,17 @@ public class AccountService {
             throw new GovernanceException("init admin account fail,error:{}", e);
         }
     }
-    
+
     private static String sha256(String pwd) throws GovernanceException {
-		try {
-			MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
-			byte[] hash = messageDigest.digest(pwd.getBytes("UTF-8"));
-			return Hex.encodeHexString(hash).toUpperCase();
-		} catch (Exception e) {
-			log.error(e.getMessage());
+        try {
+            MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = messageDigest.digest(pwd.getBytes("UTF-8"));
+            return Hex.encodeHexString(hash).toUpperCase();
+        } catch (Exception e) {
+            log.error(e.getMessage());
             throw new GovernanceException("init admin account password to sha256 fail,error:{}", e);
-		}
-	}
+        }
+    }
 
     public GovernanceResult<Object> checkData(String param, int type) {
         // according type generate select condition
