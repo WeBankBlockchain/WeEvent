@@ -187,9 +187,9 @@ public class FileService {
             CompletableFuture.runAsync(() -> {
                 String fileId = chunkParam.getFileChunksMeta().getFileId();
                 String filePath = this.uploadPath.concat(File.separator).concat(fileId).concat(File.separator)
-						.concat(chunkParam.getFileChunksMeta().getGroupId()).concat(File.separator)
-						.concat(chunkParam.getFileChunksMeta().getTopic()).concat(File.separator)
-						.concat(chunkParam.getFileChunksMeta().getFileName());
+                        .concat(chunkParam.getFileChunksMeta().getGroupId()).concat(File.separator)
+                        .concat(chunkParam.getFileChunksMeta().getTopic()).concat(File.separator)
+                        .concat(chunkParam.getFileChunksMeta().getFileName());
                 boolean overWrite = this.transportMap.get(chunkParam.getBrokerId()).get(chunkParam.getFileChunksMeta().getGroupId())
                         .get(chunkParam.getFileChunksMeta().getTopic());
 
@@ -271,8 +271,8 @@ public class FileService {
     public String downloadFile(String groupId, String topic, String fileName) throws GovernanceException {
         String filePath = this.downloadPath.concat(File.separator).concat(groupId).concat(File.separator)
                 .concat(topic).concat(File.separator).concat(fileName);
-        if(filePath.indexOf("..") != -1) {
-        	log.error("file path not exist .., topic:{}, fileName:{}, filePath:{}", topic,fileName, filePath);
+        if (filePath.indexOf("..") != -1) {
+            log.error("file path not exist .., topic:{}, fileName:{}, filePath:{}", topic, fileName, filePath);
             throw new GovernanceException(ErrorCode.FILE_NOT_EXIST);
         }
         if (!new File(filePath).exists()) {
@@ -379,7 +379,12 @@ public class FileService {
 
         FileChunksMeta fileChunksMeta = new FileChunksMeta(fileId, filename, totalSize, "", topic, groupId, true);
         fileChunksMeta.initChunkSize(chunkSize);
-        DiskFiles diskFiles = new DiskFiles(this.uploadPath + File.separator + fileId);
+        String filePath = this.uploadPath + File.separator + fileId;
+        if (filePath.indexOf("..") != -1) {
+            log.info("file path not exist.. filePath, {}", filePath);
+            throw new GovernanceException(ErrorCode.FILE_NOT_EXIST);
+        }
+        DiskFiles diskFiles = new DiskFiles(filePath);
         try {
             diskFiles.createFixedLengthFile(fileChunksMeta);
             diskFiles.saveFileMeta(fileChunksMeta);
