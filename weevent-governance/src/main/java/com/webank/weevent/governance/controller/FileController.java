@@ -95,7 +95,6 @@ public class FileController {
         if (StringUtils.isBlank(downloadFile)) {
             throw new GovernanceException("download file not exist");
         }
-        downloadFile = downloadFile.replace("..", "");
         try {
             response.setHeader("filename", URLEncoder.encode(fileName, StandardCharsets.UTF_8.toString()));
         } catch (UnsupportedEncodingException e) {

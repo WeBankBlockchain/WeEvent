@@ -36,7 +36,9 @@ public class DiskFiles {
     private Map<String, FileChunksMeta> fileIdChunksMeta = new ConcurrentHashMap<>();
 
     public DiskFiles(String path) {
-    	path = path.replace("..", "");
+    	if(path.indexOf("..") != -1) {
+    		path = path.replace("..", "");
+    	}
         File localPath = new File(path);
         if (!localPath.exists()) {
             boolean result = localPath.mkdirs();
@@ -48,7 +50,7 @@ public class DiskFiles {
         log.info("local file path: {}, {} -> {}", path, localPath.getFreeSpace(), localPath.getTotalSpace());
         this.path = path;
     }
-
+    
     public String genLocalFileName(String fileId) throws BrokerException {
         FileChunksMeta fileChunksMeta = fileIdChunksMeta.get(fileId);
         if (fileChunksMeta == null) {

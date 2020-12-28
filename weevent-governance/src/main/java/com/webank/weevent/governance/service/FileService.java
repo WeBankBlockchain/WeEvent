@@ -271,7 +271,10 @@ public class FileService {
     public String downloadFile(String groupId, String topic, String fileName) throws GovernanceException {
         String filePath = this.downloadPath.concat(File.separator).concat(groupId).concat(File.separator)
                 .concat(topic).concat(File.separator).concat(fileName);
-        filePath = filePath.replace("..", "");
+        if(filePath.indexOf("..") != -1) {
+        	log.error("file path not exist .., topic:{}, fileName:{}, filePath:{}", topic,fileName, filePath);
+            throw new GovernanceException(ErrorCode.FILE_NOT_EXIST);
+        }
         if (!new File(filePath).exists()) {
             log.error("file not exist, topic:{}, fileName:{}", topic, fileName);
             throw new GovernanceException(ErrorCode.FILE_NOT_EXIST);
