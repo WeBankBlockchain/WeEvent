@@ -21,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.quartz.JobDataMap;
 import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -123,7 +124,7 @@ public class CEPRuleController {
         return resEntity;
     }
 
-    @RequestMapping(value = "/checkWhereCondition")
+    @GetMapping(value = "/checkWhereCondition")
     public BaseRspEntity checkWhereCondition(@RequestParam(name = "payload") String payload, @RequestParam(name = "condition") String condition) {
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
         RetCode ret = CEPRuleMQ.checkCondition(payload, condition);
@@ -136,7 +137,7 @@ public class CEPRuleController {
         return resEntity;
     }
 
-    @RequestMapping(value = "/getJobDetail")
+    @GetMapping(value = "/getJobDetail")
     public BaseRspEntity getJobDetail(@RequestParam(name = "id") String id) {
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
         try {

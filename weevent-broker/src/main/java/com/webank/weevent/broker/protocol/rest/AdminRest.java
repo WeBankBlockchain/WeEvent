@@ -33,6 +33,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -72,12 +74,12 @@ public class AdminRest {
         this.discoveryClient = discoveryClient;
     }
 
-    @RequestMapping(path = "/listGroup")
+    @GetMapping(path = "/listGroup")
     public BaseResponse<List<String>> listGroup() throws BrokerException {
         return BaseResponse.buildSuccess(this.consumer.listGroupId());
     }
 
-    @RequestMapping(path = "/listNodes")
+    @GetMapping(path = "/listNodes")
     public BaseResponse<List<String>> listNodes() {
         log.info("query node list");
 
@@ -90,7 +92,7 @@ public class AdminRest {
         return BaseResponse.buildSuccess(nodesInfo);
     }
 
-    @RequestMapping(path = "/listSubscription")
+    @GetMapping(path = "/listSubscription")
     public BaseResponse<Map<String, List<SubscriptionInfo>>> listSubscription(@RequestParam(name = "nodeInstances") String nodeInstances,
                                                                               @RequestParam(name = "groupId", required = false) String groupId) {
         log.info("groupId:{}, nodeInstances:{}", groupId, nodeInstances);
@@ -131,14 +133,14 @@ public class AdminRest {
         return BaseResponse.buildSuccess(subscriptions);
     }
 
-    @RequestMapping(path = "/innerListSubscription")
+    @GetMapping(path = "/innerListSubscription")
     public BaseResponse<Map<String, SubscriptionInfo>> innerListSubscription(@RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
         log.info("groupId: {}", groupId);
 
         return BaseResponse.buildSuccess(this.consumer.listSubscription(groupId));
     }
 
-    @RequestMapping(path = "/getVersion")
+    @GetMapping(path = "/getVersion")
     public BaseResponse<BuildInfo> getVersion() {
         return BaseResponse.buildSuccess(this.buildInfo);
     }
@@ -146,7 +148,7 @@ public class AdminRest {
     /**
      * get general
      */
-    @RequestMapping(path = "/group/general")
+    @GetMapping(path = "/group/general")
     public BaseResponse<GroupGeneral> getGroupGeneral(@RequestParam(value = "groupId", required = false) String groupId) throws BrokerException {
         log.info("groupId: {}", groupId);
 
@@ -159,7 +161,7 @@ public class AdminRest {
     /**
      * query transaction list.
      */
-    @RequestMapping(path = "/transaction/transList")
+    @GetMapping(path = "/transaction/transList")
     public BaseResponse<ListPage<TbTransHash>> queryTransList(@RequestParam(value = "groupId", required = false) String groupId,
                                                               @RequestParam("pageNumber") Integer pageNumber,
                                                               @RequestParam("pageSize") Integer pageSize,
@@ -177,7 +179,7 @@ public class AdminRest {
     /**
      * query block list.
      */
-    @RequestMapping(path = "/block/blockList")
+    @GetMapping(path = "/block/blockList")
     public BaseResponse<ListPage<TbBlock>> queryBlockList(@RequestParam(value = "groupId", required = false) String groupId,
                                                           @RequestParam("pageNumber") Integer pageNumber,
                                                           @RequestParam("pageSize") Integer pageSize,
@@ -194,7 +196,7 @@ public class AdminRest {
     /**
      * query node info list.
      */
-    @RequestMapping(path = "/node/nodeList")
+    @GetMapping(path = "/node/nodeList")
     public BaseResponse<ListPage<TbNode>> queryNodeList(@RequestParam(value = "groupId", required = false) String groupId,
                                                         @RequestParam("pageNumber") Integer pageNumber,
                                                         @RequestParam("pageSize") Integer pageSize,
@@ -213,7 +215,7 @@ public class AdminRest {
     /**
      * query ContractContext.
      */
-    @RequestMapping(path = "/getContractContext")
+    @GetMapping(path = "/getContractContext")
     public BaseResponse<ContractContext> getContractContext(@RequestParam(value = "groupId", required = false) String groupId) throws BrokerException {
         log.info("groupId: {} ", groupId);
 
@@ -223,7 +225,7 @@ public class AdminRest {
     /**
      * validateGroupId.
      */
-    @RequestMapping(path = "/validateGroupId")
+    @GetMapping(path = "/validateGroupId")
     public BaseResponse<ErrorCode> validateGroupId(@RequestParam(value = "groupId") String groupId) throws BrokerException {
         log.info("groupId: {} ", groupId);
         this.consumer.validateGroupId(groupId);
