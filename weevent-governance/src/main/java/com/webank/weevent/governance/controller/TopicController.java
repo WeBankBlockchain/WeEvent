@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,7 +31,7 @@ public class TopicController {
     @Autowired
     private TopicService topicService;
 
-    @RequestMapping(value = "/close")
+    @GetMapping(value = "/close")
     public GovernanceResult<Boolean> close(@RequestParam("brokerId") Integer brokerId, @RequestParam String topic,
                                            @RequestParam(required = false) String groupId, HttpServletRequest request, HttpServletResponse response)
             throws GovernanceException {
@@ -38,14 +39,14 @@ public class TopicController {
         return new GovernanceResult<>(topicService.close(brokerId, topic, groupId, request, response));
     }
 
-    @RequestMapping(value = "/list")
+    @PostMapping(value = "/list")
     public GovernanceResult<TopicPage> getTopics(@Validated @RequestBody TopicPageEntity topicPageEntity,
                                                  HttpServletRequest request, HttpServletResponse response) throws GovernanceException {
         log.info("get topic list,topicPageEntity:{}", topicPageEntity);
         return new GovernanceResult<>(topicService.getTopics(topicPageEntity, request, response));
     }
 
-    @RequestMapping(value = "/openTopic")
+    @PostMapping(value = "/openTopic")
     public GovernanceResult<Object> open(@RequestBody TopicCreateEntity topicCreateEntity, HttpServletRequest request,
                                          HttpServletResponse response) throws GovernanceException {
         log.info("open topic creator:{} ,topic:{}", topicCreateEntity.getCreater(), topicCreateEntity.getTopic());
@@ -53,7 +54,7 @@ public class TopicController {
                 topicCreateEntity.getCreater(), topicCreateEntity.getGroupId(), request, response);
     }
 
-    @RequestMapping(value = "/topicInfo")
+    @GetMapping(value = "/topicInfo")
     public GovernanceResult<TopicEntity> getTopicInfo(@RequestParam(name = "brokerId") Integer brokerId,
                                                       @RequestParam(name = "topic") String topic,
                                                       @RequestParam(name = "groupId", required = false) String groupId, HttpServletRequest request)
