@@ -47,7 +47,7 @@ public class DiskFiles {
         log.info("local file path: {}, {} -> {}", path, localPath.getFreeSpace(), localPath.getTotalSpace());
         this.path = path;
     }
-
+    
     public String genLocalFileName(String fileId) throws BrokerException {
         FileChunksMeta fileChunksMeta = fileIdChunksMeta.get(fileId);
         if (fileChunksMeta == null) {
