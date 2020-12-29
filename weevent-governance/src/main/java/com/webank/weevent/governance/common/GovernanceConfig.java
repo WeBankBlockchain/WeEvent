@@ -3,6 +3,9 @@ package com.webank.weevent.governance.common;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
@@ -44,4 +47,20 @@ public class GovernanceConfig {
 
     @Value("${file.transport.path:./logs}")
     private String fileTransportPath;
+    
+    @Value("${acount.name}")
+    private String acountName;
+    
+    @Value("${acount.passwrod}")
+    private String acountPasswrod;
+    
+    public static String acount_name;
+    public static String acount_passwrod;
+    
+    @PostConstruct
+    private void init() {
+    	acount_name = acountName;
+    	acount_passwrod = acountPasswrod;
+    }
+
 }

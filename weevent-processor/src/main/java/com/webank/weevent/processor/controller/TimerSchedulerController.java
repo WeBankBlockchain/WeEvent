@@ -14,6 +14,7 @@ import org.quartz.CronExpression;
 import org.quartz.JobDataMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -31,7 +32,7 @@ public class TimerSchedulerController {
         this.timerSchedulerService = timerSchedulerService;
     }
 
-    @RequestMapping("/insert")
+    @PostMapping("/insert")
     public BaseRspEntity insertTimerScheduler(@Validated @RequestBody TimerScheduler timerScheduler) throws BrokerException {
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
         JobDataMap timerSchedulerMap = new JobDataMap();
@@ -48,7 +49,7 @@ public class TimerSchedulerController {
         return resEntity;
     }
 
-    @RequestMapping("/update")
+    @PostMapping("/update")
     public BaseRspEntity updateTimerScheduler(@Validated @RequestBody TimerScheduler timerScheduler) throws BrokerException {
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
         JobDataMap timerSchedulerMap = new JobDataMap();
@@ -64,14 +65,14 @@ public class TimerSchedulerController {
         return resEntity;
     }
 
-    @RequestMapping("/delete")
+    @PostMapping("/delete")
     public BaseRspEntity deleteTimerScheduler(@RequestBody TimerScheduler timerScheduler) throws BrokerException {
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
         this.timerSchedulerService.deleteTimerScheduler(timerScheduler);
         return resEntity;
     }
 
-    @RequestMapping("/checkCorn")
+    @PostMapping("/checkCorn")
     public BaseRspEntity checkCorn(@RequestParam("corn") String corn) {
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
         boolean validExpression = CronExpression.isValidExpression(corn);

@@ -290,6 +290,10 @@ public class WeEventFileClient implements IWeEventFileClient {
         // get json from disk
         List<File> fileList = new ArrayList<>();
         String filePath = this.localReceivePath + PATH_SEPARATOR + group + PATH_SEPARATOR + topic;
+        if (filePath.indexOf("..") != -1) {
+            log.info("file path not exist.. filePath, {}", filePath);
+            throw new BrokerException(ErrorCode.FILE_NOT_EXIST);
+        }
         File file = new File(filePath);
         if (!file.exists()) {
             file.mkdirs();

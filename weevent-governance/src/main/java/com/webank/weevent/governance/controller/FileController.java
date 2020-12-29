@@ -81,7 +81,7 @@ public class FileController {
         return this.fileService.prepareUploadFile(fileId, filename, topicName, groupId, totalSize, chunkSize);
     }
 
-    @RequestMapping(path = "/download")
+    @GetMapping(path = "/download")
     public void download(@RequestParam(name = "groupId") String groupId,
                          @RequestParam(name = "topic") String topic,
                          @RequestParam(name = "fileName") String fileName,
@@ -95,7 +95,6 @@ public class FileController {
         if (StringUtils.isBlank(downloadFile)) {
             throw new GovernanceException("download file not exist");
         }
-
         try {
             response.setHeader("filename", URLEncoder.encode(fileName, StandardCharsets.UTF_8.toString()));
         } catch (UnsupportedEncodingException e) {
@@ -119,7 +118,7 @@ public class FileController {
         }
     }
 
-    @RequestMapping(path = "/listFile")
+    @GetMapping(path = "/listFile")
     @ResponseBody
     public GovernanceResult<List<FileChunksMeta>> listFile(@RequestParam(name = "groupId") String groupId,
                                                            @RequestParam(name = "brokerId") Integer brokerId,
@@ -128,7 +127,7 @@ public class FileController {
         return this.fileService.listFile(groupId, brokerId, topicName);
     }
 
-    @RequestMapping(path = "/downLoadStatus")
+    @GetMapping(path = "/downLoadStatus")
     @ResponseBody
     public GovernanceResult<List<FileChunksMetaEntity>> downLoadStatus(@RequestParam(name = "groupId") String groupId,
                                                                        @RequestParam(name = "brokerId") Integer brokerId,
@@ -137,7 +136,7 @@ public class FileController {
         return this.fileService.downLoadStatus(groupId, brokerId, topicName);
     }
 
-    @RequestMapping(path = "/uploadStatus")
+    @GetMapping(path = "/uploadStatus")
     @ResponseBody
     public GovernanceResult<List<FileTransportStatusEntity>> uploadStatus(@RequestParam(name = "groupId") String groupId,
                                                                           @RequestParam(name = "brokerId") Integer brokerId,
@@ -146,7 +145,7 @@ public class FileController {
         return this.fileService.uploadStatus(groupId, brokerId, topicName);
     }
 
-    @RequestMapping(path = "/listTransport")
+    @GetMapping(path = "/listTransport")
     @ResponseBody
     public GovernanceResult<List<FileTransportChannelEntity>> listTransport(@RequestParam(name = "groupId") String groupId,
                                                                             @RequestParam(name = "brokerId") Integer brokerId) {
@@ -162,7 +161,7 @@ public class FileController {
         return fileService.closeTransport(fileTransport);
     }
 
-    @RequestMapping(path = "/genPemFile")
+    @GetMapping(path = "/genPemFile")
     public void genPemFile(@RequestParam(name = "groupId") String groupId,
                            @RequestParam(name = "brokerId") Integer brokerId,
                            HttpServletResponse response) throws GovernanceException {
@@ -206,7 +205,7 @@ public class FileController {
         }
     }
 
-    @RequestMapping(path = "/checkUploaded")
+    @GetMapping(path = "/checkUploaded")
     @ResponseBody
     public GovernanceResult<Object> checkFileIsUploaded(@RequestParam(name = "groupId") String groupId,
                                                         @RequestParam(name = "brokerId") Integer brokerId,
