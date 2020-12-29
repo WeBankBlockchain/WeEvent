@@ -94,8 +94,8 @@ public class BrokerApplication {
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
                         .allowedHeaders("*")
-                        .allowedMethods("*")
-                        .allowedOrigins("*");
+                        .allowedMethods("*");
+                        //.allowedOrigins("*")
             }
         };
     }
