@@ -33,7 +33,7 @@ public class AccountController {
     @Autowired
     private AccountService accountService;
 
-    @RequestMapping("/check/{param}/{type}")
+    @GetMapping("/check/{param}/{type}")
     public GovernanceResult<Object> checkData(@PathVariable String param, @PathVariable Integer type) {
         return accountService.checkData(param, type);
     }
@@ -58,7 +58,7 @@ public class AccountController {
         return accountService.getUserId(username);
     }
 
-    @RequestMapping("/require")
+    @GetMapping("/require")
     public BaseResponse authRequire() {
         return new BaseResponse(ConstantCode.USER_NOT_LOGGED_IN);
     }
@@ -66,7 +66,7 @@ public class AccountController {
     /**
      * Query all account except themselves
      */
-    @RequestMapping("/accountList")
+    @GetMapping("/accountList")
     public GovernanceResult<List<AccountEntity>> accountEntityList(AccountEntity accountEntity, HttpServletRequest request,
                                                                    HttpServletResponse response) throws GovernanceException {
         List<AccountEntity> accountEntities = accountService.accountEntityList(request, accountEntity, JwtUtils.getAccountId(request));
@@ -76,7 +76,7 @@ public class AccountController {
     /**
      * delete user by id
      */
-    @RequestMapping("/delete")
+    @PostMapping("/delete")
     public GovernanceResult<Boolean> deleteUser(@RequestBody AccountEntity accountEntity, HttpServletRequest request,
                                                 HttpServletResponse response) throws GovernanceException {
         accountService.deleteUser(request, accountEntity);
