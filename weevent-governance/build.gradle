@@ -51,6 +51,10 @@ dependencies {
     api project(":weevent-file")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    
+    // https://mvnrepository.com/artifact/com.alibaba.cloud/spring-cloud-starter-alibaba-nacos-config
+	implementation("com.alibaba.boot:nacos-config-spring-boot-starter:${nacosVersion}")
+	
 }
 
 bootJar {

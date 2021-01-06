@@ -1,57 +1,54 @@
 package com.webank.weevent.governance.common;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
+import lombok.Data;
 
 import javax.annotation.PostConstruct;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
-@Slf4j
-@Setter
-@Getter
+import com.alibaba.nacos.api.config.annotation.NacosValue;
+import com.alibaba.nacos.spring.context.annotation.config.NacosPropertySource;
+
+@Data
 @Component
-@PropertySource(value = "classpath:governance.properties", encoding = "UTF-8")
+@NacosPropertySource(dataId = "governance.properties", autoRefreshed = false)
 public class GovernanceConfig {
 
-    @Value("${https.read-timeout:3000}")
+    @NacosValue(value = "${https.read-timeout:3000}", autoRefreshed = true)
     private int readTimeout;
 
-    @Value("${https.connect-timeout:3000}")
+    @NacosValue(value = "${https.connect-timeout:3000}", autoRefreshed = true)
     private int connectTimeOut;
 
-    @Value("${http.connect-timeout:3000}")
+    @NacosValue(value = "${http.connect-timeout:3000}", autoRefreshed = true)
     private int httpConnectTimeOut;
 
     // max connect
-    @Value("${http.client.max-total:200}")
+    @NacosValue(value = "${http.client.max-total:200}", autoRefreshed = true)
     private int maxTotal;
 
-    @Value("${http.client.max-per-route:500}")
+    @NacosValue(value = "${http.client.max-per-route:500}", autoRefreshed = true)
     private int maxPerRoute;
 
-    @Value("${http.client.connection-request-timeout:3000}")
+    @NacosValue(value = "${http.client.connection-request-timeout:3000}", autoRefreshed = true)
     private int connectionRequestTimeout;
 
-    @Value("${http.client.connection-timeout:3000}")
+    @NacosValue(value = "${http.client.connection-timeout:3000}", autoRefreshed = true)
     private int connectionTimeout;
 
-    @Value("${http.client.socket-timeout:5000}")
+    @NacosValue(value = "${http.client.socket-timeout:5000}", autoRefreshed = true)
     private int socketTimeout;
 
-    @Value("${jwt.private.secret:PrivateSecret}")
+    @NacosValue(value = "${jwt.private.secret:PrivateSecret}", autoRefreshed = true)
     private String PrivateSecret;
 
-    @Value("${file.transport.path:./logs}")
+    @NacosValue(value = "${file.transport.path:./logs}", autoRefreshed = true)
     private String fileTransportPath;
     
-    @Value("${acount.name}")
+    @NacosValue(value = "${acount.name}", autoRefreshed = true)
     private String acountName;
     
-    @Value("${acount.passwrod}")
+    @NacosValue(value = "${acount.passwrod}", autoRefreshed = true)
     private String acountPasswrod;
     
     public static String acount_name;

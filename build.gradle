@@ -79,6 +79,9 @@ ext {
     commonsNetVersion = "3.6"
 
     bouncycastleVersion = "1.60"
+    
+    // nacos
+    nacosVersion = "0.2.7"
 
 }
 
