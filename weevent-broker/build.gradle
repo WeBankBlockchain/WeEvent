@@ -14,6 +14,9 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.data:spring-data-commons:${springBootVersion}")
 
+    implementation("com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-discovery:${nacosVersion}")
+    implementation("com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-config:${nacosVersion}")
+
     // spring boot with log4j2
     implementation("org.springframework.boot:spring-boot-starter-log4j2")
     // avoid "Log4j appears to be running in a Servlet environment, but there's no log4j-web module available."
