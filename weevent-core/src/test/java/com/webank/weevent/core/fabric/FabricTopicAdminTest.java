@@ -26,6 +26,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * FabricTopicAdminTest Tester.
@@ -44,6 +45,13 @@ public class FabricTopicAdminTest extends JUnitTestBase {
     private QueryEntity queryEntity;
     private final BigInteger blockNumber = BigInteger.valueOf(1);
     private IProducer iProducer;
+    
+    private FabricConfig fabricConfig;
+    
+    @Autowired
+    public void setFabricConfig(FabricConfig fabricConfig) {
+		this.fabricConfig = fabricConfig;
+	}
 
     @Before
     public void before() throws Exception {
@@ -51,8 +59,6 @@ public class FabricTopicAdminTest extends JUnitTestBase {
                 this.getClass().getSimpleName(),
                 this.testName.getMethodName());
 
-        FabricConfig fabricConfig = new FabricConfig();
-        fabricConfig.load("");
         FabricDelegate fabricDelegate = new FabricDelegate();
         fabricDelegate.initProxy(fabricConfig);
 

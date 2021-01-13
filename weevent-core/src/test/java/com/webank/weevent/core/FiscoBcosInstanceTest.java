@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * FiscoBcosInstance Tester.
@@ -25,6 +26,11 @@ public class FiscoBcosInstanceTest extends JUnitTestBase {
     private String topicName = "com.weevent.test";
 
     private FiscoConfig fiscoConfig;
+	
+	@Autowired
+	public void setFiscoConfig(FiscoConfig fiscoConfig) {
+		this.fiscoConfig = fiscoConfig;
+	}
 
     private FiscoBcosInstance fiscoBcosInstance;
 
@@ -41,8 +47,6 @@ public class FiscoBcosInstanceTest extends JUnitTestBase {
         // like this:
         // @SpringBootApplication(scanBasePackages = {"com.webank.weevent.broker", "com.webank.weevent.core.config"})
         // "com.webank.weevent.broker" is package name of a spring boot server
-        this.fiscoConfig = new FiscoConfig();
-        Assert.assertTrue(this.fiscoConfig.load(""));
         this.fiscoBcosInstance = new FiscoBcosInstance(this.fiscoConfig);
         this.iProducer = this.fiscoBcosInstance.buildProducer();
         Assert.assertTrue(this.iProducer.startProducer());

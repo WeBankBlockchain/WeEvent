@@ -23,6 +23,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * FabricBroker4ConsumerTest Tester.
@@ -47,6 +48,13 @@ public class FabricBroker4ConsumerTest extends JUnitTestBase {
 
     private FabricBroker4Producer iProducer;
     private FabricBroker4Consumer iConsumer;
+    
+    private FabricConfig fabricConfig;
+    
+    @Autowired
+    public void setFabricConfig(FabricConfig fabricConfig) {
+		this.fabricConfig = fabricConfig;
+	}
 
     static class MyConsumerListener implements IConsumer.ConsumerListener {
         public List<String> notifiedEvents = new ArrayList<>();
@@ -72,8 +80,6 @@ public class FabricBroker4ConsumerTest extends JUnitTestBase {
                 this.getClass().getSimpleName(),
                 this.testName.getMethodName());
 
-        FabricConfig fabricConfig = new FabricConfig();
-        fabricConfig.load("");
         FabricDelegate fabricDelegate = new FabricDelegate();
         fabricDelegate.initProxy(fabricConfig);
 

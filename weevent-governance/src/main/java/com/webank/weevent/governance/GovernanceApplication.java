@@ -37,7 +37,7 @@ import org.springframework.web.servlet.DispatcherServlet;
  */
 @Slf4j
 @EnableDiscoveryClient
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {"com.webank.weevent.governance", "com.webank.weevent.core.config"})
 @ServletComponentScan(basePackages = "com.webank.weevent.governance.filter")
 public class GovernanceApplication {
 

@@ -20,6 +20,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * FabricBroker4ProducerTest Tester.
@@ -35,6 +36,13 @@ public class FabricBroker4ProducerTest extends JUnitTestBase {
     private String channelName = "mychannel";
     private long transactionTimeout = 30000;
     private FabricBroker4Producer iProducer;
+    
+    private FabricConfig fabricConfig;
+    
+    @Autowired
+    public void setFabricConfig(FabricConfig fabricConfig) {
+		this.fabricConfig = fabricConfig;
+	}
 
     @Before
     public void before() throws Exception {
@@ -43,8 +51,6 @@ public class FabricBroker4ProducerTest extends JUnitTestBase {
                 this.testName.getMethodName());
 
 
-        FabricConfig fabricConfig = new FabricConfig();
-        fabricConfig.load("");
         FabricDelegate fabricDelegate = new FabricDelegate();
         fabricDelegate.initProxy(fabricConfig);
 

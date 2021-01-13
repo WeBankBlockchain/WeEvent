@@ -69,6 +69,13 @@ public class FileService {
     private final Map<Integer, Map<String, Map<String, Boolean>>> transportMap = new ConcurrentHashMap<>();
     // upload local file to governance server, <fileId, FileChunksMeta>
     private final Map<String, Pair<FileChunksMeta, DiskFiles>> fileChunksMap = new ConcurrentHashMap<>();
+    
+    private FiscoConfig fiscoConfig;
+    
+    @Autowired
+    public void setFiscoConfig(FiscoConfig fiscoConfig) {
+		this.fiscoConfig = fiscoConfig;
+	}
 
 
     @Autowired
@@ -425,8 +432,8 @@ public class FileService {
 
     private IWeEventFileClient buildIWeEventFileClient(String groupId, Integer brokerId) {
         if (!this.fileClientMap.containsKey(groupId + brokerId) || !this.fileClientMap.get(groupId + brokerId).containsKey(groupId)) {
-            FiscoConfig fiscoConfig = new FiscoConfig();
-            fiscoConfig.load("");
+            // FiscoConfig fiscoConfig = new FiscoConfig();
+            // fiscoConfig.load("");
 
             IWeEventFileClient fileClient = IWeEventFileClient.build(groupId, this.downloadPath, ConstantProperties.FILE_CHUNK_SIZE, fiscoConfig);
             Map<String, Pair<IWeEventFileClient, DiskFiles>> fileClientOfEachGroupMap = new ConcurrentHashMap<>();
