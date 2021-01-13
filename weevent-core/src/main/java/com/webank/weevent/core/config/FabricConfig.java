@@ -1,27 +1,23 @@
 package com.webank.weevent.core.config;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
 import com.webank.weevent.core.fisco.util.WeEventUtils;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 import lombok.ToString;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.stereotype.Component;
 
 /**
  * @author websterchen
  * @version v1.1
  * @since 2019/8/9
  */
-@Slf4j
-@Getter
-@Setter
+@Data
 @ToString
 @Component
-@PropertySource(value = "classpath:fabric/fabric.properties", encoding = "UTF-8")
 public class FabricConfig {
+	
     @Value("${chain.channel.name:mychannel}")
     private String channelName;
 
@@ -94,7 +90,7 @@ public class FabricConfig {
 
     @Value("${consumer.history_merge_block:8}")
     private Integer consumerHistoryMergeBlock;
-
+    
     /**
      * load configuration without spring
      *

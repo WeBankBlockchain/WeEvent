@@ -1,12 +1,10 @@
 package com.webank.weevent.broker.config;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
+
+import lombok.Data;
+import lombok.ToString;
 
 
 /**
@@ -16,13 +14,11 @@ import org.springframework.stereotype.Component;
  * @version 1.0
  * @since 2019/1/28
  */
-@Slf4j
-@Getter
-@Setter
+@Data
 @ToString
 @Component
-@PropertySource(value = "classpath:weevent.properties", encoding = "UTF-8")
 public class WeEventConfig {
+	
     @Value("${ip.check.white-list:}")
     private String ipWhiteList;
 
@@ -37,4 +33,5 @@ public class WeEventConfig {
 
     @Value("${mqtt.broker.keepalive:60}")
     private Integer keepAlive;
+    
 }

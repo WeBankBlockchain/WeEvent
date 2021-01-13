@@ -1,12 +1,10 @@
 package com.webank.weevent.core.config;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
+
+import lombok.Data;
+import lombok.ToString;
 
 /**
  * FISCO-BCOS Config that support loaded by spring context and pure java
@@ -15,13 +13,11 @@ import org.springframework.stereotype.Component;
  * @version 1.0
  * @since 2019/1/28
  */
-@Slf4j
-@Getter
-@Setter
+@Data
 @ToString
 @Component
-@PropertySource(value = "classpath:fisco.properties", encoding = "UTF-8")
 public class FiscoConfig {
+	
     public final static String propertiesFileKey = "block-chain-properties";
 
     @Value("${version:2.0}")
@@ -77,7 +73,7 @@ public class FiscoConfig {
 
     @Value("${bcosSDK.max_blocking_queue_size:102400}")
     private Integer maxBlockingQueueSize;
-
+    
     /**
      * load configuration without spring
      *

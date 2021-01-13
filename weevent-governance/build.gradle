@@ -52,8 +52,9 @@ dependencies {
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     
-    // https://mvnrepository.com/artifact/com.alibaba.cloud/spring-cloud-starter-alibaba-nacos-config
-	implementation("com.alibaba.boot:nacos-config-spring-boot-starter:${nacosVersion}")
+    // nacos
+	implementation("com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-discovery:${nacosVersion}")
+    implementation("com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-config:${nacosVersion}")
 	
 }
 

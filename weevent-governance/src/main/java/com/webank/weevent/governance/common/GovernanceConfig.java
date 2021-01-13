@@ -1,54 +1,51 @@
 package com.webank.weevent.governance.common;
 
-import lombok.Data;
-
 import javax.annotation.PostConstruct;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.alibaba.nacos.api.config.annotation.NacosValue;
-import com.alibaba.nacos.spring.context.annotation.config.NacosPropertySource;
+import lombok.Data;
 
 @Data
 @Component
-@NacosPropertySource(dataId = "governance.properties", autoRefreshed = false)
 public class GovernanceConfig {
 
-    @NacosValue(value = "${https.read-timeout:3000}", autoRefreshed = true)
+    @Value("${https.read-timeout:3000}")
     private int readTimeout;
 
-    @NacosValue(value = "${https.connect-timeout:3000}", autoRefreshed = true)
+    @Value("${https.connect-timeout:3000}")
     private int connectTimeOut;
 
-    @NacosValue(value = "${http.connect-timeout:3000}", autoRefreshed = true)
+    @Value("${http.connect-timeout:3000}")
     private int httpConnectTimeOut;
 
     // max connect
-    @NacosValue(value = "${http.client.max-total:200}", autoRefreshed = true)
+    @Value("${http.client.max-total:200}")
     private int maxTotal;
 
-    @NacosValue(value = "${http.client.max-per-route:500}", autoRefreshed = true)
+    @Value("${http.client.max-per-route:500}")
     private int maxPerRoute;
 
-    @NacosValue(value = "${http.client.connection-request-timeout:3000}", autoRefreshed = true)
+    @Value("${http.client.connection-request-timeout:3000}")
     private int connectionRequestTimeout;
 
-    @NacosValue(value = "${http.client.connection-timeout:3000}", autoRefreshed = true)
+    @Value("${http.client.connection-timeout:3000}")
     private int connectionTimeout;
 
-    @NacosValue(value = "${http.client.socket-timeout:5000}", autoRefreshed = true)
+    @Value("${http.client.socket-timeout:5000}")
     private int socketTimeout;
 
-    @NacosValue(value = "${jwt.private.secret:PrivateSecret}", autoRefreshed = true)
+    @Value("${jwt.private.secret:PrivateSecret}")
     private String PrivateSecret;
 
-    @NacosValue(value = "${file.transport.path:./logs}", autoRefreshed = true)
+    @Value("${file.transport.path:./logs}")
     private String fileTransportPath;
     
-    @NacosValue(value = "${acount.name}", autoRefreshed = true)
+    @Value("${acount.name}")
     private String acountName;
     
-    @NacosValue(value = "${acount.passwrod}", autoRefreshed = true)
+    @Value("${acount.passwrod}")
     private String acountPasswrod;
     
     public static String acount_name;
