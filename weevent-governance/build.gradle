@@ -52,10 +52,6 @@ dependencies {
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     
-    // nacos
-	implementation("com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-discovery:${nacosVersion}")
-    implementation("com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-config:${nacosVersion}")
-	
 }
 
 bootJar {
