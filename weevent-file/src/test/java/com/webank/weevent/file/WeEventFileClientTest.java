@@ -17,9 +17,9 @@ import com.webank.weevent.file.service.WeEventFileClient;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
@@ -31,20 +31,18 @@ public class WeEventFileClientTest {
     private String localReceivePath = "./logs";
     // chunk size 1MB
     private int fileChunkSize = 1048576;
-    private FiscoConfig fiscoConfig;
 
     private String host = "127.0.0.1";
     private int port = 21;
     private String userName = "ftpuser";
     private String passWd = "";
-
-
-    @Before
-    public void before() {
-        this.fiscoConfig = new FiscoConfig();
-        this.fiscoConfig.load("");
-    }
-
+    
+    private FiscoConfig fiscoConfig;
+    
+    @Autowired
+	public void setFiscoConfig(FiscoConfig fiscoConfig) {
+		this.fiscoConfig = fiscoConfig;
+	}
 
     @Test
     @Ignore

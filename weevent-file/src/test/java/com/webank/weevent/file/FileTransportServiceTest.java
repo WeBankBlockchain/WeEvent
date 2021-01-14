@@ -17,6 +17,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Slf4j
 public class FileTransportServiceTest {
@@ -25,13 +26,17 @@ public class FileTransportServiceTest {
     private int fileChunkSize = 1024 * 1024;
     private String groupId = "1";
     private FileChunksMeta fileChunksMeta;
+    
+    private FiscoConfig fiscoConfig;
+    
+    @Autowired
+	public void setFiscoConfig(FiscoConfig fiscoConfig) {
+		this.fiscoConfig = fiscoConfig;
+	}
 
 
     @Before
     public void before() throws BrokerException {
-
-        FiscoConfig fiscoConfig = new FiscoConfig();
-        fiscoConfig.load("");
         // create fisco instance
         FiscoBcosInstance fiscoBcosInstance = new FiscoBcosInstance(fiscoConfig);
 

@@ -21,6 +21,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -32,8 +33,13 @@ import static org.mockito.Mockito.when;
  * @version 1.0
  * @since <pre>02/12/2020</pre>
  */
-public class FileChunksTransportTest {
+public class FileChunksTransportTest extends JUnitTestBase  {
     private FiscoConfig fiscoConfig;
+    
+    @Autowired
+	public void setFiscoConfig(FiscoConfig fiscoConfig) {
+		this.fiscoConfig = fiscoConfig;
+	}
     private FileTransportService fileTransportService;
 
     private String topicName = "com.weevent.file";
@@ -44,8 +50,6 @@ public class FileChunksTransportTest {
 
     @Before
     public void before() throws BrokerException {
-        this.fiscoConfig = new FiscoConfig();
-        this.fiscoConfig.load("");
         FiscoBcosInstance fiscoBcosInstance = new FiscoBcosInstance(this.fiscoConfig);
 
         // create producer
