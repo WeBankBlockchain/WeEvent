@@ -8,7 +8,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @author matthewliu
  * @since 2018/11/21
  */
-@SpringBootApplication(scanBasePackages = {"com.webank.weevent.file", "com.webank.weevent.core.config"})
+@SpringBootApplication(scanBasePackages = {"com.webank.weevent.core.config"})
 public class CoreApplication {
 	
 

@@ -4,6 +4,7 @@ import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.core.FiscoBcosInstance;
 import com.webank.weevent.core.IConsumer;
 import com.webank.weevent.core.IProducer;
+import com.webank.weevent.core.JUnitTestBase;
 import com.webank.weevent.core.config.FiscoConfig;
 import com.webank.weevent.core.fisco.util.WeEventUtils;
 import com.webank.weevent.file.dto.FileEvent;
@@ -20,7 +21,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Slf4j
-public class FileTransportServiceTest {
+public class FileTransportServiceTest extends JUnitTestBase {
     private FileTransportService fileTransportService;
     private String localReceivePath = "./logs";
     private int fileChunkSize = 1024 * 1024;

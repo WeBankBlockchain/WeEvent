@@ -4,8 +4,16 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.Assert;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.SendResult;
+import com.webank.weevent.core.JUnitTestBase;
 import com.webank.weevent.core.config.FiscoConfig;
 import com.webank.weevent.file.dto.FileChunksMetaPlus;
 import com.webank.weevent.file.dto.FileChunksMetaStatus;
@@ -16,15 +24,9 @@ import com.webank.weevent.file.service.FileChunksMeta;
 import com.webank.weevent.file.service.WeEventFileClient;
 
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 @Slf4j
-public class WeEventFileClientTest {
+public class WeEventFileClientTest extends JUnitTestBase {
 
     private String topicName = "com.weevent.file";
     private String groupId = "1";

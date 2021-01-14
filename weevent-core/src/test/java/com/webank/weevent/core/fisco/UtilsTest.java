@@ -1,6 +1,7 @@
 package com.webank.weevent.core.fisco;
 
 import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.core.JUnitTestBase;
 import com.webank.weevent.core.config.FiscoConfig;
 import com.webank.weevent.core.fisco.util.ParamCheckUtils;
 import com.webank.weevent.core.fisco.util.Web3sdkUtils;
@@ -9,7 +10,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 
-public class UtilsTest {
+public class UtilsTest extends JUnitTestBase  {
 	
 	private FiscoConfig fiscoConfig;
 	
