@@ -74,13 +74,4 @@ public class FiscoConfig {
     @Value("${bcosSDK.max_blocking_queue_size:102400}")
     private Integer maxBlockingQueueSize;
     
-    /**
-     * load configuration without spring
-     *
-     * @param configFile config file, if empty load from default location
-     * @return true if success, else false
-     */
-    public boolean load(String configFile) {
-        return new SmartLoadConfig().load(this, configFile, propertiesFileKey);
-    }
 }
