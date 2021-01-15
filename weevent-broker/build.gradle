@@ -42,6 +42,10 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     // mqtt
     testImplementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:${PahoClientVersion}")
+    
+    // nacos
+    implementation("com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-discovery:${nacosVersion}")
+    implementation("com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-config:${nacosVersion}")
 }
 
 gitProperties {

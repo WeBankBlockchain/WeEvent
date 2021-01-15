@@ -7,11 +7,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
-
-import com.alibaba.nacos.api.NacosFactory;
-import com.alibaba.nacos.api.config.ConfigService;
-import com.alibaba.nacos.api.exception.NacosException;
 
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.WeEvent;
@@ -191,23 +186,5 @@ public class Web3sdkUtils {
     private static void systemExit(int code) {
         System.out.flush();
         System.exit(code);
-    }
-
-    /**
-     * example : getNacosConfig
-     */
-    protected static void getNacosConfig() {
-        try {
-            String serverAddr = "127.0.0.1:8848";
-            String dataId = "fisco.properties";
-            String group = "DEFAULT_GROUP";
-            Properties properties = new Properties();
-            properties.put("serverAddr", serverAddr);
-            ConfigService configService = NacosFactory.createConfigService(properties);
-            String content = configService.getConfig(dataId, group, 5000);
-            System.out.println(content);
-        } catch (NacosException e) {
-            e.printStackTrace();
-        }
     }
 }
