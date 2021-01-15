@@ -56,28 +56,11 @@ class EchoAddress {
  */
 @Slf4j
 public class Web3sdkUtils {
-	
-	private static void getNacosConfig() {
-		try {
-			String serverAddr = "127.0.0.1:8848";
-			String dataId = "fisco.properties";
-			String group = "DEFAULT_GROUP";
-			Properties properties = new Properties();
-			properties.put("serverAddr", serverAddr);
-			ConfigService configService = NacosFactory.createConfigService(properties);
-			String content = configService.getConfig(dataId, group, 5000);
-			System.out.println(content);
-		} catch (NacosException e) {
-		    // TODO Auto-generated catch block
-		    e.printStackTrace();
-		}
-	}
 
     public static void main(String[] args) {
         try {
-        	getNacosConfig();
             FiscoConfig fiscoConfig = new FiscoConfig();
-            //fiscoConfig.load("");
+            fiscoConfig.load("");
             ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
             taskExecutor.initialize();
 
@@ -208,4 +191,22 @@ public class Web3sdkUtils {
         System.out.flush();
         System.exit(code);
     }
+    
+    /**
+     * example : getNacosConfig
+     */
+    protected static void getNacosConfig() {
+		try {
+			String serverAddr = "127.0.0.1:8848";
+			String dataId = "fisco.properties";
+			String group = "DEFAULT_GROUP";
+			Properties properties = new Properties();
+			properties.put("serverAddr", serverAddr);
+			ConfigService configService = NacosFactory.createConfigService(properties);
+			String content = configService.getConfig(dataId, group, 5000);
+			System.out.println(content);
+		} catch (NacosException e) {
+		    e.printStackTrace();
+		}
+	}
 }
