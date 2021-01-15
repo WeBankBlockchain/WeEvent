@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * FiscoConfig Tester.
@@ -17,14 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 @Slf4j
 public class FiscoConfigTest extends JUnitTestBase {
-	
-	public FiscoConfig fiscoConfig;
-	
-	@Autowired
-	public void setFiscoConfig(FiscoConfig fiscoConfig) {
-		this.fiscoConfig = fiscoConfig;
-	}
-	
     @Before
     public void before() {
         log.info("=============================={}.{}==============================",
@@ -37,6 +28,8 @@ public class FiscoConfigTest extends JUnitTestBase {
      */
     @Test
     public void testLoadDefault() {
+        FiscoConfig fiscoConfig = new FiscoConfig();
+        Assert.assertTrue(fiscoConfig.load(""));
         // default value is empty
         Assert.assertFalse(fiscoConfig.getNodes().isEmpty());
     }
@@ -46,6 +39,8 @@ public class FiscoConfigTest extends JUnitTestBase {
      */
     @Test
     public void testLoad() {
+        FiscoConfig fiscoConfig = new FiscoConfig();
+        Assert.assertTrue(fiscoConfig.load("classpath:fisco.properties"));
         // default value is empty
         Assert.assertFalse(fiscoConfig.getNodes().isEmpty());
     }

@@ -7,7 +7,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
+import com.alibaba.nacos.api.NacosFactory;
+import com.alibaba.nacos.api.config.ConfigService;
+import com.alibaba.nacos.api.exception.NacosException;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.WeEvent;
 import com.webank.weevent.core.config.FiscoConfig;
@@ -53,36 +57,51 @@ class EchoAddress {
 @Slf4j
 public class Web3sdkUtils {
 	
-	
+	private static void getNacosConfig() {
+		try {
+			String serverAddr = "127.0.0.1:8848";
+			String dataId = "fisco.properties";
+			String group = "DEFAULT_GROUP";
+			Properties properties = new Properties();
+			properties.put("serverAddr", serverAddr);
+			ConfigService configService = NacosFactory.createConfigService(properties);
+			String content = configService.getConfig(dataId, group, 5000);
+			System.out.println(content);
+		} catch (NacosException e) {
+		    // TODO Auto-generated catch block
+		    e.printStackTrace();
+		}
+	}
 
-//    public static void main(String[] args) {
-//        try {
-//            FiscoConfig fiscoConfig = new FiscoConfig();
-//            fiscoConfig.load("");
-//            ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
-//            taskExecutor.initialize();
-//
-//            if (StringUtils.isBlank(fiscoConfig.getVersion())) {
-//                log.error("empty FISCO-BCOS version in fisco.properties");
-//                systemExit(1);
-//            }
-//
-//            if (fiscoConfig.getVersion().startsWith(WeEventConstants.FISCO_BCOS_2_X_VERSION_PREFIX)) {    // 2.0x
-//                if (!deployV2Contract(fiscoConfig)) {
-//                    systemExit(1);
-//                }
-//            } else {
-//                log.error("unknown FISCO-BCOS version: {}", fiscoConfig.getVersion());
-//                systemExit(1);
-//            }
-//        } catch (Exception e) {
-//            log.error("deploy topic control contract failed", e);
-//            systemExit(1);
-//        }
-//
-//        // web3sdk can't exit gracefully
-//        systemExit(0);
-//    }
+    public static void main(String[] args) {
+        try {
+        	getNacosConfig();
+            FiscoConfig fiscoConfig = new FiscoConfig();
+            //fiscoConfig.load("");
+            ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
+            taskExecutor.initialize();
+
+            if (StringUtils.isBlank(fiscoConfig.getVersion())) {
+                log.error("empty FISCO-BCOS version in fisco.properties");
+                systemExit(1);
+            }
+
+            if (fiscoConfig.getVersion().startsWith(WeEventConstants.FISCO_BCOS_2_X_VERSION_PREFIX)) {    // 2.0x
+                if (!deployV2Contract(fiscoConfig)) {
+                    systemExit(1);
+                }
+            } else {
+                log.error("unknown FISCO-BCOS version: {}", fiscoConfig.getVersion());
+                systemExit(1);
+            }
+        } catch (Exception e) {
+            log.error("deploy topic control contract failed", e);
+            systemExit(1);
+        }
+
+        // web3sdk can't exit gracefully
+        systemExit(0);
+    }
 
     public static boolean deployV2Contract(FiscoConfig fiscoConfig) throws BrokerException {
         BcosSDK sdk = Web3SDKConnector.buidBcosSDK(fiscoConfig);

@@ -39,7 +39,6 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * FiscoBcosBroker4Producer Tester.
@@ -56,11 +55,6 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
     private ContractContext contractContext;
     private IProducer iProducer;
     private FiscoConfig fiscoConfig;
-	
-	@Autowired
-	public void setFiscoConfig(FiscoConfig fiscoConfig) {
-		this.fiscoConfig = fiscoConfig;
-	}
     private FiscoBcosDelegate fiscoBcosDelegate;
     private long transactionTimeout = 30000;
 
@@ -70,6 +64,8 @@ public class FiscoBcosBroker4ProducerTest extends JUnitTestBase {
                 this.getClass().getSimpleName(),
                 this.testName.getMethodName());
 
+        this.fiscoConfig = new FiscoConfig();
+        Assert.assertTrue(this.fiscoConfig.load(""));
         this.fiscoBcosDelegate = new FiscoBcosDelegate();
         this.fiscoBcosDelegate.initProxy(this.fiscoConfig);
         this.iProducer = new FiscoBcosBroker4Producer(this.fiscoBcosDelegate);

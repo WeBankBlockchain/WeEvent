@@ -1,6 +1,7 @@
 package com.webank.weevent.core.config;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
 import com.webank.weevent.core.fisco.util.WeEventUtils;
@@ -16,6 +17,7 @@ import lombok.ToString;
 @Data
 @ToString
 @Component
+@PropertySource(value = "classpath:fabric/fabric.properties", encoding = "UTF-8")
 public class FabricConfig {
 	
     @Value("${chain.channel.name:mychannel}")
@@ -90,5 +92,24 @@ public class FabricConfig {
 
     @Value("${consumer.history_merge_block:8}")
     private Integer consumerHistoryMergeBlock;
+    
+    /**
+     * load configuration without spring
+     *
+     * @param configFile config file, if empty load from default location
+     * @return true if success, else false
+     */
+    public boolean load(String configFile) {
+        boolean loadResult = new SmartLoadConfig().load(this, configFile, "");
+        this.setOrgUserKeyFile(WeEventUtils.getClassPath() + this.getOrgUserKeyFile());
+        this.setOrgUserCertFile(WeEventUtils.getClassPath() + this.getOrgUserCertFile());
+        this.setOrdererTlsCaFile(WeEventUtils.getClassPath() + this.getOrdererTlsCaFile());
+        this.setPeerTlsCaFile(WeEventUtils.getClassPath() + this.getPeerTlsCaFile());
+
+        this.setTopicSourceLoc(WeEventUtils.getClassPath() + "fabric");
+        this.setTopicControllerSourceLoc(WeEventUtils.getClassPath() + "fabric");
+
+        return loadResult;
+    }
     
 }

@@ -29,7 +29,6 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * FiscoBcosTopicAdmin Tester.
@@ -50,11 +49,6 @@ public class FiscoTopicAdminTest extends JUnitTestBase {
     private IProducer iProducer;
     private final long transactionTimeout = 10;
     private FiscoConfig fiscoConfig;
-	
-	@Autowired
-	public void setFiscoConfig(FiscoConfig fiscoConfig) {
-		this.fiscoConfig = fiscoConfig;
-	}
 
     @Before
     public void before() throws Exception {
@@ -62,6 +56,8 @@ public class FiscoTopicAdminTest extends JUnitTestBase {
                 this.getClass().getSimpleName(),
                 this.testName.getMethodName());
 
+        this.fiscoConfig = new FiscoConfig();
+        Assert.assertTrue(fiscoConfig.load(""));
         FiscoBcosDelegate fiscoBcosDelegate = new FiscoBcosDelegate();
         fiscoBcosDelegate.initProxy(fiscoConfig);
         this.iProducer = new FiscoBcosBroker4Producer(fiscoBcosDelegate);

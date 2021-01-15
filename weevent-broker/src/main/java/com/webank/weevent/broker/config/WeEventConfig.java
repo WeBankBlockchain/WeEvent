@@ -1,6 +1,9 @@
 package com.webank.weevent.broker.config;
 
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
 import lombok.Data;
@@ -17,6 +20,7 @@ import lombok.ToString;
 @Data
 @ToString
 @Component
+@PropertySource(value = "classpath:weevent.properties", encoding = "UTF-8")
 public class WeEventConfig {
 	
     @Value("${ip.check.white-list:}")

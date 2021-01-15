@@ -23,7 +23,6 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * FiscoBcosBroker4Consumer Tester.
@@ -46,13 +45,6 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
     private final IConsumer.ConsumerListener defaultListener = new MyConsumerListener();
     private IConsumer iConsumer;
     private IProducer iProducer;
-    
-    private FiscoConfig fiscoConfig;
-	
-	@Autowired
-	public void setFiscoConfig(FiscoConfig fiscoConfig) {
-		this.fiscoConfig = fiscoConfig;
-	}
 
     static class MyConsumerListener implements IConsumer.ConsumerListener {
         public List<String> notifiedEvents = new ArrayList<>();
@@ -78,6 +70,8 @@ public class FiscoBcosBroker4ConsumerTest extends JUnitTestBase {
                 this.getClass().getSimpleName(),
                 this.testName.getMethodName());
 
+        FiscoConfig fiscoConfig = new FiscoConfig();
+        Assert.assertTrue(fiscoConfig.load(""));
         FiscoBcosDelegate fiscoBcosDelegate = new FiscoBcosDelegate();
         fiscoBcosDelegate.initProxy(fiscoConfig);
 

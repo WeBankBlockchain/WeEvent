@@ -3,12 +3,14 @@ package com.webank.weevent.governance.common;
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
 import lombok.Data;
 
 @Data
 @Component
+@PropertySource(value = "classpath:governance.properties", encoding = "UTF-8")
 public class GovernanceConfig {
 
     @Value("${https.read-timeout:3000}")

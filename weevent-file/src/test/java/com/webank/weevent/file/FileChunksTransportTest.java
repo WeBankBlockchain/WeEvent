@@ -1,29 +1,29 @@
 package com.webank.weevent.file;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.WeEvent;
 import com.webank.weevent.core.FiscoBcosInstance;
 import com.webank.weevent.core.IConsumer;
 import com.webank.weevent.core.IProducer;
-import com.webank.weevent.core.JUnitTestBase;
 import com.webank.weevent.core.config.FiscoConfig;
 import com.webank.weevent.core.fisco.util.WeEventUtils;
 import com.webank.weevent.file.inner.FileTransportService;
 import com.webank.weevent.file.service.FileChunksMeta;
 import com.webank.weevent.file.service.FileChunksTransport;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * FileChunks Tester.
@@ -32,13 +32,8 @@ import com.webank.weevent.file.service.FileChunksTransport;
  * @version 1.0
  * @since <pre>02/12/2020</pre>
  */
-public class FileChunksTransportTest extends JUnitTestBase  {
+public class FileChunksTransportTest {
     private FiscoConfig fiscoConfig;
-    
-    @Autowired
-	public void setFiscoConfig(FiscoConfig fiscoConfig) {
-		this.fiscoConfig = fiscoConfig;
-	}
     private FileTransportService fileTransportService;
 
     private String topicName = "com.weevent.file";
@@ -49,6 +44,8 @@ public class FileChunksTransportTest extends JUnitTestBase  {
 
     @Before
     public void before() throws BrokerException {
+        this.fiscoConfig = new FiscoConfig();
+        this.fiscoConfig.load("");
         FiscoBcosInstance fiscoBcosInstance = new FiscoBcosInstance(this.fiscoConfig);
 
         // create producer

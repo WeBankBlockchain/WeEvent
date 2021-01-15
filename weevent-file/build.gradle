@@ -1,4 +1,3 @@
-apply plugin: "org.springframework.boot"
 apply plugin: "io.spring.dependency-management"
 
 dependencies {
@@ -27,7 +26,6 @@ dependencies {
     implementation("org.bouncycastle:bcmail-jdk15on:${bouncycastleVersion}")
 
     implementation("org.mockito:mockito-core:${jmockVersion}")
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 
 
