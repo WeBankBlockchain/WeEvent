@@ -18,7 +18,7 @@ import lombok.ToString;
 @Data
 @ToString
 @Component
-@PropertySource(value = "classpath:weevent.properties", encoding = "UTF-8")
+@PropertySource(value = "classpath:weevent.properties", ignoreResourceNotFound = true, encoding = "UTF-8")
 public class WeEventConfig {
 	
     @Value("${ip.check.white-list:}")

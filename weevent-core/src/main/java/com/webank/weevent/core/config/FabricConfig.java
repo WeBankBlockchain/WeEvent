@@ -17,7 +17,7 @@ import lombok.ToString;
 @Data
 @ToString
 @Component
-@PropertySource(value = "classpath:fabric/fabric.properties", encoding = "UTF-8")
+@PropertySource(value = "classpath:fabric/fabric.properties", ignoreResourceNotFound = true, encoding = "UTF-8")
 public class FabricConfig {
 	
     @Value("${chain.channel.name:mychannel}")
