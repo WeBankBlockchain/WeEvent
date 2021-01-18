@@ -19,8 +19,8 @@ import lombok.ToString;
 @Component
 @PropertySource(value = "classpath:fabric/fabric.properties", ignoreResourceNotFound = true, encoding = "UTF-8")
 public class FabricConfig {
-	
-	@Value("${chain.channel.name:mychannel}")
+
+    @Value("${chain.channel.name:mychannel}")
     private String channelName;
 
     @Value("${chain.organizations.name:Org1}")
@@ -92,7 +92,7 @@ public class FabricConfig {
 
     @Value("${consumer.history_merge_block:8}")
     private Integer consumerHistoryMergeBlock;
-    
+
     /**
      * load configuration without spring
      *
@@ -111,5 +111,5 @@ public class FabricConfig {
 
         return loadResult;
     }
-    
+
 }
