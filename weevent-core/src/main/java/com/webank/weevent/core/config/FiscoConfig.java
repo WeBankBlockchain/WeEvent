@@ -22,58 +22,58 @@ public class FiscoConfig {
 	
     public final static String propertiesFileKey = "block-chain-properties";
 
-    @Value("${version:2.0}")
+    @Value("${version}")
     private String version;
 
-    @Value("${orgid:fisco}")
+    @Value("${orgid}")
     private String orgId;
 
-    @Value("${nodes:}")
+    @Value("${nodes}")
     private String nodes;
 
-    @Value("${account:bcec428d5205abe0f0cc8a734083908d9eb8563e31f943d760786edf42ad67dd}")
+    @Value("${account}")
     private String account;
 
-    @Value("${web3sdk.timeout:10000}")
+    @Value("${web3sdk.timeout}")
     private Integer web3sdkTimeout;
 
-    @Value("${web3sdk.core-pool-size:10}")
+    @Value("${web3sdk.core-pool-size}")
     private Integer web3sdkCorePoolSize;
 
-    @Value("${web3sdk.max-pool-size:1000}")
+    @Value("${web3sdk.max-pool-size}")
     private Integer web3sdkMaxPoolSize;
 
-    @Value("${web3sdk.keep-alive-seconds:10}")
+    @Value("${web3sdk.keep-alive-seconds}")
     private Integer web3sdkKeepAliveSeconds;
 
-    @Value("${web3sdk.encrypt-type:ECDSA_TYPE}")
+    @Value("${web3sdk.encrypt-type}")
     private String web3sdkEncryptType;
 
-    @Value("${ca-crt-path:ca.crt}")
+    @Value("${ca-crt-path}")
     private String CaCrtPath;
 
-    @Value("${sdk-crt-path:sdk.crt}")
+    @Value("${sdk-crt-path}")
     private String SdkCrtPath;
 
-    @Value("${sdk-key-path:sdk.key}")
+    @Value("${sdk-key-path}")
     private String SdkKeyPath;
 
-    @Value("${sdk-gm-crt-path:gmensdk.crt}")
+    @Value("${sdk-gm-crt-path}")
     private String SdkGmCrtPath;
 
-    @Value("${sdk-gm-key-path:gmensdk.key}")
+    @Value("${sdk-gm-key-path}")
     private String SdkGmKeyPath;
 
-    @Value("${pem-key-path:privateKey.pem}")
+    @Value("${pem-key-path}")
     private String PemKeyPath;
 
-    @Value("${consumer.idle-time:1000}")
+    @Value("${consumer.idle-time}")
     private Integer consumerIdleTime;
 
-    @Value("${consumer.history_merge_block:8}")
+    @Value("${consumer.history_merge_block}")
     private Integer consumerHistoryMergeBlock;
 
-    @Value("${bcosSDK.max_blocking_queue_size:102400}")
+    @Value("${bcosSDK.max_blocking_queue_size}")
     private Integer maxBlockingQueueSize;
     
     /**

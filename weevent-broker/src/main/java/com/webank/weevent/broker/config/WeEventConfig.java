@@ -21,19 +21,19 @@ import lombok.ToString;
 @PropertySource(value = "classpath:weevent.properties", ignoreResourceNotFound = true, encoding = "UTF-8")
 public class WeEventConfig {
 	
-    @Value("${ip.check.white-list:}")
+    @Value("${ip.check.white-list}")
     private String ipWhiteList;
 
-    @Value("${lru.cache.capacity:65536}")
+    @Value("${lru.cache.capacity}")
     private Integer maxCapacity;
 
-    @Value("${stomp.heartbeats:30}")
+    @Value("${stomp.heartbeats}")
     private Integer stompHeartbeats;
 
-    @Value("${mqtt.broker.tcp.port:0}")
+    @Value("${mqtt.broker.tcp.port}")
     private Integer mqttTcpPort;
 
-    @Value("${mqtt.broker.keepalive:60}")
+    @Value("${mqtt.broker.keepalive}")
     private Integer keepAlive;
     
 }
