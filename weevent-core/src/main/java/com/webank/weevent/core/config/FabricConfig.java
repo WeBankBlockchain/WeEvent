@@ -20,16 +20,16 @@ import lombok.ToString;
 @PropertySource(value = "classpath:fabric/fabric.properties", ignoreResourceNotFound = true, encoding = "UTF-8")
 public class FabricConfig {
 	
-    @Value("${chain.channel.name:mychannel}")
+	@Value("${chain.channel.name:mychannel}")
     private String channelName;
 
-    @Value("${chain.organizations.name}")
+    @Value("${chain.organizations.name:Org1}")
     private String orgName;
 
-    @Value("${chain.organizations.mspid}")
+    @Value("${chain.organizations.mspid:Org1MSP}")
     private String mspId;
 
-    @Value("${chain.organizations.username}")
+    @Value("${chain.organizations.username:Admin}")
     private String orgUserName;
 
     @Value("${chain.organizations.user.keyfile:}")
@@ -50,47 +50,47 @@ public class FabricConfig {
     @Value("${chain.orderer.tls.cafile:}")
     private String ordererTlsCaFile;
 
-    @Value("${chaincode.topic.version}")
+    @Value("${chaincode.topic.version:v1.0}")
     private String topicVerison;
 
-    @Value("${chaincode.topic.name}")
+    @Value("${chaincode.topic.name:Topic}")
     private String topicName;
 
     private String topicSourceLoc;
 
-    @Value("${chaincode.topic.path}")
+    @Value("${chaincode.topic.path:contract/Topic}")
     private String topicPath;
 
-    @Value("${chaincode.topic-controller.version}")
+    @Value("${chaincode.topic-controller.version:v1.0}")
     private String topicControllerVersion;
 
-    @Value("${chaincode.topic-controller.name}")
+    @Value("${chaincode.topic-controller.name:TopicController}")
     private String topicControllerName;
 
     private String topicControllerSourceLoc;
 
-    @Value("${chaincode.topic-controller.path}")
+    @Value("${chaincode.topic-controller.path:contract/TopicController}")
     private String topicControllerPath;
 
-    @Value("${chaincode.proposal.timeout}")
+    @Value("${chaincode.proposal.timeout:12000}")
     private Long proposalTimeout;
 
-    @Value("${chaincode.transaction.timeout}")
+    @Value("${chaincode.transaction.timeout:30000}")
     private Long transactionTimeout;
 
-    @Value("${pool.core-pool-size}")
+    @Value("${pool.core-pool-size:10}")
     private Integer corePoolSize;
 
-    @Value("${pool.max-pool-size}")
+    @Value("${pool.max-pool-size:200}")
     private Integer maxPoolSize;
 
-    @Value("${pool.keep-alive-seconds}")
+    @Value("${pool.keep-alive-seconds:10}")
     private Integer keepAliveSeconds;
 
-    @Value("${consumer.idle-time}")
+    @Value("${consumer.idle-time:1000}")
     private Integer consumerIdleTime;
 
-    @Value("${consumer.history_merge_block}")
+    @Value("${consumer.history_merge_block:8}")
     private Integer consumerHistoryMergeBlock;
     
     /**
