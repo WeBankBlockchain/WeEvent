@@ -21,6 +21,10 @@ dependencies {
     implementation("com.github.vladimir-bukhtoyarov:bucket4j-core:4.10.0")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    
+    // spring-cloud-starter-alibaba-nacos
+    implementation("com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-discovery:${nacosVersion}")
+    implementation("com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-config:${nacosVersion}")
 }
 
 bootJar {
