@@ -14,6 +14,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.data:spring-data-commons:${springBootVersion}")
 
+    // spring-cloud-starter-alibaba-nacos
     implementation("com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-discovery:${nacosVersion}")
     implementation("com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-config:${nacosVersion}")
 
@@ -43,9 +44,6 @@ dependencies {
     // mqtt
     testImplementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:${PahoClientVersion}")
     
-    // spring-cloud-starter-alibaba-nacos
-    implementation("com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-discovery:${nacosVersion}")
-    implementation("com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-config:${nacosVersion}")
 }
 
 gitProperties {
