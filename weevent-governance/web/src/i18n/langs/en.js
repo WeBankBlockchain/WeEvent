@@ -138,6 +138,7 @@ module.exports = {
     sequenceNumber: 'Published Events',
     newBlockNumber: 'Last Event’s Block',
     address: 'Topic Contract Address',
+    nodeAddress: 'Node Address',
     creater: 'Create Account',
     addTopic: 'New topic',
     noName: 'Empty topic name',
@@ -320,6 +321,7 @@ module.exports = {
   file: {
     addOne: 'New File Transmission',
     boundTopic: 'Bound Topic',
+    boundNode: 'Bound Node',
     creatTime: 'Creat Time',
     creater: 'Creater',
     roles: 'Roles',

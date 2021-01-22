@@ -66,6 +66,11 @@
       >
     </el-table-column>
     <el-table-column
+      :label="$t('file.nodeAddress')"
+      prop="nodeAddress"
+    >
+    </el-table-column>
+    <el-table-column
       :label="$t('file.creater')"
       prop="creater"
     >
@@ -106,17 +111,22 @@
   </el-table>
   <el-dialog :title="$t('file.addOne')" :visible.sync="dialogFormVisible" center width='450px' :close-on-click-modal='false'>
     <el-form :model="form" :rules="rules" ref='form' label-position="top">
-      <el-form-item :label="$t('file.boundTopic') + ':'" prop='name'>
-        <el-select v-model="form.name" @visible-change='selectShow'>
-          <el-option v-for="(item, index) in listTopic" :key="index" :label="item.topicName" :value="item.topicName"></el-option>
-          <el-pagination
-            layout="prev, pager, next"
-            small
-            :current-page.sync="pageIndex"
-            :total="total">
-          </el-pagination>
+      <el-form-item :label="$t('file.boundNode') + ':'" prop='node'>
+        <el-select v-model="form.node">
+          <el-option v-for="item in listNode" :value="item"></el-option>
         </el-select>
       </el-form-item >
+      <el-form-item :label="$t('file.boundTopic') + ':'" prop='name'>
+              <el-select v-model="form.name" @visible-change='selectShow'>
+                <el-option v-for="(item, index) in listTopic" :key="index" :label="item.topicName" :value="item.topicName"></el-option>
+                <el-pagination
+                  layout="prev, pager, next"
+                  small
+                  :current-page.sync="pageIndex"
+                  :total="total">
+                </el-pagination>
+              </el-select>
+            </el-form-item >
       <el-form-item :label="$t('file.roles') + ':'" prop='roles'>
         <el-select v-model="form.roles">
           <el-option :label="$t('file.sender')" value="1"></el-option>
@@ -170,6 +180,13 @@ import Bus from './tool/js/bus'
 const con = require('../../config/config.js')
 export default {
   data () {
+    var node = (node, value, callback) => {
+      if (value === '') {
+        callback(new Error(this.$t('tableCont.noName')))
+      } else {
+        callback()
+      }
+    }
     var name = (rule, value, callback) => {
       if (value === '') {
         callback(new Error(this.$t('tableCont.noName')))
@@ -192,8 +209,10 @@ export default {
       tableData: [],
       fileList: [],
       listTopic: [],
+      listNode: [],
       downLoadList: [],
       form: {
+      	node: '',
         name: '',
         roles: '',
         overwrite: '0',
@@ -201,6 +220,9 @@ export default {
         privateKey: ''
       },
       rules: {
+      	node: [
+          { required: true, validator: node, trigger: 'blur' }
+        ],
         name: [
           { required: true, validator: name, trigger: 'blur' }
         ],
@@ -264,6 +286,7 @@ export default {
       vm.$refs.form.validate((valid) => {
         if (valid) {
           const data = {
+          	nodeAddress: vm.form.node,
             topicName: vm.form.name,
             brokerId: Number(localStorage.getItem('brokerId')),
             groupId: localStorage.getItem('groupId'),
@@ -552,10 +575,10 @@ export default {
     selectShow (e) {
       if (e && this.pageIndex !== 1) {
         this.pageIndex = 1
-        this.getLsitData()
+        this.getListData()
       }
     },
-    getLsitData () {
+    getListData () {
       const vm = this
       const data = {
         pageIndex: vm.pageIndex - 1,
@@ -571,6 +594,13 @@ export default {
           if (res.data.data.topicInfoList) {
             vm.listTopic = [].concat(res.data.data.topicInfoList)
           }
+        }
+      })
+    },
+    getListNode () {
+      API.nodeAddress("").then(res => {
+        if (res.data.code === 0) {
+          this.listNode = [].concat(res.data.data)
         }
       })
     },
@@ -654,6 +684,7 @@ export default {
   watch: {
     dialogFormVisible (nVal) {
       if (!nVal) {
+      	this.form.node = ''
         this.form.name = ''
         this.form.roles = ''
         this.form.publicKey = ''
@@ -663,7 +694,8 @@ export default {
       }
     },
     pageIndex (nVal) {
-      this.getLsitData()
+      this.getListData()
+      this.getListNode()
     },
     groupId (nVal) {
       if (nVal !== '-1') {

@@ -4,6 +4,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -17,7 +20,7 @@ import org.springframework.stereotype.Component;
 @PropertySource(value = "classpath:governance.properties", encoding = "UTF-8")
 public class GovernanceConfig {
 
-    @Value("${https.read-timeout:3000}")
+	@Value("${https.read-timeout:3000}")
     private int readTimeout;
 
     @Value("${https.connect-timeout:3000}")
@@ -54,13 +57,22 @@ public class GovernanceConfig {
     @Value("${acount.passwrod}")
     private String acountPasswrod;
     
+    @Value("${node.address}")
+    private String nodeAddress;
+    
     public static String acount_name;
     public static String acount_passwrod;
+    public static List<String> node_address;
     
     @PostConstruct
     private void init() {
     	acount_name = acountName;
     	acount_passwrod = acountPasswrod;
+    	
+    	node_address = new ArrayList<String>();
+    	for (String node : nodeAddress.split(",")) {
+    		node_address.add(node);
+		}
     }
 
 }

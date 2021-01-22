@@ -5,6 +5,7 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
 
@@ -20,7 +21,7 @@ import org.springframework.stereotype.Component;
 @Setter
 @ToString
 @Component
-//@PropertySource(value = "classpath:weevent.properties", encoding = "UTF-8")
+@PropertySource(value = "classpath:weevent.properties", encoding = "UTF-8")
 public class WeEventConfig {
     @Value("${ip.check.white-list:}")
     private String ipWhiteList;
