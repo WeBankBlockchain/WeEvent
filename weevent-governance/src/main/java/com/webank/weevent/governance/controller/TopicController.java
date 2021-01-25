@@ -52,7 +52,7 @@ public class TopicController {
 
     @GetMapping(value = "/nodeAddress")
     public GovernanceResult<List<String>> getNode() throws GovernanceException {
-        return new GovernanceResult<List<String>>(GovernanceConfig.node_address);
+        return new GovernanceResult<List<String>>(topicService.getNodeAddress());
     }
     
     @PostMapping(value = "/openTopic")

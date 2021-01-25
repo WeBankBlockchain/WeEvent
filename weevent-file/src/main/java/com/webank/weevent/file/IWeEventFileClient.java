@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Set;
 
+import org.fisco.bcos.sdk.client.protocol.response.Peers.PeerInfo;
+
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.SendResult;
 import com.webank.weevent.core.config.FiscoConfig;
@@ -76,10 +78,10 @@ public interface IWeEventFileClient {
      * get Subscribers
      * @param topic
      * @param groupId
-     * @return
+     * @return Set<PeerInfo>
      * @throws BrokerException
      */
-    Set<String> getSubscribers(String topic, Integer groupId) throws BrokerException;
+    Set<PeerInfo> getSubscribers(String topic, Integer groupId) throws BrokerException;
 
     /**
      * open transport for authentication receiver.

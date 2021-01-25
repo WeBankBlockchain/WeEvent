@@ -45,6 +45,7 @@ import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
 import org.fisco.bcos.sdk.amop.Amop;
+import org.fisco.bcos.sdk.client.protocol.response.Peers.PeerInfo;
 import org.fisco.bcos.sdk.crypto.keystore.KeyTool;
 import org.fisco.bcos.sdk.crypto.keystore.PEMKeyStore;
 
@@ -221,7 +222,7 @@ public class WeEventFileClient implements IWeEventFileClient {
         amopChannel.subTopic(topic, fileEventListener);
     }
     
-    public Set<String> getSubscribers(String topic, Integer groupId) throws BrokerException {
+    public Set<PeerInfo> getSubscribers(String topic, Integer groupId) throws BrokerException {
         AMOPChannel amopChannel = this.fileTransportService.getChannel();
         return amopChannel.getSubscribers(topic, groupId);
     }

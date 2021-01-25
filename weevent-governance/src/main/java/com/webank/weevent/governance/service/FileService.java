@@ -40,6 +40,7 @@ import com.webank.weevent.governance.utils.Utils;
 import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.client.protocol.response.Peers.PeerInfo;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -102,7 +103,7 @@ public class FileService {
         return GovernanceResult.ok(true);
     }
     
-    public Set<String> getSubscribers(FileTransportChannelEntity fileTransport) throws GovernanceException {
+    public Set<PeerInfo> getSubscribers(FileTransportChannelEntity fileTransport) throws GovernanceException {
     	IWeEventFileClient fileClient;
     	try {
             fileClient = this.buildIWeEventFileClient(fileTransport.getGroupId(), fileTransport.getBrokerId());

@@ -57,22 +57,13 @@ public class GovernanceConfig {
     @Value("${acount.passwrod}")
     private String acountPasswrod;
     
-    @Value("${node.address}")
-    private String nodeAddress;
-    
     public static String acount_name;
     public static String acount_passwrod;
-    public static List<String> node_address;
     
     @PostConstruct
     private void init() {
     	acount_name = acountName;
     	acount_passwrod = acountPasswrod;
-    	
-    	node_address = new ArrayList<String>();
-    	for (String node : nodeAddress.split(",")) {
-    		node_address.add(node);
-		}
     }
 
 }

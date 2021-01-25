@@ -35,6 +35,7 @@ import org.fisco.bcos.sdk.amop.AmopResponse;
 import org.fisco.bcos.sdk.amop.topic.AmopMsgIn;
 import org.fisco.bcos.sdk.amop.topic.TopicType;
 import org.fisco.bcos.sdk.client.protocol.response.Peers;
+import org.fisco.bcos.sdk.client.protocol.response.Peers.PeerInfo;
 import org.fisco.bcos.sdk.crypto.keystore.KeyTool;
 import org.fisco.bcos.sdk.crypto.keystore.PEMKeyStore;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -111,15 +112,13 @@ public class AMOPChannel extends AmopCallback {
         return new HashSet<>(subVerifyTopics);
     }
 
-    public Set<String> getSubscribers(String topic, Integer groupId) {
-        Set<String> subscribers = new HashSet<>();
-        subscribers.add("abc");
-        subscribers.add("abcd");
+    public Set<PeerInfo> getSubscribers(String topic, Integer groupId) {
+        Set<PeerInfo> subscribers = new HashSet<>();
         Peers peers = this.bcosSDK.getClient(groupId).getPeers();
         log.info("peers:{}", peers.getPeers());
         for (Peers.PeerInfo peer : peers.getPeers()){
-            if(peer.getTopic().contains(topic) ){
-                subscribers.add(peer.getIpAndPort());
+            if(peer.getTopic().contains(topic)){
+                subscribers.add(peer);
             }
         }
         return subscribers;
