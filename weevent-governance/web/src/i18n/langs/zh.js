@@ -330,6 +330,7 @@ module.exports = {
     receiver: '接收方',
     upload: '上传文件',
     download: '下载文件',
+    receiverSubList: '订阅者',
     publicKey: '公钥',
     privateKey: '私钥',
     isDelete: '删除通道',

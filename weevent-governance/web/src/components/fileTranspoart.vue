@@ -102,6 +102,7 @@
       >
       <template  slot-scope="scope">
         <el-button size='mini' type='primary' @click.stop='fileOption(scope.row)' v-show="scope.row.role || scope.row.role === '1'">{{scope.row.role === '1' ? $t('file.upload') : $t('file.download')}}</el-button>
+        <el-button size='mini' type='primary' @click='showlog = !showlog' @click.stop='getSubscribers(scope.row)' v-show="scope.row.role || scope.row.role === '1'">{{scope.row.role === '1' ? $t('file.receiver') : $t('file.sender')}}</el-button>
         <el-tooltip v-show="scope.row.overWrite === '1'" class="item" effect="dark" :content="$t('file.fileCover')" placement="top">
           <i class='el-icon-warning' style='font-size:18px;color:#006cff'></i>
         </el-tooltip>
@@ -151,6 +152,15 @@
       <el-button @click="dialogFormVisible = false">{{$t('common.cancel')}}</el-button>
     </div>
   </el-dialog>
+  
+  <!-- start -->
+  <el-dialog :title="$t('file.receiverSubList')" :visible.sync="showlog" center width='600px' :close-on-click-modal='false'>
+      <p v-for='index of topicTableData'>
+      	<el-table-column :label="$t('file.nodeAddress')">{{index}}</el-table-column>
+      </p>
+  </el-dialog>
+  <!-- end -->
+  
   <el-dialog :title="$t('file.downloadList')" :visible.sync="showDownList" center :close-on-click-modal='false'>
     <el-table
     :data="downLoadList"
@@ -206,7 +216,9 @@ export default {
       showDownList: false,
       loading: false,
       dialogFormVisible: false,
+      showlog: false,
       tableData: [],
+      topicTableData: [],
       fileList: [],
       listTopic: [],
       listNode: [],
@@ -601,6 +613,21 @@ export default {
       API.nodeAddress("").then(res => {
         if (res.data.code === 0) {
           this.listNode = [].concat(res.data.data)
+        }
+      })
+    },
+    getSubscribers (e) {
+      const topicName = e.topicName
+      const data = {
+        brokerId: Number(localStorage.getItem('brokerId')),
+        groupId: Number(localStorage.getItem('groupId')),
+        topicName: topicName
+      }
+      API.getSubscribers(data).then(res => {
+        if (res.data.code === 0) {
+          if (res.data.data) {
+            this.topicTableData = [].concat(res.data.data)
+          }
         }
       })
     },

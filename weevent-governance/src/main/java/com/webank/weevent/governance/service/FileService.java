@@ -10,6 +10,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -99,6 +100,17 @@ public class FileService {
 
         this.transportChannelRepository.save(fileTransport);
         return GovernanceResult.ok(true);
+    }
+    
+    public Set<String> getSubscribers(FileTransportChannelEntity fileTransport) throws GovernanceException {
+    	IWeEventFileClient fileClient;
+    	try {
+            fileClient = this.buildIWeEventFileClient(fileTransport.getGroupId(), fileTransport.getBrokerId());
+            return fileClient.getSubscribers(fileTransport.getTopicName(), Integer.parseInt(fileTransport.getGroupId()));
+        } catch (BrokerException e) {
+            log.error("get Subscribers failed.", e);
+            throw new GovernanceException(e.getMessage());
+        }
     }
 
     private void openTransport4Sender(FileTransportChannelEntity fileTransport) throws GovernanceException {

@@ -39,6 +39,9 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     // mqtt
     testImplementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:${PahoClientVersion}")
+    
+    //h2
+    implementation("com.h2database:h2:${h2Version}")
 }
 
 gitProperties {

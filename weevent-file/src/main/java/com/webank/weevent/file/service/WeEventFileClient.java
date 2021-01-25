@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -218,6 +219,11 @@ public class WeEventFileClient implements IWeEventFileClient {
         FileEventListener fileEventListener = new FileEventListener(this.localReceivePath, this.ftpInfo, fileListener);
 
         amopChannel.subTopic(topic, fileEventListener);
+    }
+    
+    public Set<String> getSubscribers(String topic, Integer groupId) throws BrokerException {
+        AMOPChannel amopChannel = this.fileTransportService.getChannel();
+        return amopChannel.getSubscribers(topic, groupId);
     }
 
     public void openTransport4Receiver(String topic, FileListener fileListener, InputStream privatePem) throws BrokerException {

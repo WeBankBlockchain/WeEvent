@@ -220,6 +220,10 @@ class ResoruceService extends BaseModel {
   listTransport (data) {
     return this.request(api.listTransport, data)
   }
+  
+  getSubscribers (data) {
+	return this.request(api.getSubscribers, data)
+  }
 
   deleteStatus (data) {
     return this.request(api.deleteStatus, data)

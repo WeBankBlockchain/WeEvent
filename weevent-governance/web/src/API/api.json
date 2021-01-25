@@ -178,6 +178,10 @@
     "method": "get",
     "url": "file/listTransport"
   },
+  "getSubscribers": {
+    "method": "post",
+    "url": "file/getSubscribers"
+  },
   "openTransport": {
     "method": "post",
     "url": "file/openTransport"

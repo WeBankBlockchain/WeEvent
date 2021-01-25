@@ -8,6 +8,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -59,6 +60,13 @@ public class FileController {
     public GovernanceResult<Boolean> openTransport(@RequestBody FileTransportChannelEntity fileTransport) throws GovernanceException {
         log.info("openTransport, fileTransport:{}.", fileTransport.toString());
         return this.fileService.openTransport(fileTransport);
+    }
+    
+    @PostMapping(path = "/getSubscribers")
+    @ResponseBody
+    public GovernanceResult<Set<String>> getSubscribers(@RequestBody FileTransportChannelEntity fileTransport) throws GovernanceException {
+        log.info("getSubscribers, getSubscribers:{}.", fileTransport.toString());
+        return new GovernanceResult<>(this.fileService.getSubscribers(fileTransport));
     }
 
     @PostMapping(path = "/upload")
