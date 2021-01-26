@@ -13,18 +13,7 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.webank.weevent.file.service.FileChunksMeta;
-import com.webank.weevent.governance.common.GovernanceException;
-import com.webank.weevent.governance.common.GovernanceResult;
-import com.webank.weevent.governance.entity.FileChunksMetaEntity;
-import com.webank.weevent.governance.entity.FileTransportChannelEntity;
-import com.webank.weevent.governance.entity.FileTransportStatusEntity;
-import com.webank.weevent.governance.service.FileService;
-import com.webank.weevent.governance.utils.ParamCheckUtils;
-
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.client.protocol.response.Peers.PeerInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -34,6 +23,18 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.webank.weevent.file.service.FileChunksMeta;
+import com.webank.weevent.governance.common.GovernanceException;
+import com.webank.weevent.governance.common.GovernanceResult;
+import com.webank.weevent.governance.entity.FileChunksMetaEntity;
+import com.webank.weevent.governance.entity.FileTransportChannelEntity;
+import com.webank.weevent.governance.entity.FileTransportStatusEntity;
+import com.webank.weevent.governance.entity.PeerInfoParam;
+import com.webank.weevent.governance.service.FileService;
+import com.webank.weevent.governance.utils.ParamCheckUtils;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * file upload/download Controller.
@@ -65,7 +66,7 @@ public class FileController {
     
     @PostMapping(path = "/getSubscribers")
     @ResponseBody
-    public GovernanceResult<Set<PeerInfo>> getSubscribers(@RequestBody FileTransportChannelEntity fileTransport) throws GovernanceException {
+    public GovernanceResult<Set<PeerInfoParam>> getSubscribers(@RequestBody FileTransportChannelEntity fileTransport) throws GovernanceException {
         log.info("getSubscribers, getSubscribers:{}.", fileTransport.toString());
         return new GovernanceResult<>(this.fileService.getSubscribers(fileTransport));
     }

@@ -150,7 +150,7 @@
 
   <el-dialog :title="$t('file.subscribeList')" :visible.sync="showlog" center width='600px' :close-on-click-modal='false'>
     <el-table :data="topicTableData" v-loading='loading' element-loading-spinner='el-icon-loading' :element-loading-text="$t('common.loading')" element-loading-background='rgba(256,256,256,0.8)' style="width: 100%" @row-dblclick='rowClick' @expand-change='readDetail' ref='table'>
-      <el-table-column :label="$t('file.nodeAddress')" prop="IPAndPort"></el-table-column>
+      <el-table-column :label="$t('file.nodeAddress')" prop="ipAndPort"></el-table-column>
     </el-table>
   </el-dialog>
 

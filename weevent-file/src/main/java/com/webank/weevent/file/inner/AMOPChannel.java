@@ -112,13 +112,13 @@ public class AMOPChannel extends AmopCallback {
         return new HashSet<>(subVerifyTopics);
     }
 
-    public Set<PeerInfo> getSubscribers(String topic, Integer groupId) {
-        Set<PeerInfo> subscribers = new HashSet<>();
+    public Set<String> getSubscribers(String topic, Integer groupId) {
+        Set<String> subscribers = new HashSet<>();
         Peers peers = this.bcosSDK.getClient(groupId).getPeers();
         log.info("peers:{}", peers.getPeers());
         for (Peers.PeerInfo peer : peers.getPeers()){
             if(peer.getTopic().contains(topic)){
-                subscribers.add(peer);
+                subscribers.add(peer.getIpAndPort());
             }
         }
         return subscribers;

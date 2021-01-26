@@ -78,10 +78,10 @@ public interface IWeEventFileClient {
      * get Subscribers
      * @param topic topic name
      * @param groupId group id
-     * @return PeerInfo Set
+     * @return String Set
      * @throws BrokerException broker exception
      */
-    Set<PeerInfo> getSubscribers(String topic, Integer groupId) throws BrokerException;
+    Set<String> getSubscribers(String topic, Integer groupId) throws BrokerException;
 
     /**
      * open transport for authentication receiver.

@@ -222,7 +222,7 @@ public class WeEventFileClient implements IWeEventFileClient {
         amopChannel.subTopic(topic, fileEventListener);
     }
     
-    public Set<PeerInfo> getSubscribers(String topic, Integer groupId) throws BrokerException {
+    public Set<String> getSubscribers(String topic, Integer groupId) throws BrokerException {
         AMOPChannel amopChannel = this.fileTransportService.getChannel();
         return amopChannel.getSubscribers(topic, groupId);
     }

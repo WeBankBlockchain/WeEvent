@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,7 @@ import com.webank.weevent.governance.common.GovernanceResult;
 import com.webank.weevent.governance.entity.FileChunksMetaEntity;
 import com.webank.weevent.governance.entity.FileTransportChannelEntity;
 import com.webank.weevent.governance.entity.FileTransportStatusEntity;
+import com.webank.weevent.governance.entity.PeerInfoParam;
 import com.webank.weevent.governance.entity.UploadChunkParam;
 import com.webank.weevent.governance.repository.TransportChannelRepository;
 import com.webank.weevent.governance.repository.TransportStatusRepository;
@@ -40,7 +42,6 @@ import com.webank.weevent.governance.utils.Utils;
 import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.client.protocol.response.Peers.PeerInfo;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -103,11 +104,18 @@ public class FileService {
         return GovernanceResult.ok(true);
     }
     
-    public Set<PeerInfo> getSubscribers(FileTransportChannelEntity fileTransport) throws GovernanceException {
+    public Set<PeerInfoParam> getSubscribers(FileTransportChannelEntity fileTransport) throws GovernanceException {
     	IWeEventFileClient fileClient;
     	try {
+    		Set<PeerInfoParam> params = new HashSet<>();
             fileClient = this.buildIWeEventFileClient(fileTransport.getGroupId(), fileTransport.getBrokerId());
-            return fileClient.getSubscribers(fileTransport.getTopicName(), Integer.parseInt(fileTransport.getGroupId()));
+            Set<String> set = fileClient.getSubscribers(fileTransport.getTopicName(), Integer.parseInt(fileTransport.getGroupId()));
+            for (String str : set) {
+            	PeerInfoParam param = new PeerInfoParam();
+            	param.setIpAndPort(str);
+            	params.add(param);
+			}
+            return params;
         } catch (BrokerException e) {
             log.error("get Subscribers failed.", e);
             throw new GovernanceException(e.getMessage());
