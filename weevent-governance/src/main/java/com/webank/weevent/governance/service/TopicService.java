@@ -132,17 +132,17 @@ public class TopicService {
 
         return topicPage;
     }
-    
+
     public List<String> getNodeAddress() throws GovernanceException {
-    	FiscoConfig fiscoConfig = new FiscoConfig();
-    	fiscoConfig.load("");
-    	String nodes = fiscoConfig.getNodes();
-    	
-    	List<String> nodeAddress = new ArrayList<String>();
-    	for (String node : nodes.split(",")) {
-    		nodeAddress.add(node);
-		}
-    	return nodeAddress;
+        FiscoConfig fiscoConfig = new FiscoConfig();
+        fiscoConfig.load("");
+        String nodes = fiscoConfig.getNodes();
+
+        List<String> nodeAddress = new ArrayList<String>();
+        for (String node : nodes.split(",")) {
+            nodeAddress.add(node);
+        }
+        return nodeAddress;
     }
 
     public TopicEntity getTopicInfo(Integer brokerId, String topic, String groupId, HttpServletRequest request) throws GovernanceException {

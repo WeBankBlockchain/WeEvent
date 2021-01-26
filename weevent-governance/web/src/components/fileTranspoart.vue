@@ -152,13 +152,13 @@
       <el-button @click="dialogFormVisible = false">{{$t('common.cancel')}}</el-button>
     </div>
   </el-dialog>
-  
+
   <el-dialog :title="$t('file.subscribeList')" :visible.sync="showlog" center width='600px' :close-on-click-modal='false'>
     <el-table :data="topicTableData" v-loading='loading' element-loading-spinner='el-icon-loading' :element-loading-text="$t('common.loading')" element-loading-background='rgba(256,256,256,0.8)' style="width: 100%" @row-dblclick='rowClick' @expand-change='readDetail' ref='table'>
       <el-table-column :label="$t('file.nodeAddress')" prop="IPAndPort"></el-table-column>
     </el-table>
   </el-dialog>
-  
+
   <el-dialog :title="$t('file.downloadList')" :visible.sync="showDownList" center :close-on-click-modal='false'>
     <el-table
     :data="downLoadList"

@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 @PropertySource(value = "classpath:governance.properties", encoding = "UTF-8")
 public class GovernanceConfig {
 
-	@Value("${https.read-timeout:3000}")
+    @Value("${https.read-timeout:3000}")
     private int readTimeout;
 
     @Value("${https.connect-timeout:3000}")
@@ -50,20 +50,20 @@ public class GovernanceConfig {
 
     @Value("${file.transport.path:./logs}")
     private String fileTransportPath;
-    
+
     @Value("${acount.name}")
     private String acountName;
-    
+
     @Value("${acount.passwrod}")
     private String acountPasswrod;
-    
+
     public static String acount_name;
     public static String acount_passwrod;
-    
+
     @PostConstruct
     private void init() {
-    	acount_name = acountName;
-    	acount_passwrod = acountPasswrod;
+        acount_name = acountName;
+        acount_passwrod = acountPasswrod;
     }
 
 }

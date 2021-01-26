@@ -9,8 +9,6 @@ ext {
     // spring cloud
     springCloudVersion = "Greenwich.SR5"
 
-    nacosVersion = "2.1.3.RELEASE"
-
     // ----- org.apache -----
     // zookeeper
     zookeeperVersion = "3.5.5"
