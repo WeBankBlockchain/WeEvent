@@ -330,7 +330,7 @@ module.exports = {
     receiver: 'Receiver',
     upload: 'Upload',
     download: 'Download',
-    receiverSubList: 'Receiver Subscribers List',
+    subscribeList: 'Subscribers List',
     publicKey: 'Public Key',
     privateKey: 'Private Key',
     isDelete: 'Delete Topic',

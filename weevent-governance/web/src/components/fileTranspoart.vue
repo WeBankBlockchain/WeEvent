@@ -100,11 +100,9 @@
       :label="$t('file.options')"
       width='300'
       >
-      <template  slot-scope="scope">
+      <template slot-scope="scope">
         <el-button size='mini' type='primary' @click.stop='fileOption(scope.row)' v-show="scope.row.role || scope.row.role === '1'">{{scope.row.role === '1' ? $t('file.upload') : $t('file.download')}}</el-button>
-        <p style="float:right;margin-right:120px;" v-if="scope.row.role === '0'">
-        	<el-button size='mini' type='primary' @click='showlog = !showlog' @click.stop='getSubscribers(scope.row)' v-show="scope.row.role || scope.row.role === '1'">{{$t('file.sender')}}</el-button>
-        </p>
+        <el-button size='mini' type='primary' @click='showlog = !showlog' @click.stop='getSubscribers(scope.row)' v-show="scope.row.role || scope.row.role === '1'">{{$t('file.subscribeList')}}</el-button>
         <el-tooltip v-show="scope.row.overWrite === '1'" class="item" effect="dark" :content="$t('file.fileCover')" placement="top">
           <i class='el-icon-warning' style='font-size:18px;color:#006cff'></i>
         </el-tooltip>
@@ -155,7 +153,7 @@
     </div>
   </el-dialog>
   
-  <el-dialog :title="$t('file.receiverSubList')" :visible.sync="showlog" center width='600px' :close-on-click-modal='false'>
+  <el-dialog :title="$t('file.subscribeList')" :visible.sync="showlog" center width='600px' :close-on-click-modal='false'>
     <el-table :data="topicTableData" v-loading='loading' element-loading-spinner='el-icon-loading' :element-loading-text="$t('common.loading')" element-loading-background='rgba(256,256,256,0.8)' style="width: 100%" @row-dblclick='rowClick' @expand-change='readDetail' ref='table'>
       <el-table-column :label="$t('file.nodeAddress')" prop="IPAndPort"></el-table-column>
     </el-table>
