@@ -23,6 +23,11 @@ class ResoruceService extends BaseModel {
   topicList (data) {
     return this.request(api.topicList, data)
   }
+  
+  nodeAddress (data) {
+    return this.request(api.nodeAddress, data)
+  }
+  
 
   openTopic (data) {
     return this.request(api.openTopic, data)
@@ -214,6 +219,10 @@ class ResoruceService extends BaseModel {
 
   listTransport (data) {
     return this.request(api.listTransport, data)
+  }
+  
+  getSubscribers (data) {
+	return this.request(api.getSubscribers, data)
   }
 
   deleteStatus (data) {

@@ -10,6 +10,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -39,6 +40,7 @@ import com.webank.weevent.governance.utils.Utils;
 import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.client.protocol.response.Peers.PeerInfo;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -99,6 +101,17 @@ public class FileService {
 
         this.transportChannelRepository.save(fileTransport);
         return GovernanceResult.ok(true);
+    }
+    
+    public Set<PeerInfo> getSubscribers(FileTransportChannelEntity fileTransport) throws GovernanceException {
+    	IWeEventFileClient fileClient;
+    	try {
+            fileClient = this.buildIWeEventFileClient(fileTransport.getGroupId(), fileTransport.getBrokerId());
+            return fileClient.getSubscribers(fileTransport.getTopicName(), Integer.parseInt(fileTransport.getGroupId()));
+        } catch (BrokerException e) {
+            log.error("get Subscribers failed.", e);
+            throw new GovernanceException(e.getMessage());
+        }
     }
 
     private void openTransport4Sender(FileTransportChannelEntity fileTransport) throws GovernanceException {

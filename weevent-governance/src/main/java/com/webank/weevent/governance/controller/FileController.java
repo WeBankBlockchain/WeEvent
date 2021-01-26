@@ -8,6 +8,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -23,6 +24,7 @@ import com.webank.weevent.governance.utils.ParamCheckUtils;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.client.protocol.response.Peers.PeerInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -59,6 +61,13 @@ public class FileController {
     public GovernanceResult<Boolean> openTransport(@RequestBody FileTransportChannelEntity fileTransport) throws GovernanceException {
         log.info("openTransport, fileTransport:{}.", fileTransport.toString());
         return this.fileService.openTransport(fileTransport);
+    }
+    
+    @PostMapping(path = "/getSubscribers")
+    @ResponseBody
+    public GovernanceResult<Set<PeerInfo>> getSubscribers(@RequestBody FileTransportChannelEntity fileTransport) throws GovernanceException {
+        log.info("getSubscribers, getSubscribers:{}.", fileTransport.toString());
+        return new GovernanceResult<>(this.fileService.getSubscribers(fileTransport));
     }
 
     @PostMapping(path = "/upload")
