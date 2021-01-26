@@ -118,16 +118,11 @@
         </el-select>
       </el-form-item >
       <el-form-item :label="$t('file.boundTopic') + ':'" prop='name'>
-              <el-select v-model="form.name" @visible-change='selectShow'>
-                <el-option v-for="(item, index) in listTopic" :key="index" :label="item.topicName" :value="item.topicName"></el-option>
-                <el-pagination
-                  layout="prev, pager, next"
-                  small
-                  :current-page.sync="pageIndex"
-                  :total="total">
-                </el-pagination>
-              </el-select>
-            </el-form-item >
+        <el-select v-model="form.name" @visible-change='selectShow'>
+          <el-option v-for="(item, index) in listTopic" :key="index" :label="item.topicName" :value="item.topicName"></el-option>
+          <el-pagination layout="prev, pager, next" small :current-page.sync="pageIndex" :total="total"></el-pagination>
+        </el-select>
+      </el-form-item >
       <el-form-item :label="$t('file.roles') + ':'" prop='roles'>
         <el-select v-model="form.roles">
           <el-option :label="$t('file.sender')" value="1"></el-option>
@@ -230,7 +225,7 @@ export default {
         privateKey: ''
       },
       rules: {
-      	node: [
+        node: [
           { required: true, validator: node, trigger: 'blur' }
         ],
         name: [
