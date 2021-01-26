@@ -109,7 +109,7 @@ public class FileService {
     	try {
     		Set<PeerInfoParam> params = new HashSet<>();
             fileClient = this.buildIWeEventFileClient(fileTransport.getGroupId(), fileTransport.getBrokerId());
-            Set<String> set = fileClient.getSubscribers(fileTransport.getTopicName(), Integer.parseInt(fileTransport.getGroupId()));
+            Set<String> set = fileClient.getSubscribers(fileTransport.getTopicName());
             for (String str : set) {
             	PeerInfoParam param = new PeerInfoParam();
             	param.setIpAndPort(str);

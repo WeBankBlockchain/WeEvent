@@ -17,6 +17,7 @@ import java.util.concurrent.TimeoutException;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.ErrorCode;
 import com.webank.weevent.client.JsonHelper;
+import com.webank.weevent.client.WeEvent;
 import com.webank.weevent.core.dto.AmopMsgResponse;
 import com.webank.weevent.core.fisco.util.DataTypeUtils;
 import com.webank.weevent.core.fisco.web3sdk.v2.Web3SDKConnector;
@@ -112,7 +113,8 @@ public class AMOPChannel extends AmopCallback {
         return new HashSet<>(subVerifyTopics);
     }
 
-    public Set<String> getSubscribers(String topic, Integer groupId) {
+    public Set<String> getSubscribers(String topic) {
+    	Integer groupId = Integer.parseInt(WeEvent.DEFAULT_GROUP_ID);
         Set<String> subscribers = new HashSet<>();
         Peers peers = this.bcosSDK.getClient(groupId).getPeers();
         log.info("peers:{}", peers.getPeers());
