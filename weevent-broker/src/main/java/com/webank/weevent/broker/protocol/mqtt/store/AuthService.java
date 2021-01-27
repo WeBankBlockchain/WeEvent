@@ -22,7 +22,6 @@ public class AuthService {
         this.accountRepository = accountRepository;
     }
 
-
     public boolean verifyUserName(String userName, String password) {
         if (!isAuth) {
             return true;
