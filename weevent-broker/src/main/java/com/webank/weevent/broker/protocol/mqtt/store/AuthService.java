@@ -24,11 +24,11 @@ public class AuthService {
 
 
     public boolean verifyUserName(String userName, String password) {
-        if(!isAuth) {
+        if (!isAuth) {
             return true;
         }
         AccountEntity accountEntity = accountRepository.findAllByUserNameAndDeleteAt(userName, IsDeleteEnum.NOT_DELETED.getCode());
-        if(null == accountEntity) {
+        if (null == accountEntity) {
             return false;
         }
         log.info("accountEntity:{}", accountEntity.toString());
