@@ -95,6 +95,7 @@ public class TopicService {
         TopicPage result = new TopicPage();
         result.setPageIndex(pageIndex);
         result.setPageSize(pageSize);
+        result.setNodeAddress(getNodeAddress());
         if (brokerEntity == null) {
             return result;
         }
@@ -113,6 +114,7 @@ public class TopicService {
         TopicPage topicPage = invokeBrokerCGI(request, url, new TypeReference<BaseResponse<TopicPage>>() {
         }).getData();
 
+        topicPage.setNodeAddress(getNodeAddress());
         if (topicPage == null || CollectionUtils.isEmpty(topicPage.getTopicInfoList())) {
             return result;
         }

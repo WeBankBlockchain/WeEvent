@@ -1,7 +1,5 @@
 package com.webank.weevent.governance.controller;
 
-import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -15,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.webank.weevent.governance.common.GovernanceConfig;
 import com.webank.weevent.governance.common.GovernanceException;
 import com.webank.weevent.governance.common.GovernanceResult;
 import com.webank.weevent.governance.entity.TopicCreateEntity;
@@ -50,11 +47,6 @@ public class TopicController {
         return new GovernanceResult<>(topicService.getTopics(topicPageEntity, request, response));
     }
 
-    @GetMapping(value = "/nodeAddress")
-    public GovernanceResult<List<String>> getNode() throws GovernanceException {
-        return new GovernanceResult<List<String>>(topicService.getNodeAddress());
-    }
-    
     @PostMapping(value = "/openTopic")
     public GovernanceResult<Object> open(@RequestBody TopicCreateEntity topicCreateEntity, HttpServletRequest request,
                                          HttpServletResponse response) throws GovernanceException {
