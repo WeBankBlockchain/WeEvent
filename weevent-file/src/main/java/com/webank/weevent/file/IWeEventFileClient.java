@@ -3,6 +3,9 @@ package com.webank.weevent.file;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Set;
+
+import org.fisco.bcos.sdk.client.protocol.response.Peers.PeerInfo;
 
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.SendResult;
@@ -70,6 +73,14 @@ public interface IWeEventFileClient {
      * @throws BrokerException broker exception
      */
     void openTransport4Receiver(String topic, FileListener fileListener) throws BrokerException;
+    
+    /**
+     * get Subscribers
+     * @param topic topic name
+     * @return String Set
+     * @throws BrokerException broker exception
+     */
+    Set<String> getSubscribers(String topic) throws BrokerException;
 
     /**
      * open transport for authentication receiver.

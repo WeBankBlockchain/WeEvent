@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -44,6 +45,7 @@ import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
 import org.fisco.bcos.sdk.amop.Amop;
+import org.fisco.bcos.sdk.client.protocol.response.Peers.PeerInfo;
 import org.fisco.bcos.sdk.crypto.keystore.KeyTool;
 import org.fisco.bcos.sdk.crypto.keystore.PEMKeyStore;
 
@@ -218,6 +220,11 @@ public class WeEventFileClient implements IWeEventFileClient {
         FileEventListener fileEventListener = new FileEventListener(this.localReceivePath, this.ftpInfo, fileListener);
 
         amopChannel.subTopic(topic, fileEventListener);
+    }
+    
+    public Set<String> getSubscribers(String topic) throws BrokerException {
+        AMOPChannel amopChannel = this.fileTransportService.getChannel();
+        return amopChannel.getSubscribers(topic);
     }
 
     public void openTransport4Receiver(String topic, FileListener fileListener, InputStream privatePem) throws BrokerException {

@@ -6,10 +6,12 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -30,6 +32,7 @@ import com.webank.weevent.governance.common.GovernanceResult;
 import com.webank.weevent.governance.entity.FileChunksMetaEntity;
 import com.webank.weevent.governance.entity.FileTransportChannelEntity;
 import com.webank.weevent.governance.entity.FileTransportStatusEntity;
+import com.webank.weevent.governance.entity.PeerInfoParam;
 import com.webank.weevent.governance.entity.UploadChunkParam;
 import com.webank.weevent.governance.repository.TransportChannelRepository;
 import com.webank.weevent.governance.repository.TransportStatusRepository;
@@ -99,6 +102,24 @@ public class FileService {
 
         this.transportChannelRepository.save(fileTransport);
         return GovernanceResult.ok(true);
+    }
+    
+    public Set<PeerInfoParam> getSubscribers(FileTransportChannelEntity fileTransport) throws GovernanceException {
+    	IWeEventFileClient fileClient;
+    	try {
+    		Set<PeerInfoParam> params = new HashSet<>();
+            fileClient = this.buildIWeEventFileClient(fileTransport.getGroupId(), fileTransport.getBrokerId());
+            Set<String> set = fileClient.getSubscribers(fileTransport.getTopicName());
+            for (String str : set) {
+            	PeerInfoParam param = new PeerInfoParam();
+            	param.setIpAndPort(str);
+            	params.add(param);
+			}
+            return params;
+        } catch (BrokerException e) {
+            log.error("get Subscribers failed.", e);
+            throw new GovernanceException(e.getMessage());
+        }
     }
 
     private void openTransport4Sender(FileTransportChannelEntity fileTransport) throws GovernanceException {
