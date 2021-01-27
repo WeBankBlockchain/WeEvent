@@ -6,7 +6,7 @@ import lombok.Getter;
 public enum IsAuthEnum {
 
     ON("ON"),
-	OFF("OFF");
+    OFF("OFF");
 
     private String value;
 
