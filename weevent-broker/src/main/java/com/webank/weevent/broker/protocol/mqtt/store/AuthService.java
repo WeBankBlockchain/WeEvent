@@ -14,23 +14,23 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class AuthService {
-	
-	private final String isAuth;
+
+    private final String isAuth;
     private final AccountRepository accountRepository;
 
     public AuthService(String isAuth, AccountRepository accountRepository) {
-    	this.isAuth = isAuth;
+        this.isAuth = isAuth;
         this.accountRepository = accountRepository;
     }
-    
-    
+
+
     public boolean verifyUserName(String userName, String password) {
-    	if(IsAuthEnum.OFF.getValue().equals(isAuth)) {
-    		return true;
-    	}
+        if(IsAuthEnum.OFF.getValue().equals(isAuth)) {
+            return true;
+        }
         AccountEntity accountEntity = accountRepository.findAllByUserNameAndDeleteAt(userName, IsDeleteEnum.NOT_DELETED.getCode());
         if(null == accountEntity) {
-        	return false;
+            return false;
         }
         log.info("accountEntity:{}", accountEntity.toString());
         return password.equals(accountEntity.getPassword());
