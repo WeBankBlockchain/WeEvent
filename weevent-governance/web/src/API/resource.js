@@ -24,11 +24,6 @@ class ResoruceService extends BaseModel {
     return this.request(api.topicList, data)
   }
   
-  nodeAddress (data) {
-    return this.request(api.nodeAddress, data)
-  }
-  
-
   openTopic (data) {
     return this.request(api.openTopic, data)
   }

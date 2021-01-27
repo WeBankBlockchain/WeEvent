@@ -81,7 +81,7 @@ public class ProtocolProcess {
                            IProducer producer,
                            IConsumer consumer,
                            AccountRepository accountRepository) throws BrokerException {
-        AuthService authService = new AuthService(accountRepository);
+        AuthService authService = new AuthService(environment.getProperty("spring.security.user.auth"), accountRepository);
 
         // try to initialize ZKStore
         boolean zookeeper = environment.getProperty("spring.cloud.zookeeper.enabled", Boolean.class, true);

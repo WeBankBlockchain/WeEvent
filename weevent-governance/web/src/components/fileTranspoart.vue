@@ -599,13 +599,9 @@ export default {
           if (res.data.data.topicInfoList) {
             vm.listTopic = [].concat(res.data.data.topicInfoList)
           }
-        }
-      })
-    },
-    getListNode () {
-      API.nodeAddress("").then(res => {
-        if (res.data.code === 0) {
-          this.listNode = [].concat(res.data.data)
+          if(res.data.data.nodeAddress){
+            this.listNode = [].concat(res.data.data.nodeAddress)
+          }
         }
       })
     },
@@ -715,7 +711,6 @@ export default {
     },
     pageIndex (nVal) {
       this.getListData()
-      this.getListNode()
     },
     groupId (nVal) {
       if (nVal !== '-1') {

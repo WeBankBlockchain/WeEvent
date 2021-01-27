@@ -50,11 +50,6 @@ public class TopicController {
         return new GovernanceResult<>(topicService.getTopics(topicPageEntity, request, response));
     }
 
-    @GetMapping(value = "/nodeAddress")
-    public GovernanceResult<List<String>> getNode() throws GovernanceException {
-        return new GovernanceResult<List<String>>(topicService.getNodeAddress());
-    }
-    
     @PostMapping(value = "/openTopic")
     public GovernanceResult<Object> open(@RequestBody TopicCreateEntity topicCreateEntity, HttpServletRequest request,
                                          HttpServletResponse response) throws GovernanceException {
