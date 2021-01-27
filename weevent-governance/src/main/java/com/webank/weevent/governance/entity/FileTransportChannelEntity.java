@@ -39,6 +39,9 @@ public class FileTransportChannelEntity extends TopicBase {
 
     @Column(name = "over_write", columnDefinition = "varchar(1)")
     private String overWrite;
+    
+    @Column(name = "node_address", columnDefinition = "varchar(64)")
+    private String nodeAddress;
 
     @Transient
     private String createTime;

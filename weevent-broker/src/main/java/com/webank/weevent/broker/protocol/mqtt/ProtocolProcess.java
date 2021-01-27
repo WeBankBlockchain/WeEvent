@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.webank.weevent.broker.config.WeEventConfig;
+import com.webank.weevent.broker.entiry.AccountEntity;
 import com.webank.weevent.broker.protocol.mqtt.command.Connect;
 import com.webank.weevent.broker.protocol.mqtt.command.DisConnect;
 import com.webank.weevent.broker.protocol.mqtt.command.PingReq;
@@ -17,6 +18,7 @@ import com.webank.weevent.broker.protocol.mqtt.store.MessageIdStore;
 import com.webank.weevent.broker.protocol.mqtt.store.PersistSession;
 import com.webank.weevent.broker.protocol.mqtt.store.SessionContext;
 import com.webank.weevent.broker.protocol.mqtt.store.SessionStore;
+import com.webank.weevent.broker.repository.AccountRepository;
 import com.webank.weevent.broker.utils.ZKStore;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.ErrorCode;
@@ -77,9 +79,9 @@ public class ProtocolProcess {
                            WeEventConfig weEventConfig,
                            FiscoConfig fiscoConfig,
                            IProducer producer,
-                           IConsumer consumer) throws BrokerException {
-        AuthService authService = new AuthService(environment.getProperty("spring.security.user.name"),
-                environment.getProperty("spring.security.user.password"));
+                           IConsumer consumer,
+                           AccountRepository accountRepository) throws BrokerException {
+        AuthService authService = new AuthService(accountRepository);
 
         // try to initialize ZKStore
         boolean zookeeper = environment.getProperty("spring.cloud.zookeeper.enabled", Boolean.class, true);

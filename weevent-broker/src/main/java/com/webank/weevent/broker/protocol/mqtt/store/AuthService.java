@@ -1,7 +1,10 @@
 package com.webank.weevent.broker.protocol.mqtt.store;
 
+import com.webank.weevent.broker.entiry.AccountEntity;
+import com.webank.weevent.broker.enums.IsDeleteEnum;
+import com.webank.weevent.broker.repository.AccountRepository;
+
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.StringUtils;
 
 /**
  * @author websterchen
@@ -10,19 +13,20 @@ import org.apache.commons.lang.StringUtils;
  */
 @Slf4j
 public class AuthService {
-    private final String authAccount;
-    private final String authPassword;
+	
+    private final AccountRepository accountRepository;
 
-    public AuthService(String authAccount, String authPassword) {
-        this.authAccount = authAccount;
-        this.authPassword = authPassword;
+    public AuthService(AccountRepository accountRepository) {
+        this.accountRepository = accountRepository;
     }
-
+    
+    
     public boolean verifyUserName(String userName, String password) {
-        if (StringUtils.isBlank(this.authAccount) || StringUtils.isBlank(this.authPassword)) {
-            return true;
+        AccountEntity accountEntity = accountRepository.findAllByUserNameAndDeleteAt(userName, IsDeleteEnum.NOT_DELETED.getCode());
+        if(null == accountEntity) {
+        	return false;
         }
-
-        return this.authAccount.equals(userName) && this.authPassword.equals(password);
+        log.info("accountEntity:{}", accountEntity.toString());
+        return password.equals(accountEntity.getPassword());
     }
 }
