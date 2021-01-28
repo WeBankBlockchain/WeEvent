@@ -5,8 +5,6 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Set;
 
-import org.fisco.bcos.sdk.client.protocol.response.Peers.PeerInfo;
-
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.SendResult;
 import com.webank.weevent.core.config.FiscoConfig;

@@ -78,6 +78,9 @@ public class FiscoConfig {
     @Value("${bcosSDK.max_blocking_queue_size:102400}")
     private Integer maxBlockingQueueSize;
 
+    @Value("${nodeAddress:}")
+    private String nodeAddress;
+    
     /**
      * load configuration without spring
      *
