@@ -130,8 +130,7 @@ public class FileService {
             if (StringUtils.isBlank(fileTransport.getPublicKey())) {
                 fileClient.openTransport4Sender(fileTransport.getTopicName());
             } else {
-                fileClient.openTransport4Sender(fileTransport.getTopicName(),
-                        new ByteArrayInputStream(fileTransport.getPublicKey().getBytes(StandardCharsets.UTF_8)));
+                fileClient.openTransport4Sender(fileTransport.getTopicName(), new ByteArrayInputStream(fileTransport.getPublicKey().getBytes(StandardCharsets.UTF_8)));
             }
         } catch (BrokerException e) {
             log.error("open sender transport failed.", e);
@@ -140,8 +139,7 @@ public class FileService {
         }
 
         this.addIWeEventClientToCache(fileTransport, fileClient);
-        this.addTransportToCache(fileTransport.getBrokerId(), fileTransport.getGroupId(), fileTransport.getTopicName(),
-                fileTransport.getOverWrite());
+        this.addTransportToCache(fileTransport.getBrokerId(), fileTransport.getGroupId(), fileTransport.getTopicName(), fileTransport.getOverWrite());
         log.info("open sender transport success, groupId:{}, topic:{}", fileTransport.getGroupId(), fileTransport.getTopicName());
     }
 
@@ -181,8 +179,7 @@ public class FileService {
         }
 
         this.addIWeEventClientToCache(fileTransport, fileClient);
-        this.addTransportToCache(fileTransport.getBrokerId(), fileTransport.getGroupId(), fileTransport.getTopicName(),
-                fileTransport.getOverWrite());
+        this.addTransportToCache(fileTransport.getBrokerId(), fileTransport.getGroupId(), fileTransport.getTopicName(), fileTransport.getOverWrite());
         log.info("open receiver transport success, groupId:{}, topic:{}", fileTransport.getGroupId(), fileTransport.getTopicName());
     }
 
@@ -211,16 +208,14 @@ public class FileService {
                         .concat(chunkParam.getFileChunksMeta().getGroupId()).concat(File.separator)
                         .concat(chunkParam.getFileChunksMeta().getTopic()).concat(File.separator)
                         .concat(chunkParam.getFileChunksMeta().getFileName());
-                boolean overWrite = this.transportMap.get(chunkParam.getBrokerId()).get(chunkParam.getFileChunksMeta().getGroupId())
-                        .get(chunkParam.getFileChunksMeta().getTopic());
+                boolean overWrite = this.transportMap.get(chunkParam.getBrokerId()).get(chunkParam.getFileChunksMeta().getGroupId()) .get(chunkParam.getFileChunksMeta().getTopic());
 
                 FileTransportStatusEntity status = addFileTransportRecord(chunkParam);
 
                 try {
                     log.info("all chunks has uploaded success, start publish file, filePath:{}", filePath);
                     fileClient.publishFile(chunkParam.getFileChunksMeta().getTopic(), filePath, overWrite);
-                    log.info("publish file success, topic:{}, fileName:{}.", chunkParam.getFileChunksMeta().getTopic(),
-                            chunkParam.getFileChunksMeta().getFileName());
+                    log.info("publish file success, topic:{}, fileName:{}.", chunkParam.getFileChunksMeta().getTopic(), chunkParam.getFileChunksMeta().getFileName());
                     transportStatusRepository.updateTransportStatus(ConstantProperties.SUCCESS, status.getId().longValue());
                 } catch (BrokerException | IOException e) {
                     log.error("publish file error, fileName:{}.", chunkParam.getFileChunksMeta().getFileName(), e);
@@ -229,8 +224,7 @@ public class FileService {
                     // remove local file after publish
                     Utils.removeLocalFile(this.uploadPath.concat(File.separator).concat(fileId));
                     this.fileChunksMap.remove(fileId);
-                    log.info("remove local file after publish, fileName:topic:{}, fileName:{}.",
-                            chunkParam.getFileChunksMeta().getTopic(), chunkParam.getFileChunksMeta().getFileName());
+                    log.info("remove local file after publish, fileName:topic:{}, fileName:{}.", chunkParam.getFileChunksMeta().getTopic(), chunkParam.getFileChunksMeta().getFileName());
                 }
             });
         }
@@ -288,8 +282,7 @@ public class FileService {
     }
 
     public String downloadFile(String groupId, String topic, String fileName) throws GovernanceException {
-        String filePath = this.downloadPath.concat(File.separator).concat(groupId).concat(File.separator).
-                concat(topic).concat(File.separator).concat(fileName);
+        String filePath = this.downloadPath.concat(File.separator).concat(groupId).concat(File.separator).concat(topic).concat(File.separator).concat(fileName);
         if (filePath.indexOf("..") != -1) {
             log.error("file path not exist .., topic:{}, fileName:{}, filePath:{}", topic, fileName, filePath);
             throw new GovernanceException(ErrorCode.FILE_NOT_EXIST);
@@ -302,7 +295,6 @@ public class FileService {
     }
 
     public GovernanceResult<List<FileChunksMeta>> listFile(String groupId, Integer brokerId, String topic) throws GovernanceException {
-
         IWeEventFileClient fileClient = getIWeEventFileClient(groupId, brokerId);
         try {
             List<FileChunksMeta> fileChunksMetas = fileClient.listFiles(groupId, topic);
@@ -337,30 +329,25 @@ public class FileService {
         return GovernanceResult.ok(chunksMetaEntities);
     }
 
-    public GovernanceResult<List<FileTransportStatusEntity>> uploadStatus(String groupId, Integer brokerId,
-                                                                          String topic) throws GovernanceException {
-        List<FileTransportStatusEntity> fileTransportStatusList = this.transportStatusRepository
-                .queryByBrokerIdAndGroupIdAndTopicName(brokerId, groupId, topic);
+    public GovernanceResult<List<FileTransportStatusEntity>> uploadStatus(String groupId, Integer brokerId, String topic) throws GovernanceException {
+        List<FileTransportStatusEntity> fileTransportStatusList = this.transportStatusRepository.queryByBrokerIdAndGroupIdAndTopicName(brokerId, groupId, topic);
 
         IWeEventFileClient fileClient = this.getIWeEventFileClient(groupId, brokerId);
         FileTransportStats status = fileClient.status(topic);
         if (status.getSender().containsKey(groupId)) {
             List<FileChunksMetaStatus> fileChunksMetaStatusList = status.getSender().get(groupId).get(topic);
-            fileTransportStatusList
-                    .forEach(fileTransportStatusEntity -> fileChunksMetaStatusList.forEach(fileChunksMetaStatus -> {
-                        log.info("fileChunksMetaStatus.getSpeed():=" + fileChunksMetaStatus.getSpeed());
-                        if (Objects.equals(fileChunksMetaStatus.getFile().getFileName(),
-                                fileTransportStatusEntity.getFileName())) {
-                            BeanUtils.copyProperties(fileChunksMetaStatus, fileTransportStatusEntity);
-                        }
-                        if (Objects.equals(fileTransportStatusEntity.getStatus(), ConstantProperties.SUCCESS)) {
-                            fileTransportStatusEntity.setProcess("100%");
-                        } else {
-                            String speed = fileChunksMetaStatus.getSpeed();
-                            this.transportStatusRepository.updateTransportSpeed(speed,
-                                    fileTransportStatusEntity.getId().longValue());
-                        }
-                    }));
+            fileTransportStatusList.forEach(fileTransportStatusEntity -> fileChunksMetaStatusList.forEach(fileChunksMetaStatus -> {
+                log.info("fileChunksMetaStatus.getSpeed():=" + fileChunksMetaStatus.getSpeed());
+                if (Objects.equals(fileChunksMetaStatus.getFile().getFileName(), fileTransportStatusEntity.getFileName())) {
+                    BeanUtils.copyProperties(fileChunksMetaStatus, fileTransportStatusEntity);
+                }
+                if (Objects.equals(fileTransportStatusEntity.getStatus(), ConstantProperties.SUCCESS)) {
+                    fileTransportStatusEntity.setProcess("100%");
+                } else {
+                    String speed = fileChunksMetaStatus.getSpeed();
+                    this.transportStatusRepository.updateTransportSpeed(speed, fileTransportStatusEntity.getId().longValue());
+                }
+            }));
             for (FileTransportStatusEntity fileTransportStatusEntity : fileTransportStatusList) {
                 if (Objects.equals(fileTransportStatusEntity.getStatus(), ConstantProperties.SUCCESS)) {
                     fileTransportStatusEntity.setProcess("100%");
@@ -371,12 +358,10 @@ public class FileService {
     }
 
     public GovernanceResult<List<FileTransportChannelEntity>> listTransport(String groupId, Integer brokerId) {
-        List<FileTransportChannelEntity> fileTransportList = this.transportChannelRepository
-                .queryByBrokerIdAndGroupId(brokerId, groupId);
+        List<FileTransportChannelEntity> fileTransportList = this.transportChannelRepository.queryByBrokerIdAndGroupId(brokerId, groupId);
         fileTransportList.forEach(fileTransport -> {
             fileTransport.setCreateTime(Utils.dateToStr(fileTransport.getCreateDate()));
-            if (StringUtils.isNotBlank(fileTransport.getPublicKey())
-                    || StringUtils.isNotBlank(fileTransport.getPrivateKey())) {
+            if (StringUtils.isNotBlank(fileTransport.getPublicKey()) || StringUtils.isNotBlank(fileTransport.getPrivateKey())) {
                 fileTransport.setVerified(true);
             }
 
@@ -385,21 +370,16 @@ public class FileService {
         return GovernanceResult.ok(fileTransportList);
     }
 
-    public GovernanceResult<Boolean> closeTransport(FileTransportChannelEntity fileTransport)
-            throws GovernanceException {
-        IWeEventFileClient fileClient = this.getIWeEventFileClient(fileTransport.getGroupId(),
-                fileTransport.getBrokerId());
+    public GovernanceResult<Boolean> closeTransport(FileTransportChannelEntity fileTransport) throws GovernanceException {
+        IWeEventFileClient fileClient = this.getIWeEventFileClient(fileTransport.getGroupId(), fileTransport.getBrokerId());
         fileClient.closeTransport(fileTransport.getTopicName());
 
         this.transportChannelRepository.delete(fileTransport);
-        this.removeTransportCache(fileTransport.getBrokerId(), fileTransport.getGroupId(),
-                fileTransport.getTopicName());
+        this.removeTransportCache(fileTransport.getBrokerId(), fileTransport.getGroupId(), fileTransport.getTopicName());
         return GovernanceResult.ok(true);
     }
 
-    public GovernanceResult<List<Integer>> prepareUploadFile(String fileId, String filename, String topic,
-                                                             String groupId, long totalSize, Integer chunkSize) throws GovernanceException {
-
+    public GovernanceResult<List<Integer>> prepareUploadFile(String fileId, String filename, String topic, String groupId, long totalSize, Integer chunkSize) throws GovernanceException {
         if (this.fileChunksMap.containsKey(fileId)) {
             FileChunksMeta fileChunksMeta = this.fileChunksMap.get(fileId).getKey();
             return GovernanceResult.ok(this.chunkUploadedList(fileChunksMeta));
@@ -435,16 +415,14 @@ public class FileService {
         }
     }
 
-    public GovernanceResult<Object> checkFileIsUploaded(String groupId, Integer brokerId, String topic, String fileName)
-            throws GovernanceException {
+    public GovernanceResult<Object> checkFileIsUploaded(String groupId, Integer brokerId, String topic, String fileName) throws GovernanceException {
         ParamCheckUtils.validateTransportName(topic);
         ParamCheckUtils.validateFileName(fileName);
         IWeEventFileClient fileClient = getIWeEventFileClient(groupId, brokerId);
         try {
             boolean fileExist = fileClient.isFileExist(fileName, topic, groupId);
             if (fileExist) {
-                return GovernanceResult.build(ErrorCode.TRANSPORT_ALREADY_EXISTS.getCode(),
-                        "the file is already uploaded", true);
+                return GovernanceResult.build(ErrorCode.TRANSPORT_ALREADY_EXISTS.getCode(), "the file is already uploaded", true);
             }
             return GovernanceResult.ok(false);
         } catch (BrokerException e) {
@@ -487,8 +465,7 @@ public class FileService {
             this.fileChunksMap.get(fileChunksMeta.getFileId()).getKey().getChunkStatus().set(chunkIdx);
             log.info("upload file chunk data success, {}@{}.", fileChunksMeta.getFileId(), chunkIdx);
         } catch (BrokerException e) {
-            log.error("write chunk data error, topic:{}, {}@{}", fileChunksMeta.getTopic(), fileChunksMeta.getFileId(),
-                    chunkIdx, e);
+            log.error("write chunk data error, topic:{}, {}@{}", fileChunksMeta.getTopic(), fileChunksMeta.getFileId(), chunkIdx, e);
             return false;
         }
         return true;
