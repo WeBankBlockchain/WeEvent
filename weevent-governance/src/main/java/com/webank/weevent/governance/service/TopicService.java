@@ -138,7 +138,7 @@ public class TopicService {
     public List<String> getNodeAddress() throws GovernanceException {
         FiscoConfig fiscoConfig = new FiscoConfig();
         fiscoConfig.load("");
-        String nodes = fiscoConfig.getNodes();
+        String nodes = fiscoConfig.getNodeAddress();
 
         List<String> nodeAddress = new ArrayList<String>();
         for (String node : nodes.split(",")) {
