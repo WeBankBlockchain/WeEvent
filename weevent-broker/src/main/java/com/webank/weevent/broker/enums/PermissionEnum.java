@@ -5,14 +5,14 @@ import lombok.Getter;
 @Getter
 public enum PermissionEnum {
 
-	 ALL("0"),
-	 PUBLISH("publish"),
-	 SUBSCRIBE("subscribe");
+    ALL("0"),
+    PUBLISH("publish"),
+    SUBSCRIBE("subscribe");
 
-	 private String code;
+    private String code;
 
-	 PermissionEnum(String code) {
-		 this.code = code;
-	 }
+    PermissionEnum(String code) {
+        this.code = code;
+    }
 
 }
