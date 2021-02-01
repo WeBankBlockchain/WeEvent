@@ -1,6 +1,9 @@
 package com.webank.weevent.core.config;
 
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -81,5 +84,11 @@ public class FiscoConfig {
 
         log.info("FiscoConfig:{} {}", this.getConfigProperty(), this.getWeEventCoreConfig().toString());
         return true;
+    }
+
+    public void setFiscoNodes(List<String> nodes) {
+        Map<String, Object> network = new HashMap<>();
+        network.put("peers", nodes);
+        this.configProperty.setNetwork(network);
     }
 }
