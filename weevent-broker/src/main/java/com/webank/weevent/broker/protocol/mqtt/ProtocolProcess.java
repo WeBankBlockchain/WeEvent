@@ -6,6 +6,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.webank.weevent.broker.config.WeEventConfig;
 import com.webank.weevent.broker.entiry.AccountEntity;
+import com.webank.weevent.broker.entiry.AuthorSessionsParam;
+import com.webank.weevent.broker.enums.IsDeleteEnum;
+import com.webank.weevent.broker.enums.PermissionEnum;
 import com.webank.weevent.broker.protocol.mqtt.command.Connect;
 import com.webank.weevent.broker.protocol.mqtt.command.DisConnect;
 import com.webank.weevent.broker.protocol.mqtt.command.PingReq;
@@ -62,7 +65,7 @@ public class ProtocolProcess {
 
     private final SessionStore sessionStore;
     // session id(channel id if from tcp) <-> clientId
-    private final Map<String, String> authorSessions = new ConcurrentHashMap<>();
+    private final Map<String, AuthorSessionsParam> authorSessions = new ConcurrentHashMap<>();
     private final MessageIdStore messageIdStore = new MessageIdStore();
 
     // MQTT commands
@@ -73,6 +76,8 @@ public class ProtocolProcess {
     private final Subscribe subscribe;
     private final UnSubscribe unSubscribe;
     private final DisConnect disConnect;
+    
+    private final AccountRepository accountRepository;
 
     @Autowired
     public ProtocolProcess(Environment environment,
@@ -102,6 +107,7 @@ public class ProtocolProcess {
         this.subscribe = new Subscribe(this.sessionStore);
         this.unSubscribe = new UnSubscribe(this.sessionStore);
         this.disConnect = new DisConnect(this.sessionStore);
+        this.accountRepository = accountRepository;
     }
 
     public int getHeartBeat() {
@@ -112,7 +118,7 @@ public class ProtocolProcess {
         if (this.authorSessions.containsKey(sessionId)) {
             log.info("clean session: {}", sessionId);
 
-            String clientId = this.authorSessions.get(sessionId);
+            String clientId = this.authorSessions.get(sessionId).getClientId();
             this.sessionStore.removeSession(clientId);
             this.authorSessions.remove(sessionId);
         }
@@ -160,7 +166,9 @@ public class ProtocolProcess {
         MqttConnAckMessage rsp = (MqttConnAckMessage) this.connect.processConnect(msg, sessionData);
         // if accept
         if (rsp.variableHeader().connectReturnCode() == MqttConnectReturnCode.CONNECTION_ACCEPTED) {
-            this.authorSessions.put(sessionData.getSessionId(), sessionData.getClientId());
+        	AuthorSessionsParam sessionsParam = AuthorSessionsParam.builder().clientId(sessionData.getClientId())
+					.userName("user").build();
+            this.authorSessions.put(sessionData.getSessionId(), sessionsParam);
         }
         return rsp;
     }
@@ -185,10 +193,17 @@ public class ProtocolProcess {
             throw new BrokerException(ErrorCode.MQTT_CONNECT_CONFLICT);
         }
 
-        String clientId = this.authorSessions.get(sessionId);
+        String clientId = this.authorSessions.get(sessionId).getClientId();
         if (!this.sessionStore.existSession(clientId)) {
             log.error("unknown clientId, skip it");
             throw new BrokerException(ErrorCode.MQTT_UNKNOWN_CLIENT_ID);
+        }
+        
+        String userName = this.authorSessions.get(sessionId).getUserName();
+        AccountEntity accountEntity = accountRepository.findAllByUserNameAndDeleteAt(userName, IsDeleteEnum.NOT_DELETED.getCode());
+        String permission = PermissionEnum.ALL.getCode();
+        if(null != accountEntity && null != accountEntity.getPermission()) {
+        	permission = accountEntity.getPermission();
         }
 
         switch (req.fixedHeader().messageType()) {
@@ -196,12 +211,20 @@ public class ProtocolProcess {
                 return this.pingReq.process(req, clientId, remoteIp);
 
             case PUBLISH:
+            	if(PermissionEnum.SUBSCRIBE.getCode().equals(permission)) {
+            		log.error("not publish permission");
+                    throw new BrokerException(ErrorCode.MQTT_NOT_PERMISSION);
+            	}
                 return this.publish.process(req, clientId, remoteIp);
 
             case PUBACK:
                 return this.pubAck.process(req, clientId, remoteIp);
 
             case SUBSCRIBE:
+            	if(PermissionEnum.PUBLISH.getCode().equals(permission)) {
+            		log.error("not subscribe permission");
+                    throw new BrokerException(ErrorCode.MQTT_NOT_PERMISSION);
+            	}
                 return this.subscribe.process(req, clientId, remoteIp);
 
             case UNSUBSCRIBE:
