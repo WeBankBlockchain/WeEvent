@@ -91,7 +91,7 @@ public class ProtocolProcess {
             log.info("try to initialize ZKStore to persist MQTT session");
             zkStore = new ZKStore<>(PersistSession.class, "/WeEvent/mqtt", connectString);
         }
-        this.sessionStore = new SessionStore(producer, consumer, fiscoConfig.getWeeventCoreTimeout(), this.messageIdStore, zkStore);
+        this.sessionStore = new SessionStore(producer, consumer, fiscoConfig.getWeEventCoreConfig().getTimeout(), this.messageIdStore, zkStore);
         this.heartBeat = weEventConfig.getKeepAlive();
 
         this.connect = new Connect(authService, this.sessionStore);
