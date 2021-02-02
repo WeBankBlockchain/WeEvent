@@ -1,13 +1,15 @@
 package com.webank.weevent.broker.protocol.mqtt;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.webank.weevent.broker.config.WeEventConfig;
 import com.webank.weevent.broker.entiry.AccountEntity;
+import com.webank.weevent.broker.entiry.AccountTopicAuthEntity;
 import com.webank.weevent.broker.entiry.AuthorSessionsParam;
-import com.webank.weevent.broker.enums.IsDeleteEnum;
 import com.webank.weevent.broker.enums.PermissionEnum;
 import com.webank.weevent.broker.protocol.mqtt.command.Connect;
 import com.webank.weevent.broker.protocol.mqtt.command.DisConnect;
@@ -22,6 +24,7 @@ import com.webank.weevent.broker.protocol.mqtt.store.PersistSession;
 import com.webank.weevent.broker.protocol.mqtt.store.SessionContext;
 import com.webank.weevent.broker.protocol.mqtt.store.SessionStore;
 import com.webank.weevent.broker.repository.AccountRepository;
+import com.webank.weevent.broker.repository.AccountTopicAuthRepository;
 import com.webank.weevent.broker.utils.ZKStore;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.ErrorCode;
@@ -78,7 +81,7 @@ public class ProtocolProcess {
     private final DisConnect disConnect;
 
     private final Environment environment;
-    private final AccountRepository accountRepository;
+    private final AccountTopicAuthRepository accountTopicAuthRepository;
 
     @Autowired
     public ProtocolProcess(Environment environment,
@@ -86,7 +89,8 @@ public class ProtocolProcess {
                            FiscoConfig fiscoConfig,
                            IProducer producer,
                            IConsumer consumer,
-                           AccountRepository accountRepository) throws BrokerException {
+                           AccountRepository accountRepository,
+                           AccountTopicAuthRepository accountTopicAuthRepository) throws BrokerException {
         boolean auth = environment.getProperty("spring.security.user.auth", Boolean.class, false);
         AuthService authService = new AuthService(auth, accountRepository);
 
@@ -109,7 +113,7 @@ public class ProtocolProcess {
         this.unSubscribe = new UnSubscribe(this.sessionStore);
         this.disConnect = new DisConnect(this.sessionStore);
         this.environment = environment;
-        this.accountRepository = accountRepository;
+        this.accountTopicAuthRepository = accountTopicAuthRepository;
     }
 
     public int getHeartBeat() {
@@ -204,15 +208,14 @@ public class ProtocolProcess {
         boolean auth = environment.getProperty("spring.security.user.topic.auth", Boolean.class, false);
         String permission = PermissionEnum.ALL.getCode();
         String topicName = "";
-        String userTopicName = "";
+        List<String> topics = new ArrayList<>();
         if(auth) {
         	String userName = this.authorSessions.get(sessionId).getUserName();
-            AccountEntity accountEntity = accountRepository.findAllByUserNameAndDeleteAt(userName, IsDeleteEnum.NOT_DELETED.getCode());
-            if (null != accountEntity) {
-                permission = accountEntity.getPermission();
-                userTopicName = accountEntity.getTopicName();
-            }
-            topicName = ((MqttPublishVariableHeader) req.variableHeader()).topicName();
+        	List<AccountTopicAuthEntity> accountTopicAuthEntities = accountTopicAuthRepository.findAllByUserName(userName);
+        	accountTopicAuthEntities.forEach(accountTopicAuth ->{
+        		topics.add(accountTopicAuth.getTopicName());
+        	});
+        	topicName = ((MqttPublishVariableHeader) req.variableHeader()).topicName();
         }
 
         switch (req.fixedHeader().messageType()) {
@@ -220,7 +223,7 @@ public class ProtocolProcess {
                 return this.pingReq.process(req, clientId, remoteIp);
 
             case PUBLISH:
-                if (auth || userTopicName.contains(topicName) || PermissionEnum.SUBSCRIBE.getCode().equals(permission)) {
+                if (auth || topics.contains(topicName) || PermissionEnum.SUBSCRIBE.getCode().equals(permission)) {
                     log.error("not publish permission");
                     throw new BrokerException(ErrorCode.MQTT_NOT_PERMISSION);
                 }
@@ -230,7 +233,7 @@ public class ProtocolProcess {
                 return this.pubAck.process(req, clientId, remoteIp);
 
             case SUBSCRIBE:
-                if (auth || userTopicName.contains(topicName) || PermissionEnum.PUBLISH.getCode().equals(permission)) {
+                if (auth || topics.contains(topicName) || PermissionEnum.PUBLISH.getCode().equals(permission)) {
                     log.error("not subscribe permission");
                     throw new BrokerException(ErrorCode.MQTT_NOT_PERMISSION);
                 }

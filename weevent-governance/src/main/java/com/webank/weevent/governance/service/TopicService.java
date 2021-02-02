@@ -14,9 +14,9 @@ import javax.servlet.http.HttpServletResponse;
 import com.webank.weevent.client.BaseResponse;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.JsonHelper;
-import com.webank.weevent.core.config.FiscoConfig;
 import com.webank.weevent.governance.common.ConstantProperties;
 import com.webank.weevent.governance.common.ErrorCode;
+import com.webank.weevent.governance.common.GovernanceConfig;
 import com.webank.weevent.governance.common.GovernanceException;
 import com.webank.weevent.governance.common.GovernanceResult;
 import com.webank.weevent.governance.entity.BrokerEntity;
@@ -58,6 +58,13 @@ public class TopicService {
     private CommonService commonService;
 
     private final String SPLIT = "-";
+    
+    public static GovernanceConfig governanceConfig;
+
+    @Autowired
+    public void setGovernanceConfig(GovernanceConfig config) {
+        governanceConfig = config;
+    }
 
     public Boolean close(Integer brokerId, String topic, String groupId, HttpServletRequest request, HttpServletResponse response)
             throws GovernanceException {
@@ -136,10 +143,8 @@ public class TopicService {
     }
 
     public List<String> getNodeAddress() throws GovernanceException {
-        FiscoConfig fiscoConfig = new FiscoConfig();
-        fiscoConfig.load("");
-        String nodes = fiscoConfig.getNodeAddress();
-
+        String nodes = governanceConfig.getNodes().get(1);
+        
         List<String> nodeAddress = new ArrayList<String>();
         for (String node : nodes.split(",")) {
             nodeAddress.add(node);
