@@ -10,6 +10,7 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Component;
 @Setter
 @Getter
 @Component
+@ConfigurationProperties
 @PropertySource(value = "classpath:governance.properties", encoding = "UTF-8")
 public class GovernanceConfig {
 
@@ -56,6 +58,8 @@ public class GovernanceConfig {
 
     @Value("${acount.passwrod}")
     private String acountPasswrod;
+
+    private List<String> nodes;
 
     public static String acount_name;
     public static String acount_passwrod;
