@@ -209,13 +209,13 @@ public class ProtocolProcess {
         String permission = PermissionEnum.ALL.getCode();
         String topicName = "";
         List<String> topics = new ArrayList<>();
-        if(auth) {
-        	String userName = this.authorSessions.get(sessionId).getUserName();
-        	List<AccountTopicAuthEntity> accountTopicAuthEntities = accountTopicAuthRepository.findAllByUserName(userName);
-        	accountTopicAuthEntities.forEach(accountTopicAuth ->{
-        		topics.add(accountTopicAuth.getTopicName());
-        	});
-        	topicName = ((MqttPublishVariableHeader) req.variableHeader()).topicName();
+        if (auth) {
+            String userName = this.authorSessions.get(sessionId).getUserName();
+            List<AccountTopicAuthEntity> accountTopicAuthEntities = accountTopicAuthRepository.findAllByUserName(userName);
+            accountTopicAuthEntities.forEach(accountTopicAuth -> {
+                topics.add(accountTopicAuth.getTopicName());
+            });
+            topicName = ((MqttPublishVariableHeader) req.variableHeader()).topicName();
         }
 
         switch (req.fixedHeader().messageType()) {

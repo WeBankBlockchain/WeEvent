@@ -19,25 +19,25 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Entity
-@Table(name = "t_account", uniqueConstraints = { @UniqueConstraint(name = "userName", columnNames = { "user_name" }) })
+@Table(name = "t_account", uniqueConstraints = {@UniqueConstraint(name = "userName", columnNames = {"user_name"})})
 public class AccountEntity extends BaseEntity {
 
-	@NotBlank
-	@Column(name = "user_name")
-	private String userName;
+    @NotBlank
+    @Column(name = "user_name")
+    private String userName;
 
-	@Column(name = "password")
-	private String password;
+    @Column(name = "password")
+    private String password;
 
-	// 0 means not deleted ,others means deleted
-	@Column(name = "delete_at", nullable = false, columnDefinition = "BIGINT(16)")
-	private Long deleteAt = 0L;
+    // 0 means not deleted ,others means deleted
+    @Column(name = "delete_at", nullable = false, columnDefinition = "BIGINT(16)")
+    private Long deleteAt = 0L;
 
-	public AccountEntity(@NotBlank String userName) {
-		this.userName = userName;
-	}
+    public AccountEntity(@NotBlank String userName) {
+        this.userName = userName;
+    }
 
-	public AccountEntity() {
+    public AccountEntity() {
 
-	}
+    }
 }
