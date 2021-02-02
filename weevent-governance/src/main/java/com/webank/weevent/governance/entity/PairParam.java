@@ -3,7 +3,6 @@ package com.webank.weevent.governance.entity;
 import com.webank.weevent.file.IWeEventFileClient;
 import com.webank.weevent.file.inner.DiskFiles;
 
-import javafx.util.Pair;
 import lombok.Getter;
 import lombok.Setter;
 

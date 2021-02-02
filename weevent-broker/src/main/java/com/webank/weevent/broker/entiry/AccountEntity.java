@@ -9,8 +9,6 @@ import com.webank.weevent.broker.entiry.base.BaseEntity;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
 
 /**
  * AccountBase class
@@ -30,6 +28,9 @@ public class AccountEntity extends BaseEntity {
 
     @Column(name = "password")
     private String password;
+    
+    @Column(name = "topicName")
+    private String topicName;
     
     @Column(name = "permission")
     private String permission;

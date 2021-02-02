@@ -77,6 +77,7 @@ public class ProtocolProcess {
     private final UnSubscribe unSubscribe;
     private final DisConnect disConnect;
 
+    private final Environment environment;
     private final AccountRepository accountRepository;
 
     @Autowired
@@ -107,6 +108,7 @@ public class ProtocolProcess {
         this.subscribe = new Subscribe(this.sessionStore);
         this.unSubscribe = new UnSubscribe(this.sessionStore);
         this.disConnect = new DisConnect(this.sessionStore);
+        this.environment = environment;
         this.accountRepository = accountRepository;
     }
 
@@ -199,11 +201,18 @@ public class ProtocolProcess {
             throw new BrokerException(ErrorCode.MQTT_UNKNOWN_CLIENT_ID);
         }
 
-        String userName = this.authorSessions.get(sessionId).getUserName();
-        AccountEntity accountEntity = accountRepository.findAllByUserNameAndDeleteAt(userName, IsDeleteEnum.NOT_DELETED.getCode());
+        boolean auth = environment.getProperty("spring.security.user.topic.auth", Boolean.class, false);
         String permission = PermissionEnum.ALL.getCode();
-        if (null != accountEntity && null != accountEntity.getPermission()) {
-            permission = accountEntity.getPermission();
+        String topicName = "";
+        String userTopicName = "";
+        if(auth) {
+        	String userName = this.authorSessions.get(sessionId).getUserName();
+            AccountEntity accountEntity = accountRepository.findAllByUserNameAndDeleteAt(userName, IsDeleteEnum.NOT_DELETED.getCode());
+            if (null != accountEntity) {
+                permission = accountEntity.getPermission();
+                userTopicName = accountEntity.getTopicName();
+            }
+            topicName = ((MqttPublishVariableHeader) req.variableHeader()).topicName();
         }
 
         switch (req.fixedHeader().messageType()) {
@@ -211,7 +220,7 @@ public class ProtocolProcess {
                 return this.pingReq.process(req, clientId, remoteIp);
 
             case PUBLISH:
-                if (PermissionEnum.SUBSCRIBE.getCode().equals(permission)) {
+                if (auth || userTopicName.contains(topicName) || PermissionEnum.SUBSCRIBE.getCode().equals(permission)) {
                     log.error("not publish permission");
                     throw new BrokerException(ErrorCode.MQTT_NOT_PERMISSION);
                 }
@@ -221,7 +230,7 @@ public class ProtocolProcess {
                 return this.pubAck.process(req, clientId, remoteIp);
 
             case SUBSCRIBE:
-                if (PermissionEnum.PUBLISH.getCode().equals(permission)) {
+                if (auth || userTopicName.contains(topicName) || PermissionEnum.PUBLISH.getCode().equals(permission)) {
                     log.error("not subscribe permission");
                     throw new BrokerException(ErrorCode.MQTT_NOT_PERMISSION);
                 }
