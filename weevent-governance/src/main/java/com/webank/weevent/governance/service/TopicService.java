@@ -102,7 +102,7 @@ public class TopicService {
         TopicPage result = new TopicPage();
         result.setPageIndex(pageIndex);
         result.setPageSize(pageSize);
-        result.setNodeAddress(getNodeAddress());
+        result.setNodeAddress(governanceConfig.getNodes());
         if (brokerEntity == null) {
             return result;
         }
@@ -121,7 +121,7 @@ public class TopicService {
         TopicPage topicPage = invokeBrokerCGI(request, url, new TypeReference<BaseResponse<TopicPage>>() {
         }).getData();
 
-        topicPage.setNodeAddress(getNodeAddress());
+        topicPage.setNodeAddress(governanceConfig.getNodes());
         if (topicPage == null || CollectionUtils.isEmpty(topicPage.getTopicInfoList())) {
             return result;
         }
@@ -140,16 +140,6 @@ public class TopicService {
         topicPage.setTopicInfoList(topicEntityList);
 
         return topicPage;
-    }
-
-    public List<String> getNodeAddress() throws GovernanceException {
-        String nodes = governanceConfig.getNodes().get(1);
-        
-        List<String> nodeAddress = new ArrayList<String>();
-        for (String node : nodes.split(",")) {
-            nodeAddress.add(node);
-        }
-        return nodeAddress;
     }
 
     public TopicEntity getTopicInfo(Integer brokerId, String topic, String groupId, HttpServletRequest request) throws GovernanceException {

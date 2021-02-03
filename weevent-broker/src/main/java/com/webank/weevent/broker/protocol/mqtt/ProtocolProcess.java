@@ -1,16 +1,13 @@
 package com.webank.weevent.broker.protocol.mqtt;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.webank.weevent.broker.config.WeEventConfig;
-import com.webank.weevent.broker.entiry.AccountEntity;
 import com.webank.weevent.broker.entiry.AccountTopicAuthEntity;
 import com.webank.weevent.broker.entiry.AuthorSessionsParam;
-import com.webank.weevent.broker.enums.PermissionEnum;
 import com.webank.weevent.broker.protocol.mqtt.command.Connect;
 import com.webank.weevent.broker.protocol.mqtt.command.DisConnect;
 import com.webank.weevent.broker.protocol.mqtt.command.PingReq;
@@ -45,6 +42,8 @@ import io.netty.handler.codec.mqtt.MqttMessageType;
 import io.netty.handler.codec.mqtt.MqttPublishMessage;
 import io.netty.handler.codec.mqtt.MqttPublishVariableHeader;
 import io.netty.handler.codec.mqtt.MqttQoS;
+import io.netty.handler.codec.mqtt.MqttSubscribePayload;
+import io.netty.handler.codec.mqtt.MqttTopicSubscription;
 import io.netty.handler.codec.mqtt.MqttUnacceptableProtocolVersionException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -206,26 +205,26 @@ public class ProtocolProcess {
         }
 
         boolean auth = environment.getProperty("spring.security.user.topic.auth", Boolean.class, false);
-        String permission = PermissionEnum.ALL.getCode();
-        String topicName = "";
-        List<String> topics = new ArrayList<>();
-        if (auth) {
-            String userName = this.authorSessions.get(sessionId).getUserName();
-            List<AccountTopicAuthEntity> accountTopicAuthEntities = accountTopicAuthRepository.findAllByUserName(userName);
-            accountTopicAuthEntities.forEach(accountTopicAuth -> {
-                topics.add(accountTopicAuth.getTopicName());
-            });
-            topicName = ((MqttPublishVariableHeader) req.variableHeader()).topicName();
-        }
 
         switch (req.fixedHeader().messageType()) {
             case PINGREQ:
                 return this.pingReq.process(req, clientId, remoteIp);
 
             case PUBLISH:
-                if (auth || topics.contains(topicName) || PermissionEnum.SUBSCRIBE.getCode().equals(permission)) {
-                    log.error("not publish permission");
-                    throw new BrokerException(ErrorCode.MQTT_NOT_PERMISSION);
+                if (auth) {
+                    boolean isAuth = false;
+                    String topicName = ((MqttPublishVariableHeader) req.variableHeader()).topicName();
+                    String userName = this.authorSessions.get(sessionId).getUserName();
+                    List<AccountTopicAuthEntity> entities = accountTopicAuthRepository.findAllByUserName(userName);
+                    for (AccountTopicAuthEntity entity : entities) {
+                        if (entity.getTopicName().equals(topicName) && entity.getPermission() != 2) {
+                            isAuth = true;
+                        }
+                    }
+                    if (!isAuth) {
+                        log.error("userName:{},topicName:{}, not publish permission", userName, topicName);
+                        throw new BrokerException(ErrorCode.MQTT_NOT_PERMISSION);
+                    }
                 }
                 return this.publish.process(req, clientId, remoteIp);
 
@@ -233,9 +232,18 @@ public class ProtocolProcess {
                 return this.pubAck.process(req, clientId, remoteIp);
 
             case SUBSCRIBE:
-                if (auth || topics.contains(topicName) || PermissionEnum.PUBLISH.getCode().equals(permission)) {
-                    log.error("not subscribe permission");
-                    throw new BrokerException(ErrorCode.MQTT_NOT_PERMISSION);
+                if (auth) {
+                    List<MqttTopicSubscription> topicSubscriptions = ((MqttSubscribePayload) req.payload()).topicSubscriptions();
+                    for (MqttTopicSubscription topicSubscription : topicSubscriptions) {
+                        String topicName = topicSubscription.topicName();
+                        String userName = this.authorSessions.get(sessionId).getUserName();
+                        AccountTopicAuthEntity entity = accountTopicAuthRepository.findAllByUserNameAndTopicName(userName, topicName);
+                        if (null != entity && entity.getPermission() != 1) {
+                            return this.subscribe.process(req, clientId, remoteIp);
+                        }
+                        log.error("userName:{},topicName:{}, not subscribe permission", userName, topicName);
+                        throw new BrokerException(ErrorCode.MQTT_NOT_PERMISSION);
+                    }
                 }
                 return this.subscribe.process(req, clientId, remoteIp);
 

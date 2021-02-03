@@ -11,5 +11,7 @@ import com.webank.weevent.broker.entiry.AccountTopicAuthEntity;
 public interface AccountTopicAuthRepository extends JpaRepository<AccountTopicAuthEntity, Long> {
 
 	List<AccountTopicAuthEntity> findAllByUserName(String userName);
+	
+	AccountTopicAuthEntity findAllByUserNameAndTopicName(String userName, String topicName);
     
 }

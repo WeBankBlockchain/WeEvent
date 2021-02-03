@@ -30,13 +30,14 @@ public class AccountTopicAuthEntity extends BaseEntity {
     private String topicName;
     
     @Column(name = "permission")
-    private String permission;
+    private Integer permission;
 
     //0 means not deleted ,others means deleted
     @Column(name = "delete_at", nullable = false, columnDefinition = "BIGINT(16)")
     private Long deleteAt = 0L;
 
-    public AccountTopicAuthEntity(@NotBlank String topicName) {
+    public AccountTopicAuthEntity(@NotBlank String userName, @NotBlank String topicName) {
+    	this.userName = userName;
         this.topicName = topicName;
     }
 
