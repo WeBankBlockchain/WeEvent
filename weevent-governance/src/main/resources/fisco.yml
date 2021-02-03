@@ -27,8 +27,8 @@ cryptoMaterial:
 account:
   accountAddress: "bcec428d5205abe0f0cc8a734083908d9eb8563e31f943d760786edf42ad67dd"
 #  accountFileFormat: "pem"
-#  accountFilePath: "conf"
-#  keyStoreDir: "account"
+#  accountFilePath: ""
+  keyStoreDir: "account"
 #  password: ""
 
 #amop:
