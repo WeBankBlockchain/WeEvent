@@ -1,9 +1,14 @@
 package com.webank.weevent.core.config;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -11,10 +16,11 @@ import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.config.model.ConfigProperty;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Component;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.representer.Representer;
 
 /**
@@ -36,9 +42,9 @@ public class FiscoConfig {
 
     private WeEventCoreConfig weEventCoreConfig;
 
-    @Value("${nodeAddress:}")
-    private String nodeAddress;
-    
+    Set<String > pathKeySet = new HashSet<>(Arrays.asList("conf", "certPath","caCert","sslCert","sslKey","enSslCert","enSslKey",
+            "accountFilePath","keyStoreDir","privateKey", "publicKeys"));
+
     /**
      * load configuration without spring
      *
@@ -78,6 +84,12 @@ public class FiscoConfig {
             return false;
         }
 
+        try {
+            convertPath(this.configProperty);
+        } catch (IOException e) {
+            log.error("convertPath configFile error:{} {}", configFile, e);
+        }
+
         try (InputStream inputStream = clz.getClassLoader().getResourceAsStream(file.replace("classpath:", ""))) {
             this.weEventCoreConfig = yaml.loadAs(inputStream, WeEventCoreConfig.class);
         } catch (Exception e) {
@@ -87,6 +99,43 @@ public class FiscoConfig {
 
         log.info("FiscoConfig:{} {}", this.getConfigProperty(), this.getWeEventCoreConfig().toString());
         return true;
+    }
+
+    private Map<String, Object> convertPathMap(Map<String, Object> map) throws IOException {
+        PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+
+        for (String key : map.keySet()){
+            if (!pathKeySet.contains(key)){
+                continue;
+            }
+            Object val = map.get(key);
+            if (val instanceof String){
+                if (((String) val).isEmpty()){
+                    continue;
+                }
+                String newPath = resolver.getResource("classpath:" + val).getFile().getPath();
+                map.put(key, newPath);
+            }
+        }
+        return map;
+    }
+
+    private void convertPathList(List<String> list) throws IOException {
+        PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+        List<String> newList = new ArrayList<>();
+        for (int i = 0; i<list.size(); i++){
+            if (!pathKeySet.contains(list.get(i))){
+                continue;
+            }
+            String newPath = resolver.getResource("classpath:" + list.get(i)).getFile().getPath();
+            newList.set(i, newPath);
+        }
+    }
+
+    private void convertPath(ConfigProperty configProperty) throws IOException {
+        configProperty.setCryptoMaterial( convertPathMap(configProperty.getCryptoMaterial()));
+        configProperty.setAccount( convertPathMap(configProperty.getAccount()));
+        //todo: amop not used here
     }
 
     public void setFiscoNodes(List<String> nodes) {
