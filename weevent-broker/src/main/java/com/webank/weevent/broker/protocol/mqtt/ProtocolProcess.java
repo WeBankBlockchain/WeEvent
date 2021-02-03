@@ -205,46 +205,47 @@ public class ProtocolProcess {
         }
 
         boolean auth = environment.getProperty("spring.security.user.topic.auth", Boolean.class, false);
+        if (auth && req.fixedHeader().messageType().equals(MqttMessageType.PUBLISH)) {
+            boolean isAuth = false;
+            String topicName = ((MqttPublishVariableHeader) req.variableHeader()).topicName();
+            String userName = this.authorSessions.get(sessionId).getUserName();
+            List<AccountTopicAuthEntity> entities = accountTopicAuthRepository.findAllByUserName(userName);
+            for (AccountTopicAuthEntity entity : entities) {
+                if (entity.getTopicName().equals(topicName) && (entity.getPermission() == 0 || entity.getPermission() == 1)) {
+                    isAuth = true;
+                }
+            }
+            if (!isAuth) {
+                log.error("userName:{},topicName:{}, not publish permission", userName, topicName);
+                throw new BrokerException(ErrorCode.MQTT_NOT_PERMISSION);
+            }
+        }
+
+        if (auth && req.fixedHeader().messageType().equals(MqttMessageType.SUBSCRIBE)) {
+            List<MqttTopicSubscription> topicSubscriptions = ((MqttSubscribePayload) req.payload()).topicSubscriptions();
+            for (MqttTopicSubscription topicSubscription : topicSubscriptions) {
+                String topicName = topicSubscription.topicName();
+                String userName = this.authorSessions.get(sessionId).getUserName();
+                AccountTopicAuthEntity entity = accountTopicAuthRepository.findAllByUserNameAndTopicName(userName, topicName);
+                if (null != entity && (entity.getPermission() == 0 || entity.getPermission() == 2)) {
+                    return this.subscribe.process(req, clientId, remoteIp);
+                }
+                log.error("userName:{},topicName:{}, not subscribe permission", userName, topicName);
+                throw new BrokerException(ErrorCode.MQTT_NOT_PERMISSION);
+            }
+        }
 
         switch (req.fixedHeader().messageType()) {
             case PINGREQ:
                 return this.pingReq.process(req, clientId, remoteIp);
 
             case PUBLISH:
-                if (auth) {
-                    boolean isAuth = false;
-                    String topicName = ((MqttPublishVariableHeader) req.variableHeader()).topicName();
-                    String userName = this.authorSessions.get(sessionId).getUserName();
-                    List<AccountTopicAuthEntity> entities = accountTopicAuthRepository.findAllByUserName(userName);
-                    for (AccountTopicAuthEntity entity : entities) {
-                        if (entity.getTopicName().equals(topicName) && entity.getPermission() != 2) {
-                            isAuth = true;
-                        }
-                    }
-                    if (!isAuth) {
-                        log.error("userName:{},topicName:{}, not publish permission", userName, topicName);
-                        throw new BrokerException(ErrorCode.MQTT_NOT_PERMISSION);
-                    }
-                }
                 return this.publish.process(req, clientId, remoteIp);
 
             case PUBACK:
                 return this.pubAck.process(req, clientId, remoteIp);
 
             case SUBSCRIBE:
-                if (auth) {
-                    List<MqttTopicSubscription> topicSubscriptions = ((MqttSubscribePayload) req.payload()).topicSubscriptions();
-                    for (MqttTopicSubscription topicSubscription : topicSubscriptions) {
-                        String topicName = topicSubscription.topicName();
-                        String userName = this.authorSessions.get(sessionId).getUserName();
-                        AccountTopicAuthEntity entity = accountTopicAuthRepository.findAllByUserNameAndTopicName(userName, topicName);
-                        if (null != entity && entity.getPermission() != 1) {
-                            return this.subscribe.process(req, clientId, remoteIp);
-                        }
-                        log.error("userName:{},topicName:{}, not subscribe permission", userName, topicName);
-                        throw new BrokerException(ErrorCode.MQTT_NOT_PERMISSION);
-                    }
-                }
                 return this.subscribe.process(req, clientId, remoteIp);
 
             case UNSUBSCRIBE:
