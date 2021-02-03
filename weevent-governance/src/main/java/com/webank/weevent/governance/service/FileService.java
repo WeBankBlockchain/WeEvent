@@ -442,7 +442,7 @@ public class FileService {
             Map<String, PairParam> fileClientOfEachGroupMap = new ConcurrentHashMap<>();
             PairParam pairParam = new PairParam();
             pairParam.setDiskFiles(fileClient.getDiskFiles());
-            pairParam.setNodeAddress(fiscoConfig.getNodeAddress());
+            pairParam.setNodeAddress(fileTransport.getNodeAddress());
             pairParam.setWeEventFileClient(fileClient);
             fileClientOfEachGroupMap.put(groupId, pairParam);
             this.fileClientMap.put(key, fileClientOfEachGroupMap);
