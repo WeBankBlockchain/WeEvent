@@ -54,6 +54,7 @@ CREATE TABLE  t_file_transport_channel (
 CREATE TABLE  t_file_transport_status (
   `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `topic_name` VARCHAR(256) NOT NULL COMMENT '主题名称',
+  `node_address` VARCHAR(64) NOT NULL COMMENT '节点地址',
   `creater` VARCHAR(256) DEFAULT NULL COMMENT '创建人',
   `broker_id` INT(11) NOT NULL COMMENT 'broker主键id',
   `group_id` VARCHAR(64) DEFAULT NULL COMMENT '群组id',

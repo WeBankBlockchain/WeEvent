@@ -57,11 +57,13 @@ public interface IWeEventFileClient {
      * @param topic binding topic
      * @param localFile local file to be send
      * @param overwrite if receiver has this file, overwrite it?
+     * @param nodeAddress node address
+     * @param role topic role
      * @return send result, SendResult.SUCCESS if success, and return SendResult.eventId
      * @throws BrokerException broker exception
      * @throws IOException IOException
      */
-    FileChunksMeta publishFile(String topic, String localFile, boolean overwrite) throws BrokerException, IOException;
+    FileChunksMeta publishFile(String topic, String localFile, boolean overwrite, String nodeAddress, String role) throws BrokerException, IOException;
 
     /**
      * open transport for receiver.
@@ -133,19 +135,21 @@ public interface IWeEventFileClient {
      * query transport status.
      *
      * @param topic topic name
+     * @param nodeAddress node address
      * @return FileTransportStats
      */
-    FileTransportStats status(String topic);
+    FileTransportStats status(String topic, String nodeAddress);
 
     /**
      * list received files.
      *
      * @param group group id
      * @param topic topic name
+     * @param nodeAddress node address
      * @return FileChunksMeta list
      * @throws BrokerException broker exception
      */
-    List<FileChunksMeta> listFiles(String group, String topic) throws BrokerException;
+    List<FileChunksMeta> listFiles(String group, String topic, String nodeAddress) throws BrokerException;
 
     /**
      * sign a file transport event.
@@ -186,8 +190,10 @@ public interface IWeEventFileClient {
      * @param fileName file name
      * @param topic topic name
      * @param groupId group id
+     * @param nodeAddress node address
+     * @param role role
      * @return is file exist
      * @throws BrokerException BrokerException
      */
-    boolean isFileExist(String fileName, String topic, String groupId) throws BrokerException;
+    boolean isFileExist(String fileName, String topic, String groupId, String nodeAddress, String role) throws BrokerException;
 }

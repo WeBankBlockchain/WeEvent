@@ -383,7 +383,7 @@ export default {
     },
     downStatus (e) {
       const vm = this
-      const url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topicName=' + e.topicName
+      const url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topicName=' + e.topicName + '&nodeAddress=' + e.nodeAddress
       API.downLoadStatus(url).then(res => {
         if (res.data.code === 0) {
           if (res.data.data && res.data.data.length > 0) {
@@ -422,7 +422,7 @@ export default {
     },
     upStatus (e) {
       const vm = this
-      const url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topicName=' + e.topicName
+      const url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topicName=' + e.topicName + '&nodeAddress=' + e.nodeAddress
       API.uploadStatus(url).then(res => {
         if (res.data.code === 0) {
           if (res.data.data && res.data.data.length > 0) {
@@ -548,15 +548,19 @@ export default {
       if (e.role === '1') {
         // upload file
         sessionStorage.setItem('uploadName', e.topicName)
+        sessionStorage.setItem('uploadNodeAddress', e.nodeAddress)
+        sessionStorage.setItem('uploadRole', e.role)
         sessionStorage.setItem('overWrite', e.overWrite)
         Bus.$emit('openUploader', {
+          nodeAddress: e.nodeAddress,
+          role: e.role,
           topicName: e.topicName,
           brokerId: localStorage.getItem('brokerId'),
           groupId: localStorage.getItem('groupId')
         })
       } else {
         // download file
-        const url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topicName=' + e.topicName
+        const url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topicName=' + e.topicName + '&nodeAddress=' + e.nodeAddress 
         API.listFile(url).then(res => {
           if (res.data.code === 0) {
             this.downLoadList = [].concat(res.data.data)

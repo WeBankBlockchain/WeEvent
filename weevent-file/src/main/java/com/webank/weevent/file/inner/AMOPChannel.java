@@ -341,10 +341,10 @@ public class AMOPChannel extends AmopCallback {
         }
     }
 
-    public String switchTopic(String topic) throws BrokerException {
+    public String switchTopic(String topic, String nodeAddress, String role) throws BrokerException {
         log.info("send AMOP message to switch topic.");
         FileEvent fileEvent = new FileEvent(FileEvent.EventType.FileChannelSwitch, "");
-        FileChunksMeta fileChunksMeta = new FileChunksMeta("", "", 0L, "", topic, "", true);
+        FileChunksMeta fileChunksMeta = new FileChunksMeta("", "", 0L, "", topic, "", true, nodeAddress, role);
         fileEvent.setFileChunksMeta(fileChunksMeta);
 
         try {
@@ -392,7 +392,10 @@ public class AMOPChannel extends AmopCallback {
                     fileChunksMeta.getFileSize(),
                     fileChunksMeta.getFileMd5(),
                     topic,
-                    fileChunksMeta.getGroupId(), fileChunksMeta.isOverwrite());
+                    fileChunksMeta.getGroupId(),
+                    fileChunksMeta.isOverwrite(),
+                    fileChunksMeta.getNodeAddress(),
+                    fileChunksMeta.getRole());
         } catch (UnsupportedEncodingException e) {
             log.error("decode fileName error", e);
             throw new BrokerException(ErrorCode.DECODE_FILE_NAME_ERROR);
