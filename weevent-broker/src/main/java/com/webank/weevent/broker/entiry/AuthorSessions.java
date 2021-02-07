@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class AuthorSessionsParam {
+public class AuthorSessions {
 
     private String clientId;
     private String userName;
