@@ -7,7 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.webank.weevent.broker.config.WeEventConfig;
 import com.webank.weevent.broker.entiry.AccountTopicAuthEntity;
-import com.webank.weevent.broker.entiry.AuthorSessionsParam;
+import com.webank.weevent.broker.entiry.AuthorSessions;
 import com.webank.weevent.broker.protocol.mqtt.command.Connect;
 import com.webank.weevent.broker.protocol.mqtt.command.DisConnect;
 import com.webank.weevent.broker.protocol.mqtt.command.PingReq;
@@ -67,7 +67,7 @@ public class ProtocolProcess {
 
     private final SessionStore sessionStore;
     // session id(channel id if from tcp) <-> clientId
-    private final Map<String, AuthorSessionsParam> authorSessions = new ConcurrentHashMap<>();
+    private final Map<String, AuthorSessions> authorSessions = new ConcurrentHashMap<>();
     private final MessageIdStore messageIdStore = new MessageIdStore();
 
     // MQTT commands
@@ -171,7 +171,7 @@ public class ProtocolProcess {
         MqttConnAckMessage rsp = (MqttConnAckMessage) this.connect.processConnect(msg, sessionData);
         // if accept
         if (rsp.variableHeader().connectReturnCode() == MqttConnectReturnCode.CONNECTION_ACCEPTED) {
-            AuthorSessionsParam sessionsParam = AuthorSessionsParam.builder().clientId(sessionData.getClientId())
+            AuthorSessions sessionsParam = AuthorSessions.builder().clientId(sessionData.getClientId())
                     .userName("user").build();
             this.authorSessions.put(sessionData.getSessionId(), sessionsParam);
         }

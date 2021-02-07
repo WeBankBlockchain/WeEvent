@@ -8,7 +8,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class PairParam {
+public class FileClient {
 
     private IWeEventFileClient weEventFileClient;
     private DiskFiles diskFiles;

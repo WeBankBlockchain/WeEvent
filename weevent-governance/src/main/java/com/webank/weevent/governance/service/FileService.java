@@ -32,7 +32,7 @@ import com.webank.weevent.governance.common.GovernanceResult;
 import com.webank.weevent.governance.entity.FileChunksMetaEntity;
 import com.webank.weevent.governance.entity.FileTransportChannelEntity;
 import com.webank.weevent.governance.entity.FileTransportStatusEntity;
-import com.webank.weevent.governance.entity.PairParam;
+import com.webank.weevent.governance.entity.FileClient;
 import com.webank.weevent.governance.entity.PeerInfoParam;
 import com.webank.weevent.governance.entity.UploadChunkParam;
 import com.webank.weevent.governance.repository.TransportChannelRepository;
@@ -68,7 +68,7 @@ public class FileService {
     // file download root path
     private String downloadPath;
     // <brokerId, <groupId, <IWeEventFileClient, DiskFiles>>>
-    private final Map<String, Map<String, PairParam>> fileClientMap = new ConcurrentHashMap<>();
+    private final Map<String, Map<String, FileClient>> fileClientMap = new ConcurrentHashMap<>();
     // <brokerId, <groupId, <topic, overwrite>>>
     private final Map<Integer, Map<String, Map<String, Boolean>>> transportMap = new ConcurrentHashMap<>();
     // upload local file to governance server, <fileId, FileChunksMeta>
@@ -447,8 +447,8 @@ public class FileService {
         String key = fileTransport.getGroupId() + fileTransport.getBrokerId();
         if (!this.fileClientMap.containsKey(key) || !this.fileClientMap.get(key).containsKey(groupId)) {
             IWeEventFileClient fileClient = IWeEventFileClient.build(groupId, this.downloadPath, ConstantProperties.FILE_CHUNK_SIZE, fiscoConfig);
-            Map<String, PairParam> fileClientOfEachGroupMap = new ConcurrentHashMap<>();
-            PairParam pairParam = new PairParam();
+            Map<String, FileClient> fileClientOfEachGroupMap = new ConcurrentHashMap<>();
+            FileClient pairParam = new FileClient();
             pairParam.setDiskFiles(fileClient.getDiskFiles());
             pairParam.setNodeAddress(fileTransport.getNodeAddress());
             pairParam.setWeEventFileClient(fileClient);
@@ -521,11 +521,11 @@ public class FileService {
 
     private void addIWeEventClientToCache(FileTransportChannelEntity fileTransport, IWeEventFileClient fileClient) {
         String key = fileTransport.getGroupId() + fileTransport.getBrokerId();
-        Map<String, PairParam> clientMap = this.fileClientMap.get(key);
+        Map<String, FileClient> clientMap = this.fileClientMap.get(key);
         if (Objects.isNull(clientMap)) {
             clientMap = new ConcurrentHashMap<>();
         }
-        PairParam pairParam = new PairParam();
+        FileClient pairParam = new FileClient();
         pairParam.setWeEventFileClient(fileClient);
         pairParam.setDiskFiles(fileClient.getDiskFiles());
         pairParam.setNodeAddress(fileTransport.getNodeAddress());
