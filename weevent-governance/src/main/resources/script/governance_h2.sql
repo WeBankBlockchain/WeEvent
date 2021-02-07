@@ -126,6 +126,7 @@ CREATE TABLE  t_file_transport_status (
     delete_at BIGINT NOT NULL,
     group_id VARCHAR (64),
     topic_name VARCHAR (128),
+    node_address VARCHAR(64) NOT NULL,
     transport_status VARCHAR(1),
     speed VARCHAR(64),
     PRIMARY KEY (id)
