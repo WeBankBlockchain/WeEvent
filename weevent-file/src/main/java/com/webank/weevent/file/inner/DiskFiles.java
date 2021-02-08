@@ -48,7 +48,7 @@ public class DiskFiles {
         log.info("local file path: {}, {} -> {}", path, localPath.getFreeSpace(), localPath.getTotalSpace());
         this.path = path;
     }
-    
+
     public String genLocalFileName(String fileId) throws BrokerException {
         FileChunksMeta fileChunksMeta = fileIdChunksMeta.get(fileId);
         if (fileChunksMeta == null) {
@@ -57,17 +57,17 @@ public class DiskFiles {
         }
         return this.path + PATH_SEPARATOR + fileChunksMeta.getGroupId() + PATH_SEPARATOR + getNodeAddress() + PATH_SEPARATOR + fileChunksMeta.getTopic() + PATH_SEPARATOR + fileChunksMeta.getFileName();
     }
-    
-   public static String getNodeAddress() {
-	   FiscoConfig fiscoConfig = new FiscoConfig();
-       fiscoConfig.load("");
-       List<String> nodes = (List<String>) fiscoConfig.getConfigProperty().getNetwork().get("peers");
-       String nodeAddress = "";
-       for (String node : nodes) {
-    	   nodeAddress += node.replace(".", "").replace(":", "").replace(",", "");
-       }
-       return nodeAddress;
-   } 
+
+    public static String getNodeAddress() {
+        FiscoConfig fiscoConfig = new FiscoConfig();
+        fiscoConfig.load("");
+        List<String> nodes = (List<String>) fiscoConfig.getConfigProperty().getNetwork().get("peers");
+        String nodeAddress = "";
+        for (String node : nodes) {
+            nodeAddress += node.replace(".", "").replace(":", "").replace(",", "");
+        }
+        return nodeAddress;
+    }
 
     private String genLocalMetaFileName(String fileId) throws BrokerException {
         return this.genLocalFileName(fileId) + MetaFileSuffix;
@@ -122,7 +122,7 @@ public class DiskFiles {
 
     public void createFixedLengthFile(FileChunksMeta fileChunksMeta) throws BrokerException {
         // ensure path exist and disk space
-        String filePath = this.path + PATH_SEPARATOR + fileChunksMeta.getGroupId() + PATH_SEPARATOR + getNodeAddress() +PATH_SEPARATOR + fileChunksMeta.getTopic();
+        String filePath = this.path + PATH_SEPARATOR + fileChunksMeta.getGroupId() + PATH_SEPARATOR + getNodeAddress() + PATH_SEPARATOR + fileChunksMeta.getTopic();
         File path = new File(filePath);
         path.mkdirs();
         if (!path.exists()) {
