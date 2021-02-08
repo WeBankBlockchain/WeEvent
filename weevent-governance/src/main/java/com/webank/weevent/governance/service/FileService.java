@@ -200,8 +200,7 @@ public class FileService {
         	convertNodeAddress += node;
         	nodeAddress += convertNodeAddress(node);
 		}
-        chunkParam.getFileChunksMeta().setNodeAddress(nodeAddress);
-        chunkParam.getFileChunksMeta().setCconvertNodeAddress(convertNodeAddress);
+        chunkParam.getFileChunksMeta().setNodeAddress(convertNodeAddress);
         String topic = chunkParam.getFileChunksMeta().getTopic();
 
         String fileClientKey = chunkParam.getBrokerId() + IDENTIFIER + chunkParam.getFileChunksMeta().getGroupId() + 
@@ -225,7 +224,7 @@ public class FileService {
                 String fileId = chunkParam.getFileChunksMeta().getFileId();
                 String filePath = this.uploadPath.concat(File.separator).concat(fileId).concat(File.separator)
                         .concat(chunkParam.getFileChunksMeta().getGroupId()).concat(File.separator)
-                        .concat(chunkParam.getFileChunksMeta().getNodeAddress()).concat(File.separator)
+                        .concat(convertNodeAddress(chunkParam.getFileChunksMeta().getNodeAddress())).concat(File.separator)
                         .concat(topic).concat(File.separator)
                         .concat(chunkParam.getFileChunksMeta().getFileName());
                 
@@ -262,7 +261,7 @@ public class FileService {
             status.setBrokerId(chunkParam.getBrokerId());
             status.setGroupId(chunkParam.getFileChunksMeta().getGroupId());
             status.setTopicName(chunkParam.getFileChunksMeta().getTopic());
-            status.setNodeAddress(chunkParam.getFileChunksMeta().getConvertNodeAddress());
+            status.setNodeAddress(chunkParam.getFileChunksMeta().getNodeAddress());
             status.setFileName(chunkParam.getFileChunksMeta().getFileName());
             status.setFileMD5(chunkParam.getFileId());
             status.setFileSize(chunkParam.getFileChunksMeta().getFileSize());

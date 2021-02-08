@@ -39,8 +39,6 @@ public class FileChunksMeta {
     private boolean overwrite;
     // nodeAddress
     private String nodeAddress;
-    // convertNodeAddress
-    private String convertNodeAddress;
 
     // chunk size
     private int chunkSize = 0;
@@ -96,10 +94,6 @@ public class FileChunksMeta {
         this.nodeAddress = nodeAddress;
     }
     
-    public void setCconvertNodeAddress(String convertNodeAddress) {
-        this.convertNodeAddress = convertNodeAddress;
-    }
-
     public void clearPrivacy() {
         this.host = "";
         this.fileName = "";
