@@ -39,9 +39,8 @@ public class FileChunksMeta {
     private boolean overwrite;
     // nodeAddress
     private String nodeAddress;
-    // role
-    private String role;
-    
+    // convertNodeAddress
+    private String convertNodeAddress;
 
     // chunk size
     private int chunkSize = 0;
@@ -56,46 +55,24 @@ public class FileChunksMeta {
     private int startTime = 0;
     // file receiver's host
     private String host;
-    
-    public FileChunksMeta(String fileId,
-            String fileName,
-            long fileSize,
-            String fileMd5,
-            String topic,
-            String groupId,
-            boolean overwrite) {
-		this.fileId = fileId;
-		this.fileName = fileName;
-		this.fileSize = fileSize;
-		this.fileMd5 = fileMd5;
-		this.topic = topic;
-		this.groupId = groupId;
-		this.overwrite = overwrite;
-		
-		this.startTime = (int) (System.currentTimeMillis() / 1000);
-	}
 
     public FileChunksMeta(String fileId,
-            String fileName,
-            long fileSize,
-            String fileMd5,
-            String topic,
-            String groupId,
-            boolean overwrite,
-            String nodeAddress,
-            String role) {
-		this.fileId = fileId;
-		this.fileName = fileName;
-		this.fileSize = fileSize;
-		this.fileMd5 = fileMd5;
-		this.topic = topic;
-		this.groupId = groupId;
-		this.overwrite = overwrite;
-		this.nodeAddress = nodeAddress;
-		this.role = role;
-		
-		this.startTime = (int) (System.currentTimeMillis() / 1000);
-	}
+                          String fileName,
+                          long fileSize,
+                          String fileMd5,
+                          String topic,
+                          String groupId,
+                          boolean overwrite) {
+        this.fileId = fileId;
+        this.fileName = fileName;
+        this.fileSize = fileSize;
+        this.fileMd5 = fileMd5;
+        this.topic = topic;
+        this.groupId = groupId;
+        this.overwrite = overwrite;
+
+        this.startTime = (int) (System.currentTimeMillis() / 1000);
+    }
 
     public void initChunkSize(int chunkSize) {
         this.chunkSize = chunkSize;
@@ -113,6 +90,14 @@ public class FileChunksMeta {
 
     public void setHost(String host) {
         this.host = host;
+    }
+    
+    public void setNodeAddress(String nodeAddress) {
+        this.nodeAddress = nodeAddress;
+    }
+    
+    public void setCconvertNodeAddress(String convertNodeAddress) {
+        this.convertNodeAddress = convertNodeAddress;
     }
 
     public void clearPrivacy() {

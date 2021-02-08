@@ -110,7 +110,7 @@ public class FileTransportService {
                 && "json".equals(event.getExtensions().get(WeEvent.WeEvent_FORMAT));
     }
 
-    public FileTransportStats stats(boolean all, String groupId, String topicName, String nodeAddress) {
+    public FileTransportStats stats(boolean all, String groupId, String topicName) {
         FileTransportStats fileTransportStats = new FileTransportStats();
 
         // sender
@@ -125,7 +125,7 @@ public class FileTransportService {
         fileTransportStats.getSender().put(groupId, senders);
 
         // receiver
-        List<FileChunksMeta> localFiles = this.diskFiles.listNotCompleteFiles(all, groupId, topicName, nodeAddress);
+        List<FileChunksMeta> localFiles = this.diskFiles.listNotCompleteFiles(all, groupId, topicName);
         Map<String, List<FileChunksMetaStatus>> receivers = new HashMap<>();
         for (String topic : channel.getSubTopics()) {
             List<FileChunksMetaStatus> filePlus = localFiles.stream()
@@ -140,9 +140,9 @@ public class FileTransportService {
         return fileTransportStats;
     }
 
-    public boolean getFileExistence(String fileName, String topic, String groupId, String nodeAddress, String role) throws BrokerException {
+    public boolean getFileExistence(String fileName, String topic, String groupId) throws BrokerException {
 
-        FileChunksMeta fileChunksMeta = new FileChunksMeta("", fileName, 0, "", topic, groupId, false, nodeAddress, role);
+        FileChunksMeta fileChunksMeta = new FileChunksMeta("", fileName, 0, "", topic, groupId, false);
 
         return channel.isFileExist(fileChunksMeta);
     }

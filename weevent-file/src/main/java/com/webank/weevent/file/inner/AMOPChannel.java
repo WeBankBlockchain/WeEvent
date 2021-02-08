@@ -235,7 +235,7 @@ public class AMOPChannel extends AmopCallback {
             }
 
             AmopMsgResponse amopMsgResponse = JsonHelper.json2Object(rsp.getAmopMsgIn().getContent(), AmopMsgResponse.class);
-            if (amopMsgResponse.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+            if (ErrorCode.SUCCESS.getCode() != amopMsgResponse.getErrorCode()) {
                 log.error("create remote file context failed, rsp:{}", amopMsgResponse.getErrorMessage());
                 throw toBrokerException(amopMsgResponse);
             }
@@ -341,10 +341,10 @@ public class AMOPChannel extends AmopCallback {
         }
     }
 
-    public String switchTopic(String topic, String nodeAddress, String role) throws BrokerException {
+    public String switchTopic(String topic) throws BrokerException {
         log.info("send AMOP message to switch topic.");
         FileEvent fileEvent = new FileEvent(FileEvent.EventType.FileChannelSwitch, "");
-        FileChunksMeta fileChunksMeta = new FileChunksMeta("", "", 0L, "", topic, "", true, nodeAddress, role);
+        FileChunksMeta fileChunksMeta = new FileChunksMeta("", "", 0L, "", topic, "", true);
         fileEvent.setFileChunksMeta(fileChunksMeta);
 
         try {
@@ -393,14 +393,11 @@ public class AMOPChannel extends AmopCallback {
                     fileChunksMeta.getFileMd5(),
                     topic,
                     fileChunksMeta.getGroupId(),
-                    fileChunksMeta.isOverwrite(),
-                    fileChunksMeta.getNodeAddress(),
-                    fileChunksMeta.getRole());
+                    fileChunksMeta.isOverwrite());
         } catch (UnsupportedEncodingException e) {
             log.error("decode fileName error", e);
             throw new BrokerException(ErrorCode.DECODE_FILE_NAME_ERROR);
         }
-
         return newFileChunksMeta;
     }
 
@@ -511,7 +508,7 @@ public class AMOPChannel extends AmopCallback {
                 log.info("get {}, try to initialize context for receiving file", fileEvent.getEventType());
                 try {
                     FileChunksMeta fileChunksMeta = fileEvent.getFileChunksMeta();
-
+                    
                     FileChunksMeta retFileChunksMeta = this.fileTransportService.prepareReceiveFile(getNewFileChunksMeta(fileChunksMeta));
                     log.info("create file context success, fileName: {}", fileEvent.getFileChunksMeta().getFileName());
 

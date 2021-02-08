@@ -12,6 +12,5 @@ public class FileClient {
 
     private IWeEventFileClient weEventFileClient;
     private DiskFiles diskFiles;
-    private String nodeAddress;
 
 }

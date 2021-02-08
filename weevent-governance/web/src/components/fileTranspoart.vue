@@ -2,7 +2,6 @@
 <div class='event-table topic fileTranspoart'>
   <div class='refresh top_part'>
     <el-button type='primary' size='small' icon='el-icon-plus' @click='addNewOne'>{{$t('common.add')}}</el-button>
-    <el-button type='primary' @click='generatePPK()'>{{$t('file.generatePPK')}}</el-button>
   </div>
   <el-table
     :data="tableData"
@@ -103,6 +102,7 @@
       <template slot-scope="scope">
         <el-button size='mini' type='primary' @click.stop='fileOption(scope.row)' v-show="scope.row.role || scope.row.role === '1'">{{scope.row.role === '1' ? $t('file.upload') : $t('file.download')}}</el-button>
         <el-button size='mini' type='primary' @click='showlog = !showlog' @click.stop='getSubscribers(scope.row)' v-show="scope.row.role || scope.row.role === '1'">{{$t('file.subscribeList')}}</el-button>
+        <el-button size='mini' type='primary' @click='generatePPK(scope.row)'>{{$t('file.generatePPK')}}</el-button>
         <el-tooltip v-show="scope.row.overWrite === '1'" class="item" effect="dark" :content="$t('file.fileCover')" placement="top">
           <i class='el-icon-warning' style='font-size:18px;color:#006cff'></i>
         </el-tooltip>
@@ -556,11 +556,12 @@ export default {
           role: e.role,
           topicName: e.topicName,
           brokerId: localStorage.getItem('brokerId'),
-          groupId: localStorage.getItem('groupId')
+          groupId: localStorage.getItem('groupId'),
+          nodeAddress: e.nodeAddress
         })
       } else {
         // download file
-        const url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topicName=' + e.topicName + '&nodeAddress=' + e.nodeAddress 
+        const url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topicName=' + e.topicName + '&nodeAddress=' + e.nodeAddress + '&role=' + e.role
         API.listFile(url).then(res => {
           if (res.data.code === 0) {
             this.downLoadList = [].concat(res.data.data)
@@ -611,10 +612,14 @@ export default {
     },
     getSubscribers (e) {
       const topicName = e.topicName
+      const nodeAddress = e.nodeAddress
+      const role = e.role
       const data = {
         brokerId: Number(localStorage.getItem('brokerId')),
         groupId: Number(localStorage.getItem('groupId')),
-        topicName: topicName
+        topicName: topicName,
+        role: role,
+        nodeAddress: nodeAddress
       }
       API.getSubscribers(data).then(res => {
         if (res.data.code === 0) {
@@ -653,7 +658,7 @@ export default {
     },
     generatePPK (e) {
       const vm = this
-      const url = con.ROOT + 'file/genPemFile?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&filePath=' + "./logs"
+      const url = con.ROOT + 'file/genPemFile?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topicName=' + e.topicName + '&nodeAddress=' + e.nodeAddress
       var xhr = new XMLHttpRequest()
       var formData = new FormData()
       xhr.open('get', url)
