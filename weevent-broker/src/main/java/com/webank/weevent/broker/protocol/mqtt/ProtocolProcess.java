@@ -62,6 +62,10 @@ import org.springframework.stereotype.Component;
 public class ProtocolProcess {
     // fix length of message id in variableHeader
     public static int fixLengthOfMessageId = 2;
+    
+    private final static Integer SUB_PUB  = 0;
+    private final static Integer SUB = 1;
+    private final static Integer PUB = 2;
 
     private final int heartBeat;
 
@@ -211,7 +215,7 @@ public class ProtocolProcess {
             String userName = this.authorSessions.get(sessionId).getUserName();
             List<AccountTopicAuthEntity> entities = accountTopicAuthRepository.findAllByUserName(userName);
             for (AccountTopicAuthEntity entity : entities) {
-                if (entity.getTopicName().equals(topicName) && (entity.getPermission() == 0 || entity.getPermission() == 1)) {
+                if (entity.getTopicName().equals(topicName) && (entity.getPermission() == SUB_PUB || entity.getPermission() == SUB)) {
                     isAuth = true;
                 }
             }
@@ -227,7 +231,7 @@ public class ProtocolProcess {
                 String topicName = topicSubscription.topicName();
                 String userName = this.authorSessions.get(sessionId).getUserName();
                 AccountTopicAuthEntity entity = accountTopicAuthRepository.findAllByUserNameAndTopicName(userName, topicName);
-                if (null != entity && (entity.getPermission() == 0 || entity.getPermission() == 2)) {
+                if (null != entity && (entity.getPermission() == SUB_PUB || entity.getPermission() == PUB)) {
                     return this.subscribe.process(req, clientId, remoteIp);
                 }
                 log.error("userName:{},topicName:{}, not subscribe permission", userName, topicName);
