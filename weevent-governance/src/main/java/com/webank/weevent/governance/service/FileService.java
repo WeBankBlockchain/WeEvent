@@ -5,7 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -24,6 +24,7 @@ import com.webank.weevent.file.dto.FileChunksMetaStatus;
 import com.webank.weevent.file.dto.FileTransportStats;
 import com.webank.weevent.file.inner.DiskFiles;
 import com.webank.weevent.file.service.FileChunksMeta;
+import com.webank.weevent.file.service.WeEventFileClient;
 import com.webank.weevent.governance.GovernanceApplication;
 import com.webank.weevent.governance.common.ConstantProperties;
 import com.webank.weevent.governance.common.ErrorCode;
@@ -66,13 +67,12 @@ public class FileService {
     private String uploadPath;
     // file download root path
     private String downloadPath;
-    // <brokerId, <groupId, <IWeEventFileClient, DiskFiles>>>
-    private final Map<String, Map<String, Pair<IWeEventFileClient, DiskFiles>>> fileClientMap = new ConcurrentHashMap<>();
-    // <brokerId, <groupId, <topic, overwrite>>>
-    private final Map<Integer, Map<String, Map<String, Boolean>>> transportMap = new ConcurrentHashMap<>();
+    private final Map<String, IWeEventFileClient> fileClientMap = new ConcurrentHashMap<>();
+    private final Map<String, Boolean> transportMap = new ConcurrentHashMap<>();
     // upload local file to governance server, <fileId, FileChunksMeta>
     private final Map<String, Pair<FileChunksMeta, DiskFiles>> fileChunksMap = new ConcurrentHashMap<>();
 
+    private final static String IDENTIFIER = "__";
 
     @Autowired
     public void setTransportChannelRepository(TransportChannelRepository transportChannelRepository) throws GovernanceException {
@@ -92,7 +92,7 @@ public class FileService {
         ParamCheckUtils.validateTransportName(fileTransport.getTopicName());
         ParamCheckUtils.validateTransportRole(fileTransport.getRole());
         ParamCheckUtils.validateOverWrite(fileTransport.getOverWrite());
-        this.checkTransportExist(fileTransport.getBrokerId(), fileTransport.getGroupId(), fileTransport.getTopicName());
+        this.checkTransportExist(fileTransport.getBrokerId(), fileTransport.getGroupId(), fileTransport.getNodeAddress(), fileTransport.getTopicName());
 
         if (ConstantProperties.TRANSPORT_RECEIVER.equals(fileTransport.getRole())) {
             this.openTransport4Receiver(fileTransport);
@@ -103,18 +103,18 @@ public class FileService {
         this.transportChannelRepository.save(fileTransport);
         return GovernanceResult.ok(true);
     }
-    
+
     public Set<PeerInfoParam> getSubscribers(FileTransportChannelEntity fileTransport) throws GovernanceException {
-    	IWeEventFileClient fileClient;
-    	try {
-    		Set<PeerInfoParam> params = new HashSet<>();
-            fileClient = this.buildIWeEventFileClient(fileTransport.getGroupId(), fileTransport.getBrokerId());
+        IWeEventFileClient fileClient;
+        try {
+            Set<PeerInfoParam> params = new HashSet<>();
+            fileClient = this.buildIWeEventFileClient(fileTransport.getBrokerId(), fileTransport.getGroupId(), fileTransport.getNodeAddress());
             Set<String> set = fileClient.getSubscribers(fileTransport.getTopicName());
             for (String str : set) {
-            	PeerInfoParam param = new PeerInfoParam();
-            	param.setIpAndPort(str);
-            	params.add(param);
-			}
+                PeerInfoParam param = new PeerInfoParam();
+                param.setIpAndPort(str);
+                params.add(param);
+            }
             return params;
         } catch (BrokerException e) {
             log.error("get Subscribers failed.", e);
@@ -125,7 +125,7 @@ public class FileService {
     private void openTransport4Sender(FileTransportChannelEntity fileTransport) throws GovernanceException {
         IWeEventFileClient fileClient;
         try {
-            fileClient = this.buildIWeEventFileClient(fileTransport.getGroupId(), fileTransport.getBrokerId());
+            fileClient = this.buildIWeEventFileClient(fileTransport.getBrokerId(), fileTransport.getGroupId(), fileTransport.getNodeAddress());
 
             if (StringUtils.isBlank(fileTransport.getPublicKey())) {
                 fileClient.openTransport4Sender(fileTransport.getTopicName());
@@ -135,12 +135,14 @@ public class FileService {
             }
         } catch (BrokerException e) {
             log.error("open sender transport failed.", e);
-            this.fileClientMap.remove(fileTransport.getGroupId() + fileTransport.getBrokerId());
+            String fileClientKey = fileTransport.getBrokerId() + IDENTIFIER + fileTransport.getGroupId() +
+                    IDENTIFIER + fileTransport.getTopicName() + IDENTIFIER + nodeAddress2Path(fileTransport.getNodeAddress());
+            this.fileClientMap.remove(fileClientKey);
             throw new GovernanceException(e.getMessage());
         }
 
         this.addIWeEventClientToCache(fileTransport.getBrokerId(), fileTransport.getGroupId(), fileClient);
-        this.addTransportToCache(fileTransport.getBrokerId(), fileTransport.getGroupId(), fileTransport.getTopicName(),
+        this.addTransportToCache(fileTransport.getBrokerId(), fileTransport.getGroupId(), fileTransport.getNodeAddress(), fileTransport.getTopicName(),
                 fileTransport.getOverWrite());
         log.info("open sender transport success, groupId:{}, topic:{}", fileTransport.getGroupId(), fileTransport.getTopicName());
     }
@@ -148,7 +150,7 @@ public class FileService {
     private void openTransport4Receiver(FileTransportChannelEntity fileTransport) throws GovernanceException {
         IWeEventFileClient fileClient;
         try {
-            fileClient = this.buildIWeEventFileClient(fileTransport.getGroupId(), fileTransport.getBrokerId());
+            fileClient = this.buildIWeEventFileClient(fileTransport.getBrokerId(), fileTransport.getGroupId(), fileTransport.getNodeAddress());
             if (StringUtils.isBlank(fileTransport.getPrivateKey())) {
                 fileClient.openTransport4Receiver(fileTransport.getTopicName(), new IWeEventFileClient.FileListener() {
                     @Override
@@ -176,12 +178,14 @@ public class FileService {
             }
         } catch (BrokerException e) {
             log.error("open receive transport failed.", e);
-            this.fileClientMap.remove(fileTransport.getGroupId() + fileTransport.getBrokerId());
+            String fileClientKey = fileTransport.getBrokerId() + IDENTIFIER + fileTransport.getGroupId() +
+                    IDENTIFIER + fileTransport.getTopicName() + IDENTIFIER + nodeAddress2Path(fileTransport.getNodeAddress());
+            this.fileClientMap.remove(fileClientKey);
             throw new GovernanceException(e.getMessage());
         }
 
         this.addIWeEventClientToCache(fileTransport.getBrokerId(), fileTransport.getGroupId(), fileClient);
-        this.addTransportToCache(fileTransport.getBrokerId(), fileTransport.getGroupId(), fileTransport.getTopicName(),
+        this.addTransportToCache(fileTransport.getBrokerId(), fileTransport.getGroupId(), fileTransport.getNodeAddress(), fileTransport.getTopicName(),
                 fileTransport.getOverWrite());
         log.info("open receiver transport success, groupId:{}, topic:{}", fileTransport.getGroupId(), fileTransport.getTopicName());
     }
@@ -190,7 +194,7 @@ public class FileService {
         UploadChunkParam chunkParam = parseUploadChunkRequest(request);
         log.info("upload chunk:{}", chunkParam);
 
-        IWeEventFileClient fileClient = this.getIWeEventFileClient(chunkParam.getFileChunksMeta().getGroupId(), chunkParam.getBrokerId());
+        IWeEventFileClient fileClient = this.getIWeEventFileClient(chunkParam.getBrokerId(), chunkParam.getFileChunksMeta().getGroupId(), chunkParam.getNodeAddress());
         boolean isSuccess = this.uploadChunks(chunkParam.getFileChunksMeta(), chunkParam.getChunkNumber(), chunkParam.getChunkData());
 
         // if chunk upload failed, sleep and retry again
@@ -207,12 +211,10 @@ public class FileService {
         if (chunkParam.getFileChunksMeta().checkChunkFull()) {
             CompletableFuture.runAsync(() -> {
                 String fileId = chunkParam.getFileChunksMeta().getFileId();
-                String filePath = this.uploadPath.concat(File.separator).concat(fileId).concat(File.separator)
-                        .concat(chunkParam.getFileChunksMeta().getGroupId()).concat(File.separator)
-                        .concat(chunkParam.getFileChunksMeta().getTopic()).concat(File.separator)
-                        .concat(chunkParam.getFileChunksMeta().getFileName());
-                boolean overWrite = this.transportMap.get(chunkParam.getBrokerId()).get(chunkParam.getFileChunksMeta().getGroupId())
-                        .get(chunkParam.getFileChunksMeta().getTopic());
+                String filePath = this.uploadPath.concat(File.separator).concat(nodeAddress2Path(chunkParam.getNodeAddress())).concat(File.separator).concat(fileId).concat(File.separator).concat(chunkParam
+                        .getFileChunksMeta().getTopic()).concat(File.separator).concat(chunkParam.getFileChunksMeta().getFileName());
+                boolean overWrite = this.transportMap.get(genTransportKey(chunkParam.getBrokerId(), chunkParam.getFileChunksMeta().getGroupId(),
+                        chunkParam.getNodeAddress(), chunkParam.getFileChunksMeta().getTopic()));
 
                 FileTransportStatusEntity status = addFileTransportRecord(chunkParam);
 
@@ -249,6 +251,7 @@ public class FileService {
             status.setBrokerId(chunkParam.getBrokerId());
             status.setGroupId(chunkParam.getFileChunksMeta().getGroupId());
             status.setTopicName(chunkParam.getFileChunksMeta().getTopic());
+            status.setNodeAddress(chunkParam.getNodeAddress());
             status.setFileName(chunkParam.getFileChunksMeta().getFileName());
             status.setFileMD5(chunkParam.getFileId());
             status.setFileSize(chunkParam.getFileChunksMeta().getFileSize());
@@ -265,6 +268,7 @@ public class FileService {
         String fileId = request.getParameter("identifier");
         FileChunksMeta fileChunksMeta = this.fileChunksMap.get(fileId).getKey();
 
+        chunkParam.setNodeAddress(request.getParameter("nodeAddress"));
         chunkParam.setFileChunksMeta(fileChunksMeta);
         chunkParam.setBrokerId(Integer.parseInt(request.getParameter("brokerId")));
         chunkParam.setChunkNumber(Integer.parseInt(request.getParameter("chunkNumber")) - 1);
@@ -289,9 +293,9 @@ public class FileService {
         return chunkParam;
     }
 
-    public String downloadFile(String groupId, String topic, String fileName) throws GovernanceException {
-        String filePath = this.downloadPath.concat(File.separator).concat(groupId).concat(File.separator)
-                .concat(topic).concat(File.separator).concat(fileName);
+    public String downloadFile(String groupId, String topic, String fileName, String nodeAddress) throws GovernanceException {
+        nodeAddress = nodeAddress2Path(nodeAddress);
+        String filePath = this.downloadPath.concat(File.separator).concat(nodeAddress).concat(File.separator).concat(groupId).concat(File.separator).concat(topic).concat(File.separator).concat(fileName);
         if (filePath.indexOf("..") != -1) {
             log.error("file path not exist .., topic:{}, fileName:{}, filePath:{}", topic, fileName, filePath);
             throw new GovernanceException(ErrorCode.FILE_NOT_EXIST);
@@ -303,9 +307,8 @@ public class FileService {
         return filePath;
     }
 
-    public GovernanceResult<List<FileChunksMeta>> listFile(String groupId, Integer brokerId, String topic) throws GovernanceException {
-
-        IWeEventFileClient fileClient = getIWeEventFileClient(groupId, brokerId);
+    public GovernanceResult<List<FileChunksMeta>> listFile(String groupId, Integer brokerId, String topic, String nodeAddress) throws GovernanceException {
+        IWeEventFileClient fileClient = getIWeEventFileClient(brokerId, groupId, nodeAddress);
         try {
             List<FileChunksMeta> fileChunksMetas = fileClient.listFiles(groupId, topic);
             return GovernanceResult.ok(fileChunksMetas);
@@ -315,10 +318,10 @@ public class FileService {
         }
     }
 
-    public GovernanceResult<List<FileChunksMetaEntity>> downLoadStatus(String groupId, Integer brokerId, String topic) throws GovernanceException {
+    public GovernanceResult<List<FileChunksMetaEntity>> downLoadStatus(String groupId, Integer brokerId, String topic, String nodeAddress) throws GovernanceException {
         List<FileChunksMetaStatus> fileChunksMetaStatusList = null;
         List<FileChunksMetaEntity> chunksMetaEntities = new ArrayList<FileChunksMetaEntity>();
-        IWeEventFileClient fileClient = this.getIWeEventFileClient(groupId, brokerId);
+        IWeEventFileClient fileClient = this.getIWeEventFileClient(brokerId, groupId, nodeAddress);
         FileTransportStats status = fileClient.status(topic);
         if (status.getReceiver().containsKey(groupId)) {
             fileChunksMetaStatusList = status.getReceiver().get(groupId).get(topic);
@@ -339,11 +342,10 @@ public class FileService {
         return GovernanceResult.ok(chunksMetaEntities);
     }
 
-    public GovernanceResult<List<FileTransportStatusEntity>> uploadStatus(String groupId, Integer brokerId, String topic) throws GovernanceException {
-        List<FileTransportStatusEntity> fileTransportStatusList = this.transportStatusRepository
-                .queryByBrokerIdAndGroupIdAndTopicName(brokerId, groupId, topic);
+    public GovernanceResult<List<FileTransportStatusEntity>> uploadStatus(String groupId, Integer brokerId, String topic, String nodeAddress) throws GovernanceException {
+        List<FileTransportStatusEntity> fileTransportStatusList = this.transportStatusRepository.queryByBrokerIdAndGroupIdAndNodeAddressAndTopicName(brokerId, groupId, nodeAddress, topic);
 
-        IWeEventFileClient fileClient = this.getIWeEventFileClient(groupId, brokerId);
+        IWeEventFileClient fileClient = this.getIWeEventFileClient(brokerId, groupId, nodeAddress);
         FileTransportStats status = fileClient.status(topic);
         if (status.getSender().containsKey(groupId)) {
             List<FileChunksMetaStatus> fileChunksMetaStatusList = status.getSender().get(groupId).get(topic);
@@ -382,11 +384,11 @@ public class FileService {
     }
 
     public GovernanceResult<Boolean> closeTransport(FileTransportChannelEntity fileTransport) throws GovernanceException {
-        IWeEventFileClient fileClient = this.getIWeEventFileClient(fileTransport.getGroupId(), fileTransport.getBrokerId());
+        IWeEventFileClient fileClient = this.getIWeEventFileClient(fileTransport.getBrokerId(), fileTransport.getGroupId(), fileTransport.getNodeAddress());
         fileClient.closeTransport(fileTransport.getTopicName());
 
         this.transportChannelRepository.delete(fileTransport);
-        this.removeTransportCache(fileTransport.getBrokerId(), fileTransport.getGroupId(), fileTransport.getTopicName());
+        this.removeTransportCache(fileTransport.getBrokerId(), fileTransport.getGroupId(), fileTransport.getNodeAddress(), fileTransport.getTopicName());
         return GovernanceResult.ok(true);
     }
 
@@ -418,20 +420,19 @@ public class FileService {
         return GovernanceResult.ok(chunkUploadedList(fileChunksMeta));
     }
 
-    public String genPemFile(String groupId, Integer brokerId) throws GovernanceException {
-        IWeEventFileClient fileClient = getIWeEventFileClient(groupId, brokerId);
+    public String genPemFile() throws GovernanceException {
         try {
-            return fileClient.genPemFile();
+            return WeEventFileClient.genPemFile();
         } catch (BrokerException e) {
             log.error("genPemFile error, pemPath:{}.", e);
             throw new GovernanceException(ErrorCode.GENERATE_PEM_FAILED);
         }
     }
 
-    public GovernanceResult<Object> checkFileIsUploaded(String groupId, Integer brokerId, String topic, String fileName) throws GovernanceException {
+    public GovernanceResult<Object> checkFileIsUploaded(String groupId, Integer brokerId, String topic, String fileName, String nodeAddress) throws GovernanceException {
         ParamCheckUtils.validateTransportName(topic);
         ParamCheckUtils.validateFileName(fileName);
-        IWeEventFileClient fileClient = getIWeEventFileClient(groupId, brokerId);
+        IWeEventFileClient fileClient = getIWeEventFileClient(brokerId, groupId, nodeAddress);
         try {
             boolean fileExist = fileClient.isFileExist(fileName, topic, groupId);
             if (fileExist) {
@@ -444,25 +445,32 @@ public class FileService {
         }
     }
 
-    private IWeEventFileClient buildIWeEventFileClient(String groupId, Integer brokerId) {
-        if (!this.fileClientMap.containsKey(groupId + brokerId) || !this.fileClientMap.get(groupId + brokerId).containsKey(groupId)) {
+    private IWeEventFileClient buildIWeEventFileClient(Integer brokerId, String groupId, String nodeAddress) {
+        String clientKey = brokerId + IDENTIFIER + groupId + IDENTIFIER + nodeAddress;
+
+        if (!this.fileClientMap.containsKey(clientKey)) {
+
             FiscoConfig fiscoConfig = new FiscoConfig();
             fiscoConfig.load("");
 
-            IWeEventFileClient fileClient = IWeEventFileClient.build(groupId, this.downloadPath, ConstantProperties.FILE_CHUNK_SIZE, fiscoConfig);
-            Map<String, Pair<IWeEventFileClient, DiskFiles>> fileClientOfEachGroupMap = new ConcurrentHashMap<>();
-            fileClientOfEachGroupMap.put(groupId, new Pair<>(fileClient, fileClient.getDiskFiles()));
-            this.fileClientMap.put(groupId + brokerId, fileClientOfEachGroupMap);
+            List<String> nodeList = Arrays.asList(nodeAddress.split(","));
+            fiscoConfig.setFiscoNodes(nodeList);
+
+            String downloadPath = this.downloadPath + File.separator + nodeAddress2Path(nodeAddress);
+            IWeEventFileClient fileClient = IWeEventFileClient.build(groupId, downloadPath, ConstantProperties.FILE_CHUNK_SIZE, fiscoConfig);
+
+            this.fileClientMap.put(clientKey, fileClient);
         }
 
-        return this.fileClientMap.get(groupId + brokerId).get(groupId).getKey();
+        return this.fileClientMap.get(clientKey);
     }
 
-    private IWeEventFileClient getIWeEventFileClient(String groupId, Integer brokerId) throws GovernanceException {
-        if (!this.fileClientMap.containsKey(groupId + brokerId) || !this.fileClientMap.get(groupId + brokerId).containsKey(groupId)) {
+    private IWeEventFileClient getIWeEventFileClient(Integer brokerId, String groupId, String nodeAddress) throws GovernanceException {
+        String clientKey = brokerId + IDENTIFIER + groupId + IDENTIFIER + nodeAddress;
+        if (!this.fileClientMap.containsKey(clientKey)) {
             throw new GovernanceException(ErrorCode.TRANSPORT_NOT_EXISTS);
         }
-        return this.fileClientMap.get(groupId + brokerId).get(groupId).getKey();
+        return this.fileClientMap.get(clientKey);
     }
 
     private boolean uploadChunks(FileChunksMeta fileChunksMeta, Integer chunkIdx, byte[] chunkData) {
@@ -478,10 +486,9 @@ public class FileService {
         return true;
     }
 
-    private void checkTransportExist(Integer brokerId, String groupId, String topic) throws GovernanceException {
-        if (this.transportMap.containsKey(brokerId)
-                && this.transportMap.get(brokerId).containsKey(groupId)
-                && this.transportMap.get(brokerId).get(groupId).containsKey(topic)) {
+    private void checkTransportExist(Integer brokerId, String groupId, String nodeAddress, String topic) throws GovernanceException {
+        String transportKey = genTransportKey(brokerId, groupId, nodeAddress, topic);
+        if (this.transportMap.containsKey(transportKey)) {
             throw new GovernanceException(ErrorCode.TRANSPORT_ALREADY_EXISTS);
         }
     }
@@ -489,7 +496,7 @@ public class FileService {
     private void syncTransportToCache(List<FileTransportChannelEntity> transportList) throws GovernanceException {
         for (FileTransportChannelEntity fileTransport : transportList) {
             try {
-                checkTransportExist(fileTransport.getBrokerId(), fileTransport.getGroupId(), fileTransport.getTopicName());
+                checkTransportExist(fileTransport.getBrokerId(), fileTransport.getGroupId(), fileTransport.getNodeAddress(), fileTransport.getTopicName());
                 if (ConstantProperties.TRANSPORT_RECEIVER.equals(fileTransport.getRole())) {
                     this.openTransport4Receiver(fileTransport);
                 } else {
@@ -516,47 +523,23 @@ public class FileService {
     }
 
     private void addIWeEventClientToCache(Integer brokerId, String groupId, IWeEventFileClient fileClient) {
-        Map<String, Pair<IWeEventFileClient, DiskFiles>> clientMap = this.fileClientMap.get(groupId + brokerId);
-        if (Objects.isNull(clientMap)) {
-            clientMap = new ConcurrentHashMap<>();
-        }
-        clientMap.put(groupId, new Pair<>(fileClient, fileClient.getDiskFiles()));
-        this.fileClientMap.put(groupId + brokerId, clientMap);
+        String clientKey = genClientKey(brokerId, groupId, Utils.list2String(fileClient.getNodeList()));
+        this.fileClientMap.put(clientKey, fileClient);
     }
 
-    private void addTransportToCache(Integer brokerId, String groupId, String topic, String overwrite) {
+    private void addTransportToCache(Integer brokerId, String groupId, String nodeAddress, String topic, String overwrite) {
         // 0 means false, 1 means true;
         boolean isOverWrite = "1".equals(overwrite);
-        if (this.transportMap.isEmpty()) {
-            Map<String, Map<String, Boolean>> group2TransportMap = new ConcurrentHashMap<>();
-            Map<String, Boolean> transport2OverWriteMap = new HashMap<>();
-            transport2OverWriteMap.put(topic, isOverWrite);
-            group2TransportMap.put(groupId, transport2OverWriteMap);
-            this.transportMap.put(brokerId, group2TransportMap);
-            return;
-        }
-        if (!this.transportMap.containsKey(brokerId)) {
-            Map<String, Map<String, Boolean>> group2TransportMap = new ConcurrentHashMap<>();
-            Map<String, Boolean> transport2OverWriteMap = new HashMap<>();
-            transport2OverWriteMap.put(topic, isOverWrite);
-            group2TransportMap.put(groupId, transport2OverWriteMap);
-            this.transportMap.put(brokerId, group2TransportMap);
-            return;
-        }
-        if (!this.transportMap.get(brokerId).containsKey(groupId)) {
-            Map<String, Boolean> transport2OverWriteMap = new HashMap<>();
-            transport2OverWriteMap.put(topic, isOverWrite);
-            this.transportMap.get(brokerId).put(groupId, transport2OverWriteMap);
-        } else {
-            this.transportMap.get(brokerId).get(groupId).put(topic, isOverWrite);
-        }
+        String transportKey = genTransportKey(brokerId, groupId, nodeAddress, topic);
+        this.transportMap.put(transportKey, isOverWrite);
     }
 
-    private void removeTransportCache(Integer brokerId, String groupId, String topic) {
-        if (Objects.isNull(this.transportMap.get(brokerId)) || Objects.isNull(this.transportMap.get(brokerId).get(groupId))) {
-            log.error("transport:{} not exists in local cache.", topic);
+    private void removeTransportCache(Integer brokerId, String groupId, String nodeAddress, String topic) {
+        String transportKey = genTransportKey(brokerId, groupId, nodeAddress, topic);
+        if (this.transportMap.containsKey(transportKey)) {
+            this.transportMap.remove(transportKey);
         } else {
-            this.transportMap.get(brokerId).get(groupId).remove(topic);
+            log.error("transport:{} not exists in local cache.", topic);
         }
     }
 
@@ -568,5 +551,18 @@ public class FileService {
             }
         }
         return uploadedChunks;
+    }
+
+
+    public static String nodeAddress2Path(String nodeAddress) {
+        return nodeAddress.replace(":", "_").replace(",", "_");
+    }
+
+    public static String genClientKey(Integer brokerId, String groupId, String nodeAddress) {
+        return brokerId + IDENTIFIER + groupId + IDENTIFIER + nodeAddress;
+    }
+
+    public static String genTransportKey(Integer brokerId, String groupId, String nodeAddress, String topic) {
+        return brokerId + IDENTIFIER + groupId + IDENTIFIER + nodeAddress + IDENTIFIER + topic;
     }
 }

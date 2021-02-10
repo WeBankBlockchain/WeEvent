@@ -24,8 +24,7 @@ import lombok.Setter;
 @EqualsAndHashCode(callSuper = false)
 @Entity
 @Table(name = "t_file_transport_channel",
-        uniqueConstraints = {@UniqueConstraint(name = "topicBrokerGroupDelete",
-                columnNames = {"topic_name", "broker_id", "group_id"})})
+        uniqueConstraints = {@UniqueConstraint(name = "topicBrokerGroupDelete", columnNames = {"topic_name", "broker_id", "group_id", "node_address", "role"})})
 public class FileTransportChannelEntity extends TopicBase {
 
     @Column(name = "role", columnDefinition = "varchar(1)")

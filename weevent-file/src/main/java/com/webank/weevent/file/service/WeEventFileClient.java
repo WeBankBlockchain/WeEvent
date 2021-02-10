@@ -54,7 +54,6 @@ public class WeEventFileClient implements IWeEventFileClient {
 
     private static final String ZIP_NAME = "PPK.zip";
     private static final String FILE_PATH = "./logs";
-    private static final String PATH_SEPARATOR = "/";
     private static final String PRIVATE_KEY_SUFFIX = ".pem";
     private static final String PUBLIC_KEY_SUFFIX = ".pub.pem";
     private static final String HEX_HEADER = "0x";
@@ -296,7 +295,7 @@ public class WeEventFileClient implements IWeEventFileClient {
     public List<FileChunksMeta> listFiles(String group, String topic) throws BrokerException {
         // get json from disk
         List<File> fileList = new ArrayList<>();
-        String filePath = this.localReceivePath + PATH_SEPARATOR + group + PATH_SEPARATOR + topic;
+        String filePath = this.localReceivePath + File.separator + group + File.separator + topic;
         if (filePath.indexOf("..") != -1) {
             log.info("file path not exist.. filePath, {}", filePath);
             throw new BrokerException(ErrorCode.FILE_NOT_EXIST);
@@ -342,7 +341,7 @@ public class WeEventFileClient implements IWeEventFileClient {
         return this.fileTransportService.getDiskFiles();
     }
 
-    public String genPemFile() throws BrokerException {
+    public static String genPemFile() throws BrokerException {
         try {
             BouncyCastleProvider prov = new BouncyCastleProvider();
             Security.addProvider(prov);
@@ -357,8 +356,8 @@ public class WeEventFileClient implements IWeEventFileClient {
             PemFile privatePemFile = new PemFile(pair.getPrivate(), PRIVATE_KEY_DESC);
             PemFile publicPemFile = new PemFile(pair.getPublic(), PUBLIC_KEY_DESC);
 
-            String privateKeyUrl = FILE_PATH + PATH_SEPARATOR + account + PRIVATE_KEY_SUFFIX;
-            String publicKeyUrl = FILE_PATH + PATH_SEPARATOR + account + PUBLIC_KEY_SUFFIX;
+            String privateKeyUrl = FILE_PATH + File.separator + account + PRIVATE_KEY_SUFFIX;
+            String publicKeyUrl = FILE_PATH + File.separator + account + PUBLIC_KEY_SUFFIX;
 
             privatePemFile.write(privateKeyUrl);
             publicPemFile.write(publicKeyUrl);
@@ -377,6 +376,11 @@ public class WeEventFileClient implements IWeEventFileClient {
             log.error("generate pem file error", e);
             throw new BrokerException(ErrorCode.FILE_GEN_PEM_BC_FAILED);
         }
+    }
+
+    @Override
+    public List<String> getNodeList() {
+        return this.config.getFiscoNodes();
     }
 
     private static void zipFiles(File[] srcFiles, File zipFile) throws IOException {
@@ -401,6 +405,7 @@ public class WeEventFileClient implements IWeEventFileClient {
     public boolean isFileExist(String fileName, String topic, String groupId) throws BrokerException {
         return this.fileTransportService.getFileExistence(fileName, topic, groupId);
     }
+
 
     private static void validateLocalFile(String filePath) throws BrokerException {
         if (StringUtils.isBlank(filePath)) {
@@ -495,13 +500,13 @@ public class WeEventFileClient implements IWeEventFileClient {
                     if (StringUtils.isBlank(this.ftpInfo.getFtpReceivePath())) {
                         log.info("upload file to ftp server, file：{}", fileName);
                         ftpClientService
-                                .upLoadFile(this.receivePath + PATH_SEPARATOR + topic + PATH_SEPARATOR + fileName);
+                                .upLoadFile(this.receivePath + File.separator + topic + File.separator + fileName);
                     } else {
                         // specify upload directory
                         log.info("upload file to ftp server, to path: {}, file：{}", this.ftpInfo.getFtpReceivePath(),
                                 fileName);
                         ftpClientService.upLoadFile(this.ftpInfo.getFtpReceivePath(),
-                                this.receivePath + PATH_SEPARATOR + topic + PATH_SEPARATOR + fileName);
+                                this.receivePath + File.separator + topic + File.separator + fileName);
                     }
                 } catch (BrokerException e) {
                     e.printStackTrace();

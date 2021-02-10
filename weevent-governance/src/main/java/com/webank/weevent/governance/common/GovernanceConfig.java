@@ -59,7 +59,7 @@ public class GovernanceConfig {
     @Value("${acount.passwrod}")
     private String acountPasswrod;
 
-    private List<String> nodes;
+    private List<String> nodeAddressList;
 
     public static String acount_name;
     public static String acount_passwrod;
