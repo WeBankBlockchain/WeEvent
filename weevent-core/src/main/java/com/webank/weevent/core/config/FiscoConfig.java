@@ -143,4 +143,8 @@ public class FiscoConfig {
         network.put("peers", nodes);
         this.configProperty.setNetwork(network);
     }
+
+    public List<String> getFiscoNodes(){
+        return (List<String>) this.getConfigProperty().getNetwork().get("peers");
+    }
 }
