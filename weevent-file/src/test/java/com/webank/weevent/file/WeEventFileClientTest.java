@@ -355,10 +355,11 @@ public class WeEventFileClientTest {
 
     @Test
     public void testGetPemFile() throws BrokerException {
-        WeEventFileClient weEventFileClient = new WeEventFileClient(this.groupId, this.localReceivePath, this.fileChunkSize, this.fiscoConfig);
-        weEventFileClient.genPemFile();
+//        WeEventFileClient.genPemFile(fiscoConfig.getWeEventCoreConfig().getWeb3sdkEncryptType());
+        WeEventFileClient.genPemFile("SM_TYPE");
         Assert.assertTrue(true);
     }
+
 
     @Test
     @Ignore
