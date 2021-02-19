@@ -420,9 +420,10 @@ public class FileService {
         return GovernanceResult.ok(chunkUploadedList(fileChunksMeta));
     }
 
-    public String genPemFile() throws GovernanceException {
+    public String genPemFile(String encryptType) throws GovernanceException {
         try {
-            return WeEventFileClient.genPemFile();
+            //all client's types are same
+            return WeEventFileClient.genPemFile(encryptType);
         } catch (BrokerException e) {
             log.error("genPemFile error, pemPath:{}.", e);
             throw new GovernanceException(ErrorCode.GENERATE_PEM_FAILED);

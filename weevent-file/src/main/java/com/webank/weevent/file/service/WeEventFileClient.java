@@ -11,6 +11,7 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.util.ArrayList;
@@ -46,6 +47,9 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
 import org.fisco.bcos.sdk.amop.Amop;
 import org.fisco.bcos.sdk.client.protocol.response.Peers.PeerInfo;
+import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
+import org.fisco.bcos.sdk.crypto.keypair.ECDSAKeyPair;
+import org.fisco.bcos.sdk.crypto.keypair.SM2KeyPair;
 import org.fisco.bcos.sdk.crypto.keystore.KeyTool;
 import org.fisco.bcos.sdk.crypto.keystore.PEMKeyStore;
 
@@ -56,11 +60,8 @@ public class WeEventFileClient implements IWeEventFileClient {
     private static final String FILE_PATH = "./logs";
     private static final String PRIVATE_KEY_SUFFIX = ".pem";
     private static final String PUBLIC_KEY_SUFFIX = ".pub.pem";
-    private static final String HEX_HEADER = "0x";
     private static final String PRIVATE_KEY_DESC = "PRIVATE KEY";
     private static final String PUBLIC_KEY_DESC = "PUBLIC KEY";
-    private static final String ALGORITHM = "ECDSA";
-    private static final String CURVE_TYPE = "SECP256k1";
 
     private final String groupId;
     private String localReceivePath = "";
@@ -341,17 +342,21 @@ public class WeEventFileClient implements IWeEventFileClient {
         return this.fileTransportService.getDiskFiles();
     }
 
-    public static String genPemFile() throws BrokerException {
+    public static String genPemFile(String encryptType) throws BrokerException {
         try {
-            BouncyCastleProvider prov = new BouncyCastleProvider();
-            Security.addProvider(prov);
+            CryptoKeyPair cryptoKeyPair ;
+            if (encryptType.equals("SM_TYPE")) {
+                cryptoKeyPair = (new SM2KeyPair()).generateKeyPair();
+                cryptoKeyPair= cryptoKeyPair.createKeyPair(cryptoKeyPair.getHexPrivateKey());
+                System.out.println("----------sm");
+            } else {
+                cryptoKeyPair = (new ECDSAKeyPair()).generateKeyPair();
+                cryptoKeyPair= cryptoKeyPair.createKeyPair(cryptoKeyPair.getHexPrivateKey());
+                System.out.println("----------no sm");
+            }
 
-            ECNamedCurveParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec(CURVE_TYPE);
-            KeyPairGenerator generator = KeyPairGenerator.getInstance(ALGORITHM, prov.getName());
-            generator.initialize(ecSpec, new SecureRandom());
-            KeyPair pair = generator.generateKeyPair();
-            String pubKey = pair.getPublic().toString();
-            String account = HEX_HEADER + pubKey.substring(pubKey.indexOf("[") + 1, pubKey.indexOf("]")).replace(":", "");
+            KeyPair pair = cryptoKeyPair.getKeyPair();
+            String account = cryptoKeyPair.getAddress();
 
             PemFile privatePemFile = new PemFile(pair.getPrivate(), PRIVATE_KEY_DESC);
             PemFile publicPemFile = new PemFile(pair.getPublic(), PUBLIC_KEY_DESC);
@@ -371,8 +376,7 @@ public class WeEventFileClient implements IWeEventFileClient {
                 file.delete();
             }
             return zipUrl;
-        } catch (IOException | NoSuchProviderException | NoSuchAlgorithmException
-                | InvalidAlgorithmParameterException e) {
+        } catch (Exception e) {
             log.error("generate pem file error", e);
             throw new BrokerException(ErrorCode.FILE_GEN_PEM_BC_FAILED);
         }

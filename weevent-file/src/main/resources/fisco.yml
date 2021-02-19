@@ -25,7 +25,8 @@ consumerIdleTime: 1000
 #  enSslKey: "conf/gm/gmensdk.key"
 
 account:
-  accountAddress: "bcec428d5205abe0f0cc8a734083908d9eb8563e31f943d760786edf42ad67dd"
+  accountAddress: "0x64fa644d2a694681bd6addd6c5e36cccd8dcdde3"
+#  accountAddress: "0x4278900c23e4b364ba6202a24682d99be9ff8cbc" # sm_type
 #  accountFileFormat: "pem"
 #  accountFilePath: "conf"
   keyStoreDir: "account"

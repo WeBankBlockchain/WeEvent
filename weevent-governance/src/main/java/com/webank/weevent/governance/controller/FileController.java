@@ -180,6 +180,7 @@ public class FileController {
     @GetMapping(path = "/genPemFile")
     public void genPemFile(@RequestParam(name = "groupId") String groupId,
                            @RequestParam(name = "brokerId") Integer brokerId,
+                           @RequestParam(name = "encryptType") String encryptType,
                            HttpServletResponse response) throws GovernanceException {
 
         log.info("genPemFile, groupId:{}, brokerId:{}.", groupId, brokerId);
@@ -192,7 +193,7 @@ public class FileController {
         response.setHeader("content-type", "application/octet-stream");
         response.setContentType("application/octet-stream; charset=UTF-8");
 
-        String downloadFile = this.fileService.genPemFile();
+        String downloadFile = this.fileService.genPemFile(encryptType);
         if (StringUtils.isBlank(downloadFile)) {
             throw new GovernanceException("download file not exist");
         }
