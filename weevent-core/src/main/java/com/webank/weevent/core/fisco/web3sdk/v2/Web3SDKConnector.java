@@ -20,6 +20,7 @@ import org.fisco.bcos.sdk.config.ConfigOption;
 import org.fisco.bcos.sdk.config.exceptions.ConfigException;
 import org.fisco.bcos.sdk.config.model.ConfigProperty;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
+import org.fisco.bcos.sdk.crypto.keystore.KeyTool;
 import org.fisco.bcos.sdk.model.CryptoType;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -57,19 +58,11 @@ public class Web3SDKConnector {
         ConfigOption configOption;
 
         try {
-            if (fiscoConfig.getWeEventCoreConfig().getWeb3sdkEncryptType().equals("ECDSA_TYPE")) {
-                configOption = new ConfigOption(fiscoConfig.getConfigProperty(), CryptoType.ECDSA_TYPE);
-            } else if (fiscoConfig.getWeEventCoreConfig().getWeb3sdkEncryptType().equals("SM2_TYPE")) {
-                configOption = new ConfigOption(fiscoConfig.getConfigProperty(), CryptoType.SM_TYPE);
-            } else {
-                log.error("unknown encrypt type:{}, support ECDSA_TYPE or SM2_TYPE", fiscoConfig.getWeEventCoreConfig().getWeb3sdkEncryptType());
-                throw new BrokerException(ErrorCode.BCOS_SDK_BUILD_ERROR);
-            }
+            configOption = new ConfigOption(fiscoConfig.getConfigProperty(), CryptoType.ECDSA_TYPE);
         } catch (ConfigException e) {
             log.error("build BcosSDK, load configOption fail", e);
             throw new BrokerException(ErrorCode.BCOS_SDK_BUILD_ERROR);
         }
-
         return new BcosSDK(configOption);
     }
 
@@ -87,10 +80,6 @@ public class Web3SDKConnector {
             StopWatch sw = StopWatch.createStarted();
 
             Client client = sdk.getClient(groupId);
-            if (fiscoConfig.getWeEventCoreConfig().getWeb3sdkEncryptType().equals("ECDSA_TYPE")) {
-                CryptoKeyPair keyPair = client.getCryptoSuite().getKeyPairFactory().createKeyPair((String)fiscoConfig.getConfigProperty().getAccount().get("accountAddress"));
-                client.getCryptoSuite().setCryptoKeyPair(keyPair);
-            }
 
             // check connect with getNodeVersion command
             org.fisco.bcos.sdk.model.NodeVersion version = client.getNodeVersion();

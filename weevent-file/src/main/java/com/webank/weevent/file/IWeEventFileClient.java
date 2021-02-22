@@ -174,13 +174,6 @@ public interface IWeEventFileClient {
     DiskFiles getDiskFiles();
 
     /**
-     * generate pem key pair.
-     * @return genPemFile url
-     * @throws BrokerException BrokerException
-     */
-    String genPemFile() throws BrokerException;
-
-    /**
      * Check if the receiver end has a file.
      *
      * @param fileName file name
@@ -190,4 +183,10 @@ public interface IWeEventFileClient {
      * @throws BrokerException BrokerException
      */
     boolean isFileExist(String fileName, String topic, String groupId) throws BrokerException;
+
+    /**
+     * get connected node list
+     * @return node list
+     */
+    List<String> getNodeList();
 }

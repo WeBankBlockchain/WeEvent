@@ -42,9 +42,6 @@ public class FiscoConfig {
 
     private WeEventCoreConfig weEventCoreConfig;
 
-    Set<String > pathKeySet = new HashSet<>(Arrays.asList("conf", "certPath","caCert","sslCert","sslKey","enSslCert","enSslKey",
-            "accountFilePath","keyStoreDir","privateKey", "publicKeys"));
-
     /**
      * load configuration without spring
      *
@@ -84,12 +81,6 @@ public class FiscoConfig {
             return false;
         }
 
-        try {
-            convertPath(this.configProperty);
-        } catch (IOException e) {
-            log.error("convertPath configFile error:{} {}", configFile, e);
-        }
-
         try (InputStream inputStream = clz.getClassLoader().getResourceAsStream(file.replace("classpath:", ""))) {
             this.weEventCoreConfig = yaml.loadAs(inputStream, WeEventCoreConfig.class);
         } catch (Exception e) {
@@ -101,46 +92,13 @@ public class FiscoConfig {
         return true;
     }
 
-    private Map<String, Object> convertPathMap(Map<String, Object> map) throws IOException {
-        PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-
-        for (String key : map.keySet()){
-            if (!pathKeySet.contains(key)){
-                continue;
-            }
-            Object val = map.get(key);
-            if (val instanceof String){
-                if (((String) val).isEmpty()){
-                    continue;
-                }
-                String newPath = resolver.getResource("classpath:" + val).getFile().getPath();
-                map.put(key, newPath);
-            }
-        }
-        return map;
-    }
-
-    private void convertPathList(List<String> list) throws IOException {
-        PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-        List<String> newList = new ArrayList<>();
-        for (int i = 0; i<list.size(); i++){
-            if (!pathKeySet.contains(list.get(i))){
-                continue;
-            }
-            String newPath = resolver.getResource("classpath:" + list.get(i)).getFile().getPath();
-            newList.set(i, newPath);
-        }
-    }
-
-    private void convertPath(ConfigProperty configProperty) throws IOException {
-        configProperty.setCryptoMaterial( convertPathMap(configProperty.getCryptoMaterial()));
-        configProperty.setAccount( convertPathMap(configProperty.getAccount()));
-        //todo: amop not used here
-    }
-
     public void setFiscoNodes(List<String> nodes) {
         Map<String, Object> network = new HashMap<>();
         network.put("peers", nodes);
         this.configProperty.setNetwork(network);
+    }
+
+    public List<String> getFiscoNodes(){
+        return (List<String>) this.getConfigProperty().getNetwork().get("peers");
     }
 }

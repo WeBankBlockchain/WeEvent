@@ -86,7 +86,7 @@ public class FileController {
                                                              @RequestParam(name = "totalSize") long totalSize,
                                                              @RequestParam(name = "chunkSize") Integer chunkSize,
                                                              @RequestParam(name = "filename") String filename) throws GovernanceException {
-        log.info("prepareUploadFile, groupId:{}, fileId:{}, filename:{}, topic:{}, totalSize:{}, totalChunks:{}.",
+        log.info("prepareUploadFile, groupId:{}, fileId:{}, filename:{}, topic:{}, totalSize:{}, totalChunks:{}",
                 groupId, fileId, filename, topicName, totalSize, totalChunks);
         return this.fileService.prepareUploadFile(fileId, filename, topicName, groupId, totalSize, chunkSize);
     }
@@ -180,11 +180,10 @@ public class FileController {
     @GetMapping(path = "/genPemFile")
     public void genPemFile(@RequestParam(name = "groupId") String groupId,
                            @RequestParam(name = "brokerId") Integer brokerId,
-                           @RequestParam(name = "topicName") String topicName,
-                           @RequestParam(name = "nodeAddress") String nodeAddress,
+                           @RequestParam(name = "encryptType") String encryptType,
                            HttpServletResponse response) throws GovernanceException {
 
-        log.info("genPemFile, groupId:{}, brokerId:{}, topicName:{}, nodeAddress:{}.", groupId, brokerId, topicName, nodeAddress);
+        log.info("genPemFile, groupId:{}, brokerId:{}.", groupId, brokerId);
         List<FileTransportChannelEntity> list = this.fileService.listTransport(groupId, brokerId).getData();
         if (list.size() == 0) {
             throw new GovernanceException("please create file transport");
@@ -194,7 +193,7 @@ public class FileController {
         response.setHeader("content-type", "application/octet-stream");
         response.setContentType("application/octet-stream; charset=UTF-8");
 
-        String downloadFile = this.fileService.genPemFile(groupId, brokerId, topicName, nodeAddress);
+        String downloadFile = this.fileService.genPemFile(encryptType);
         if (StringUtils.isBlank(downloadFile)) {
             throw new GovernanceException("download file not exist");
         }

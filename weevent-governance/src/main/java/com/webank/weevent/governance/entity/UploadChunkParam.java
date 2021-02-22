@@ -11,6 +11,8 @@ public class UploadChunkParam {
 
     private String fileId;
 
+    private String nodeAddress;
+
     private Integer brokerId;
 
     private int chunkNumber;
@@ -23,6 +25,7 @@ public class UploadChunkParam {
     public String toString() {
         return "UploadChunkParam{" +
                 "fileId='" + fileId + '\'' +
+                ", nodeAddress=" + nodeAddress +
                 ", brokerId=" + brokerId +
                 ", chunkData=" + chunkData.length +
                 ", chunkIdx=" + chunkNumber +

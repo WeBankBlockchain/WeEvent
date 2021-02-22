@@ -3,7 +3,7 @@
 // see http://vuejs-templates.github.io/webpack for documentation.
 const path = require('path')
 const os = require('os')
-// const config =  require('./config.js')
+ const config =  require('./config.js')
 var needHost = ''
 
 try {
@@ -21,15 +21,15 @@ module.exports = {
     // Various Dev Server settings
     host: needHost, // can be overwritten by process.env.HOST
     port: 1010, // can be overwritten by process.env.PORT, if port is in use, a free one will be determined
-    // proxyTable:{
-    //  '/api':{
-    //     target: config.proxyRoot,
-    //     changeOrigin:true,
-    //     pathRewrite:{
-    //       '^/api': '/weevent-governance'
-    //     }
-    //   }
-    // },
+     proxyTable:{
+      '/api':{
+         target: config.proxyRoot,
+         changeOrigin:true,
+         pathRewrite:{
+           '^/api': '/weevent-governance'
+         }
+       }
+     },
     autoOpenBrowser: true,
     errorOverlay: true,
     notifyOnErrors: true,

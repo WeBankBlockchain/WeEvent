@@ -14,16 +14,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.data:spring-data-commons:${springBootVersion}")
 
-    implementation("org.fisco-bcos.java-sdk:java-sdk:${web3sdkVersion.fisco}") {
-        // io.netty:netty-tcnative-boringssl-static:2.0.20.Final crash
-        // exclude group: "io.netty"
-        exclude group: "io.netty", module: "netty-tcnative-boringssl-static"
-        // compile solidity
-        exclude group: "org.ethereum", module: "solcJ-all"
-        exclude group: "org.slf4j", module: "slf4j-log4j12"
-    }
-
-        // spring boot with log4j2
+    // spring boot with log4j2
     implementation("org.springframework.boot:spring-boot-starter-log4j2")
     // avoid "Log4j appears to be running in a Servlet environment, but there's no log4j-web module available."
     implementation("org.apache.logging.log4j:log4j-web:${log4jVersion}")

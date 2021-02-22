@@ -18,10 +18,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.ErrorCode;
 import com.webank.weevent.client.JsonHelper;
-import com.webank.weevent.core.config.FiscoConfig;
 import com.webank.weevent.file.service.FileChunksMeta;
 
 import lombok.extern.slf4j.Slf4j;
+
 
 /**
  * Files stored in local disk.
@@ -31,7 +31,6 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class DiskFiles {
-    private static final String PATH_SEPARATOR = "/";
     public final String MetaFileSuffix = ".json";
     private final String path;
     private Map<String, FileChunksMeta> fileIdChunksMeta = new ConcurrentHashMap<>();
@@ -48,25 +47,15 @@ public class DiskFiles {
         log.info("local file path: {}, {} -> {}", path, localPath.getFreeSpace(), localPath.getTotalSpace());
         this.path = path;
     }
-
+    
     public String genLocalFileName(String fileId) throws BrokerException {
         FileChunksMeta fileChunksMeta = fileIdChunksMeta.get(fileId);
         if (fileChunksMeta == null) {
             log.error("the fileChunksMeta corresponding to fieldId not exist, {}", fileId);
             throw new BrokerException(ErrorCode.FILE_GEN_LOCAL_FILE_NAME_FAILED);
         }
-        return this.path + PATH_SEPARATOR + fileChunksMeta.getGroupId() + PATH_SEPARATOR + getNodeAddress() + PATH_SEPARATOR + fileChunksMeta.getTopic() + PATH_SEPARATOR + fileChunksMeta.getFileName();
-    }
-
-    public static String getNodeAddress() {
-        FiscoConfig fiscoConfig = new FiscoConfig();
-        fiscoConfig.load("");
-        List<String> nodes = (List<String>) fiscoConfig.getConfigProperty().getNetwork().get("peers");
-        String nodeAddress = "";
-        for (String node : nodes) {
-            nodeAddress += node.replace(".", "").replace(":", "").replace(",", "");
-        }
-        return nodeAddress;
+        return this.path + File.separator + fileChunksMeta.getGroupId()+ File.separator
+                + fileChunksMeta.getTopic() + File.separator + fileChunksMeta.getFileName();
     }
 
     private String genLocalMetaFileName(String fileId) throws BrokerException {
@@ -122,7 +111,7 @@ public class DiskFiles {
 
     public void createFixedLengthFile(FileChunksMeta fileChunksMeta) throws BrokerException {
         // ensure path exist and disk space
-        String filePath = this.path + PATH_SEPARATOR + fileChunksMeta.getGroupId() + PATH_SEPARATOR + getNodeAddress() + PATH_SEPARATOR + fileChunksMeta.getTopic();
+        String filePath = this.path + File.separator + fileChunksMeta.getGroupId() + File.separator+ fileChunksMeta.getTopic();
         File path = new File(filePath);
         path.mkdirs();
         if (!path.exists()) {
@@ -245,7 +234,7 @@ public class DiskFiles {
     public List<FileChunksMeta> listNotCompleteFiles(boolean all, String groupId, String topicName) {
         List<FileChunksMeta> fileChunksMetas = new ArrayList<>();
 
-        String filePath = this.path + PATH_SEPARATOR + groupId + PATH_SEPARATOR + getNodeAddress() + PATH_SEPARATOR + topicName;
+        String filePath = this.path + File.separator + groupId + File.separator + topicName;
         File topPath = new File(filePath);
         topPath.mkdirs();
         if (!topPath.exists()) {
@@ -272,7 +261,7 @@ public class DiskFiles {
 
     public boolean checkFileExist(FileChunksMeta fileChunksMeta) throws BrokerException {
         // ensure path exist and disk space
-        String filePath = this.path + PATH_SEPARATOR + fileChunksMeta.getGroupId() + PATH_SEPARATOR + getNodeAddress() + PATH_SEPARATOR + fileChunksMeta.getTopic() + PATH_SEPARATOR + fileChunksMeta.getFileName();
+        String filePath = this.path + File.separator + fileChunksMeta.getGroupId() + File.separator+ fileChunksMeta.getTopic() + File.separator + fileChunksMeta.getFileName();
         File file = new File(filePath);
         return file.exists();
     }
