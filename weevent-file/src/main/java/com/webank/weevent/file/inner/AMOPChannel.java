@@ -235,7 +235,7 @@ public class AMOPChannel extends AmopCallback {
             }
 
             AmopMsgResponse amopMsgResponse = JsonHelper.json2Object(rsp.getAmopMsgIn().getContent(), AmopMsgResponse.class);
-            if (ErrorCode.SUCCESS.getCode() != amopMsgResponse.getErrorCode()) {
+            if (amopMsgResponse.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
                 log.error("create remote file context failed, rsp:{}", amopMsgResponse.getErrorMessage());
                 throw toBrokerException(amopMsgResponse);
             }
@@ -392,12 +392,12 @@ public class AMOPChannel extends AmopCallback {
                     fileChunksMeta.getFileSize(),
                     fileChunksMeta.getFileMd5(),
                     topic,
-                    fileChunksMeta.getGroupId(),
-                    fileChunksMeta.isOverwrite());
+                    fileChunksMeta.getGroupId(), fileChunksMeta.isOverwrite());
         } catch (UnsupportedEncodingException e) {
             log.error("decode fileName error", e);
             throw new BrokerException(ErrorCode.DECODE_FILE_NAME_ERROR);
         }
+
         return newFileChunksMeta;
     }
 
@@ -508,7 +508,7 @@ public class AMOPChannel extends AmopCallback {
                 log.info("get {}, try to initialize context for receiving file", fileEvent.getEventType());
                 try {
                     FileChunksMeta fileChunksMeta = fileEvent.getFileChunksMeta();
-                    
+
                     FileChunksMeta retFileChunksMeta = this.fileTransportService.prepareReceiveFile(getNewFileChunksMeta(fileChunksMeta));
                     log.info("create file context success, fileName: {}", fileEvent.getFileChunksMeta().getFileName());
 
