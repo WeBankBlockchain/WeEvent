@@ -2,6 +2,7 @@
 <div class='event-table topic fileTranspoart'>
   <div class='refresh top_part'>
     <el-button type='primary' size='small' icon='el-icon-plus' @click='addNewOne'>{{$t('common.add')}}</el-button>
+    <el-button type='primary' @click='generatePPK()'>{{$t('file.generatePPK')}}</el-button>
   </div>
   <el-table
     :data="tableData"
@@ -102,7 +103,6 @@
       <template slot-scope="scope">
         <el-button size='mini' type='primary' @click.stop='fileOption(scope.row)' v-show="scope.row.role || scope.row.role === '1'">{{scope.row.role === '1' ? $t('file.upload') : $t('file.download')}}</el-button>
         <el-button size='mini' type='primary' @click='showlog = !showlog' @click.stop='getSubscribers(scope.row)' v-show="scope.row.role || scope.row.role === '1'">{{$t('file.subscribeList')}}</el-button>
-        <el-button size='mini' type='primary' @click='generatePPK(scope.row)'>{{$t('file.generatePPK')}}</el-button>
         <el-tooltip v-show="scope.row.overWrite === '1'" class="item" effect="dark" :content="$t('file.fileCover')" placement="top">
           <i class='el-icon-warning' style='font-size:18px;color:#006cff'></i>
         </el-tooltip>
