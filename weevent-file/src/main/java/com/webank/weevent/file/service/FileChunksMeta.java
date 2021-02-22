@@ -37,8 +37,6 @@ public class FileChunksMeta {
     private String groupId;
     // overwrite
     private boolean overwrite;
-    // nodeAddress
-    private String nodeAddress;
 
     // chunk size
     private int chunkSize = 0;
@@ -89,11 +87,7 @@ public class FileChunksMeta {
     public void setHost(String host) {
         this.host = host;
     }
-    
-    public void setNodeAddress(String nodeAddress) {
-        this.nodeAddress = nodeAddress;
-    }
-    
+
     public void clearPrivacy() {
         this.host = "";
         this.fileName = "";
