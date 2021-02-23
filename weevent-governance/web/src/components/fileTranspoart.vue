@@ -658,7 +658,7 @@ export default {
     },
     generatePPK (e) {
       const vm = this
-      const url = con.ROOT + 'file/genPemFile?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topicName=' + e.topicName + '&nodeAddress=' + e.nodeAddress
+      const url = con.ROOT + 'file/genPemFile?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&encryptType='
       var xhr = new XMLHttpRequest()
       var formData = new FormData()
       xhr.open('get', url)

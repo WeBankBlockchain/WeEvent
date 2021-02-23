@@ -211,7 +211,7 @@ public class FileService {
         if (chunkParam.getFileChunksMeta().checkChunkFull()) {
             CompletableFuture.runAsync(() -> {
                 String fileId = chunkParam.getFileChunksMeta().getFileId();
-                String filePath = this.uploadPath.concat(File.separator).concat(nodeAddress2Path(chunkParam.getNodeAddress())).concat(File.separator).concat(fileId).concat(File.separator).concat(chunkParam
+                String filePath = this.uploadPath.concat(File.separator).concat(fileId).concat(File.separator).concat(chunkParam.getFileChunksMeta().getGroupId()).concat(File.separator).concat(chunkParam
                         .getFileChunksMeta().getTopic()).concat(File.separator).concat(chunkParam.getFileChunksMeta().getFileName());
                 boolean overWrite = this.transportMap.get(genTransportKey(chunkParam.getBrokerId(), chunkParam.getFileChunksMeta().getGroupId(),
                         chunkParam.getNodeAddress(), chunkParam.getFileChunksMeta().getTopic()));
