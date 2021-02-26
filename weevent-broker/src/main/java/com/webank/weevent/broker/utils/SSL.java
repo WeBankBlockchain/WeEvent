@@ -1,21 +1,21 @@
 package com.webank.weevent.broker.utils;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
-import javax.net.ssl.SSLException;
-
+import com.webank.weevent.client.BrokerException;
+import com.webank.weevent.client.ErrorCode;
 import io.netty.handler.ssl.ClientAuth;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import lombok.extern.slf4j.Slf4j;
 
+
 @Slf4j
 public class SSL {
 
-    public static SslContext getSSLContext(String caCertFile, String sslCertFile, String sslKeyFile, Boolean needAuthClient) {
-
+    public static SslContext getSSLContext(String caCertFile, String sslCertFile, String sslKeyFile, Boolean needAuthClient) throws BrokerException {
+        log.info("getSSLContext form crt file:{},{},{}" , caCertFile, sslCertFile, sslKeyFile);
         InputStream caCert = null;
         InputStream sslCert = null;
         InputStream sslKey = null;
@@ -34,6 +34,7 @@ public class SSL {
                     .build();
         } catch (Exception e) {
             log.error("init ssl context error:{}", e.toString());
+            throw new BrokerException(ErrorCode.MQTT_SSL_ERROR);
         } finally {
             if (caCert != null) {
                 try {
@@ -54,7 +55,6 @@ public class SSL {
                 }
             }
         }
-        return null;
     }
 
 

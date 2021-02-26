@@ -34,15 +34,23 @@ import org.springframework.stereotype.Component;
 public class TcpBroker {
     private WeEventConfig weEventConfig;
 
+    private SslContext sslContext;
+
     private EventLoopGroup bossGroup;
     private EventLoopGroup workerGroup;
     private Channel tcpChannel;
 
     private ProtocolProcess protocolProcess;
 
+
     @Autowired
     public void setWeEventConfig(WeEventConfig weEventConfig) {
         this.weEventConfig = weEventConfig;
+    }
+
+    @Autowired
+    public void setSslContext(SslContext sslContext) {
+        this.sslContext = sslContext;
     }
 
     @Autowired
@@ -92,14 +100,8 @@ public class TcpBroker {
                                 0,
                                 weEventConfig.getKeepAlive()));
 
-                        if (weEventConfig.getSsl()){
-                            SslContext sslContext = SSL.getSSLContext(weEventConfig.getCaCertFile(),
-                                    weEventConfig.getServerCertFile(),
-                                    weEventConfig.getServerKeyFile(),
-                                    weEventConfig.getClientAuth());
-                            if(sslContext!=null){
-                                channelPipeline.addLast(sslContext.newHandler(socketChannel.alloc()));
-                            }
+                        if (weEventConfig.getSsl() && sslContext!=null ){
+                            channelPipeline.addLast(sslContext.newHandler(socketChannel.alloc()));
                         }
 //                        channelPipeline.addLast("ssl", getSslHandler(sslContext, socketChannel.alloc()));
                         channelPipeline.addLast("decoder", new MqttDecoder());
