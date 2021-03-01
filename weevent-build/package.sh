@@ -8,12 +8,12 @@
 ################################################################################
 function usage(){
     echo "Usage:"
-    echo "    package b1.6.0: ./package.sh"
+    echo "    package master: ./package.sh"
     echo "    package tag: ./package.sh --tag v1.0.0"
     echo "    package local: ./package.sh --tag local"
 }
 
-tag="b1.6.0"
+tag="master"
 version=$(grep "[ ]\+version[ ]\+\".*\"" ../build.gradle | awk '{print $2}' | sed 's/"//g')
 current_path=$(pwd)
 top_path=$(dirname ${current_path})
