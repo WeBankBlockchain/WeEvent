@@ -348,11 +348,9 @@ public class WeEventFileClient implements IWeEventFileClient {
             if (encryptType.equals("SM_TYPE")) {
                 cryptoKeyPair = (new SM2KeyPair()).generateKeyPair();
                 cryptoKeyPair= cryptoKeyPair.createKeyPair(cryptoKeyPair.getHexPrivateKey());
-                System.out.println("----------sm");
             } else {
                 cryptoKeyPair = (new ECDSAKeyPair()).generateKeyPair();
                 cryptoKeyPair= cryptoKeyPair.createKeyPair(cryptoKeyPair.getHexPrivateKey());
-                System.out.println("----------no sm");
             }
 
             KeyPair pair = cryptoKeyPair.getKeyPair();

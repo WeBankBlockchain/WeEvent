@@ -153,6 +153,8 @@ public enum ErrorCode {
     MQTT_UNKNOWN_CLIENT_ID(200611, "unknown client id"),
     MQTT_NOT_SUPPORT_QOS2(200612, "do not support qos=2"),
     MQTT_NOT_PERMISSION(200613, "not permission"),
+    MQTT_SSL_ERROR(200614, "mqtt get ssl context error"),
+
 
     FTP_INVALID_USERNAME_PASSWD(200700, "invalid username or password"),
     FTP_INVALID_HOST_PORT(200701, "invalid host or port"),
