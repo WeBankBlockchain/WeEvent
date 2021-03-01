@@ -8,6 +8,7 @@ poolSize: 10
 maxPoolSize: 200
 keepAliveSeconds: 10
 web3sdkEncryptType: ECDSA_TYPE
+#web3sdkEncryptType: SM_TYPE
 
 consumerHistoryMergeBlock: 8
 consumerIdleTime: 1000
@@ -25,8 +26,10 @@ consumerIdleTime: 1000
 #  enSslKey: "conf/gm/gmensdk.key"
 
 account:
+# ECDSA_TYPE
   accountAddress: "0x64fa644d2a694681bd6addd6c5e36cccd8dcdde3"
-#  accountAddress: "0x4278900c23e4b364ba6202a24682d99be9ff8cbc" # sm_type
+# sm_type
+#  accountAddress: "0x4278900c23e4b364ba6202a24682d99be9ff8cbc"
 #  accountFileFormat: "pem"
 #  accountFilePath: "conf"
   keyStoreDir: "account"
