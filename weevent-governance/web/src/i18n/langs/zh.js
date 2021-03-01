@@ -40,7 +40,9 @@ module.exports = {
     reqException: '数据请求异常',
     timeOut: '请求超时，请稍后重试',
     all: '全选',
-    noServer: '检测到您还未添加任何服务,请先添加相关服务'
+    noServer: '检测到您还未添加任何服务,请先添加相关服务',
+    standard: '标准 (ECDSA)',
+    guomi: '国密 (SM2)',
   },
   serverSet: {
     serverMana: '服务管理',
@@ -319,6 +321,7 @@ module.exports = {
   },
   file: {
     addOne: '新增文件传输通道',
+    secretKey: '签名算法',
     boundTopic: '绑定的主题',
     boundNode: '选择节点',
     creatTime: '创建时间',
