@@ -2,7 +2,7 @@
 <div class='event-table topic fileTranspoart'>
   <div class='refresh top_part'>
     <el-button type='primary' size='small' icon='el-icon-plus' @click='addNewOne'>{{$t('common.add')}}</el-button>
-    <el-button type='primary' @click='generatePPK()'>{{$t('file.generatePPK')}}</el-button>
+    <el-button type='primary' @click='generateSecretKey'>{{$t('file.generatePPK')}}</el-button>
   </div>
   <el-table
     :data="tableData"
@@ -147,6 +147,21 @@
       <el-button @click="dialogFormVisible = false">{{$t('common.cancel')}}</el-button>
     </div>
   </el-dialog>
+  
+  <el-dialog :title="$t('file.secretKey')" :visible.sync="dialogSecretKeyVisible" center width='450px' :close-on-click-modal='false'>
+    <el-form :model="form" ref='form' label-position="top">
+      <el-form-item>
+        <el-radio-group v-model="form.secretKey">
+	      <el-radio label="1">{{$t('common.standard')}}</el-radio>
+	      <el-radio label="0">{{$t('common.guomi')}}</el-radio>
+	    </el-radio-group>
+      </el-form-item>
+    </el-form>
+    <div slot="footer" class="dialog-footer">
+      <el-button type="primary" @click='generatePPK(form)'>{{$t('common.ok')}}</el-button>
+      <el-button @click="dialogSecretKeyVisible = false">{{$t('common.cancel')}}</el-button>
+    </div>
+  </el-dialog>
 
   <el-dialog :title="$t('file.subscribeList')" :visible.sync="showlog" center width='600px' :close-on-click-modal='false'>
     <el-table :data="topicTableData" v-loading='loading' element-loading-spinner='el-icon-loading' :element-loading-text="$t('common.loading')" element-loading-background='rgba(256,256,256,0.8)' style="width: 100%" @row-dblclick='rowClick' @expand-change='readDetail' ref='table'>
@@ -209,6 +224,7 @@ export default {
       showDownList: false,
       loading: false,
       dialogFormVisible: false,
+      dialogSecretKeyVisible: false,
       showlog: false,
       tableData: [],
       topicTableData: [],
@@ -221,6 +237,7 @@ export default {
         name: '',
         roles: '',
         overwrite: '0',
+        secretKey: '1',
         publicKey: '',
         privateKey: ''
       },
@@ -259,6 +276,9 @@ export default {
     },
     addNewOne () {
       this.dialogFormVisible = true
+    },
+    generateSecretKey () {
+      this.dialogSecretKeyVisible = true
     },
     getData () {
       const vm = this
@@ -461,7 +481,7 @@ export default {
     },
     readDetail (e) {
       const vm = this
-      const name = e.topicName
+      const name = e.nodeAddress + e.topicName
       if (vm.downLoadList[name]) {
         window.clearInterval(vm.downLoadList[name])
         delete vm.downLoadList[name]
@@ -561,6 +581,7 @@ export default {
         })
       } else {
         // download file
+        sessionStorage.setItem('nodeAddress', e.nodeAddress)
         const url = '?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&topicName=' + e.topicName + '&nodeAddress=' + e.nodeAddress + '&role=' + e.role
         API.listFile(url).then(res => {
           if (res.data.code === 0) {
@@ -630,7 +651,7 @@ export default {
       })
     },
     dFile (e) {
-      const url = con.ROOT + 'file/download?topic=' + e.topic + '&fileName=' + e.fileName + '&groupId=' + e.groupId
+      const url = con.ROOT + 'file/download?topic=' + e.topic + '&fileName=' + e.fileName + '&groupId=' + e.groupId + '&nodeAddress=' + sessionStorage.getItem('nodeAddress')
       var xhr = new XMLHttpRequest()
       var formData = new FormData()
       xhr.open('get', url)
@@ -657,8 +678,12 @@ export default {
       xhr.send(formData)
     },
     generatePPK (e) {
+      var encryptType = ''
+      if(e.secretKey === '0'){
+      	encryptType = 'SM_TYPE'
+      }
       const vm = this
-      const url = con.ROOT + 'file/genPemFile?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&encryptType='
+      const url = con.ROOT + 'file/genPemFile?brokerId=' + localStorage.getItem('brokerId') + '&groupId=' + localStorage.getItem('groupId') + '&encryptType=' + encryptType
       var xhr = new XMLHttpRequest()
       var formData = new FormData()
       xhr.open('get', url)
@@ -692,6 +717,7 @@ export default {
         }
       }
       xhr.send(formData)
+      vm.dialogSecretKeyVisible = false
     }
   },
   mounted () {
@@ -715,6 +741,12 @@ export default {
         this.form.publicKey = ''
         this.form.privateKey = ''
         this.form.overwrite = '0'
+        this.$refs.form.resetFields()
+      }
+    },
+    dialogSecretKeyVisible (nVal) {
+      if (!nVal) {
+        this.form.secretKey = '1'
         this.$refs.form.resetFields()
       }
     },

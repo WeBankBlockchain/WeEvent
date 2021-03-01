@@ -330,12 +330,14 @@ public class FileService {
                 FileChunksMeta chunksMeta = fileChunksMetaStatus.getFile();
                 FileChunksMetaEntity fileChunksMetaEntity = new FileChunksMetaEntity();
                 BeanUtils.copyProperties(chunksMeta, fileChunksMetaEntity);
+                BeanUtils.copyProperties(fileChunksMetaStatus, fileChunksMetaEntity);
                 if (Objects.equals(fileChunksMetaStatus.getProcess(), "100.00%")) {
+                	FileTransportStatusEntity fileTransportStatusEntity = this.transportStatusRepository.queryByBrokerIdAndGroupIdAndTopicNameAndFileName(brokerId, groupId, topic, fileChunksMetaStatus.getFile().getFileName());
                     fileChunksMetaEntity.setStatus("1");
+                    fileChunksMetaEntity.setSpeed(fileTransportStatusEntity.getSpeed());
                 } else {
                     fileChunksMetaEntity.setStatus("3");
                 }
-                BeanUtils.copyProperties(fileChunksMetaStatus, fileChunksMetaEntity);
                 chunksMetaEntities.add(fileChunksMetaEntity);
             }
         }
