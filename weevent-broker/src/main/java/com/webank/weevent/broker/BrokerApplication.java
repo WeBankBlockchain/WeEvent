@@ -205,10 +205,8 @@ public class BrokerApplication {
     }
 
     @Bean
-    public SslContext getSslContext(WeEventConfig config) throws BrokerException {
-        if (!config.getSsl()){
-            return null;
-        }
+    @ConditionalOnProperty(prefix = "mqtt.broker.security", name = "ssl", havingValue = "true")
+    public SslContext sslContext(WeEventConfig config) throws BrokerException {
         return SSL.getSSLContext(config.getCaCertFile(), config.getServerCertFile(), config.getServerKeyFile(), config.getClientAuth());
     }
 }
