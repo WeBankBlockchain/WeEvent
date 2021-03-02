@@ -48,7 +48,7 @@ public class TcpBroker {
         this.weEventConfig = weEventConfig;
     }
 
-    @Autowired
+    @Autowired(required=false)
     public void setSslContext(SslContext sslContext) {
         this.sslContext = sslContext;
     }
