@@ -6,7 +6,7 @@ dependencies {
     implementation("org.apache.logging.log4j:log4j-web:${log4jVersion}")
 
     // web3sdk for FISCO-BCOS 2.0
-    implementation("org.fisco-bcos.java-sdk:java-sdk:${web3sdkVersion.fisco}") {
+    implementation("org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:${web3sdkVersion.fisco}") {
         // io.netty:netty-tcnative-boringssl-static:2.0.20.Final crash
         exclude group: "io.netty"
         // compile solidity

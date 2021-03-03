@@ -3,11 +3,13 @@ package com.webank.weevent.governance.utils;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 
+import com.google.common.base.Joiner;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 
@@ -71,5 +73,14 @@ public class Utils {
         }
 
         return localFile.delete();
+    }
+
+
+    public static List<String> string2List(String s){
+        return Arrays.asList(s.split(","));
+    }
+
+    public static String list2String(List<String> list){
+        return Joiner.on(",").join(list);
     }
 }
