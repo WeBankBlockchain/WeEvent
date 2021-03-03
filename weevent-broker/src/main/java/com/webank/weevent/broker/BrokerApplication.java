@@ -6,6 +6,7 @@ import java.util.concurrent.Executor;
 
 import com.webank.weevent.broker.config.WeEventConfig;
 import com.webank.weevent.broker.filter.HttpInterceptorConfig;
+import com.webank.weevent.broker.utils.SSL;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.core.IConsumer;
 import com.webank.weevent.core.IProducer;
@@ -21,6 +22,7 @@ import com.webank.weevent.core.fisco.web3sdk.FiscoBcosDelegate;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.googlecode.jsonrpc4j.ErrorResolver;
 import com.googlecode.jsonrpc4j.spring.AutoJsonRpcServiceImplExporter;
+import io.netty.handler.ssl.SslContext;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.http11.Http11NioProtocol;
 import org.springframework.boot.SpringApplication;
@@ -125,6 +127,7 @@ public class BrokerApplication {
     @ConditionalOnProperty(prefix = "block.chain", name = "type", havingValue = "fisco")
     public FiscoBcosDelegate fiscoBcosDelegate(FiscoConfig fiscoConfig) throws BrokerException {
         log.info("++++++++++ FISCO-BCOS Enter ++++++++++");
+        fiscoConfig.load("");
         FiscoBcosDelegate fiscoBcosDelegate = new FiscoBcosDelegate();
         fiscoBcosDelegate.initProxy(fiscoConfig);
         return fiscoBcosDelegate;
@@ -199,5 +202,11 @@ public class BrokerApplication {
 
         log.info("init daemon thread pool");
         return pool;
+    }
+
+    @Bean
+    @ConditionalOnProperty(prefix = "mqtt.broker.security", name = "ssl", havingValue = "true")
+    public SslContext sslContext(WeEventConfig config) throws BrokerException {
+        return SSL.getSSLContext(config.getCaCertFile(), config.getServerCertFile(), config.getServerKeyFile(), config.getClientAuth());
     }
 }

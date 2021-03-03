@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.webank.weevent.client.BaseResponse;
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.JsonHelper;
+import com.webank.weevent.core.config.FiscoConfig;
 import com.webank.weevent.governance.common.ConstantProperties;
 import com.webank.weevent.governance.common.ErrorCode;
 import com.webank.weevent.governance.common.GovernanceException;
@@ -37,6 +38,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import static com.webank.weevent.governance.GovernanceApplication.governanceConfig;
 
 /**
  * topic service
@@ -94,6 +97,7 @@ public class TopicService {
         TopicPage result = new TopicPage();
         result.setPageIndex(pageIndex);
         result.setPageSize(pageSize);
+        result.setNodeAddress(governanceConfig.getNodeAddressList());
         if (brokerEntity == null) {
             return result;
         }
@@ -112,6 +116,7 @@ public class TopicService {
         TopicPage topicPage = invokeBrokerCGI(request, url, new TypeReference<BaseResponse<TopicPage>>() {
         }).getData();
 
+        topicPage.setNodeAddress(governanceConfig.getNodeAddressList());
         if (topicPage == null || CollectionUtils.isEmpty(topicPage.getTopicInfoList())) {
             return result;
         }

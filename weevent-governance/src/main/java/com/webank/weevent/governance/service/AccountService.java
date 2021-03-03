@@ -39,7 +39,7 @@ public class AccountService {
             if (accountEntity == null) {
                 accountEntity = new AccountEntity();
                 accountEntity.setUsername(GovernanceConfig.acount_name);
-                accountEntity.setPassword(sha256(GovernanceConfig.acount_passwrod));
+                accountEntity.setPassword(sha256(GovernanceConfig.acount_password));
                 accountRepository.save(accountEntity);
             }
         } catch (Exception e) {
