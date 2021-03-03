@@ -40,18 +40,21 @@ public class SSL {
                 try {
                     caCert.close();
                 } catch (IOException e) {
+                    log.error("caCert InputStream close error:{}", e.toString());
                 }
             }
             if (sslCert != null) {
                 try {
                     sslCert.close();
                 } catch (IOException e) {
+                    log.error("sslCert InputStream close error:{}", e.toString());
                 }
             }
             if (sslKey != null) {
                 try {
                     sslKey.close();
                 } catch (IOException e) {
+                    log.error("sslKey InputStream close error:{}", e.toString());
                 }
             }
         }
