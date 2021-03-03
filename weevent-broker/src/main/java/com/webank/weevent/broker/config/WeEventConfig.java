@@ -37,4 +37,15 @@ public class WeEventConfig {
 
     @Value("${mqtt.broker.keepalive:60}")
     private Integer keepAlive;
+
+    @Value("${mqtt.broker.security.ssl:true}")
+    private Boolean ssl;
+    @Value("${mqtt.broker.security.ssl.client_auth:true}")
+    private Boolean clientAuth;
+    @Value("${mqtt.broker.security.ssl.ca_cert:ca.crt}")
+    private String caCertFile;
+    @Value("${mqtt.broker.security.ssl.server_cert:server.crt}")
+    private String serverCertFile;
+    @Value("${mqtt.broker.security.ssl.server_key:server.key}")
+    private String serverKeyFile;
 }

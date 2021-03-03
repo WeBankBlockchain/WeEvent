@@ -20,7 +20,6 @@ import org.apache.commons.net.ftp.FTPReply;
 
 @Slf4j
 public class FtpClientService {
-    private static final String PATH_SEPARATOR = "/";
     public FTPClient ftpClient = new FTPClient();
     private String defaultDir = "";
 
@@ -243,9 +242,9 @@ public class FtpClientService {
 
                 // change ftpClient work path
                 outputStream = new FileOutputStream(localFile);
-                String workDir = remoteFilePath.substring(0, remoteFilePath.lastIndexOf(PATH_SEPARATOR));
+                String workDir = remoteFilePath.substring(0, remoteFilePath.lastIndexOf(File.separator));
                 if (StringUtils.isBlank(workDir)) {
-                    workDir = PATH_SEPARATOR;
+                    workDir = File.separator;
                 }
 
                 changeDir = ftpClient.changeWorkingDirectory(workDir);
@@ -341,7 +340,7 @@ public class FtpClientService {
             FTPFile[] ftpFiles = ftpClient.listFiles();
             if (ftpFiles != null && ftpFiles.length > 0) {
                 for (FTPFile file : ftpFiles) {
-                    String path = remoteDirPath + PATH_SEPARATOR + file.getName();
+                    String path = remoteDirPath + File.separator + file.getName();
                     if (file.isFile()) {
                         filePathList.add(path);
                     } else {
