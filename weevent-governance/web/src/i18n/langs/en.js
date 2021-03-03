@@ -40,7 +40,9 @@ module.exports = {
     reqException: 'Request exception',
     timeOut: 'Request timeout',
     all: 'all',
-    noServer: 'Please input the servers'
+    noServer: 'Please input the servers',
+    standard: 'Standard (ECDSA)',
+    guomi: 'Guo Mi (SM2)',
   },
   serverSet: {
     serverMana: 'Server Management',
@@ -319,8 +321,11 @@ module.exports = {
   },
   file: {
     addOne: 'New File Transmission',
+    secretKey: 'Sign Algorithm',
     boundTopic: 'Bound Topic',
+    boundNode: 'Bound Node',
     creatTime: 'Creat Time',
+    nodeAddress: 'Node Address',
     creater: 'Creater',
     roles: 'Roles',
     options: 'Options',
@@ -328,6 +333,7 @@ module.exports = {
     receiver: 'Receiver',
     upload: 'Upload',
     download: 'Download',
+    subscribeList: 'Subscribers List',
     publicKey: 'Public Key',
     privateKey: 'Private Key',
     isDelete: 'Delete Topic',

@@ -4,9 +4,12 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
+
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
@@ -14,6 +17,7 @@ import org.springframework.stereotype.Component;
 @Setter
 @Getter
 @Component
+@ConfigurationProperties
 @PropertySource(value = "classpath:governance.properties", encoding = "UTF-8")
 public class GovernanceConfig {
 
@@ -47,20 +51,22 @@ public class GovernanceConfig {
 
     @Value("${file.transport.path:./logs}")
     private String fileTransportPath;
-    
+
     @Value("${acount.name}")
     private String acountName;
-    
-    @Value("${acount.passwrod}")
-    private String acountPasswrod;
-    
+
+    @Value("${acount.password}")
+    private String acountPassword;
+
+    private List<String> nodeAddressList;
+
     public static String acount_name;
-    public static String acount_passwrod;
-    
+    public static String acount_password;
+
     @PostConstruct
     private void init() {
-    	acount_name = acountName;
-    	acount_passwrod = acountPasswrod;
+        acount_name = acountName;
+        acount_password = acountPassword;
     }
 
 }

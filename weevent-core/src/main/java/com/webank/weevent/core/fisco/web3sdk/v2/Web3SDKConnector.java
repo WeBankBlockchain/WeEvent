@@ -20,6 +20,7 @@ import org.fisco.bcos.sdk.config.ConfigOption;
 import org.fisco.bcos.sdk.config.exceptions.ConfigException;
 import org.fisco.bcos.sdk.config.model.ConfigProperty;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
+import org.fisco.bcos.sdk.crypto.keystore.KeyTool;
 import org.fisco.bcos.sdk.model.CryptoType;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -57,51 +58,11 @@ public class Web3SDKConnector {
         ConfigOption configOption;
 
         try {
-            Map<String, Object> cryptoMaterial = new HashMap<>();
-            cryptoMaterial.put("caCert",
-                    resolver.getResource("classpath:" + fiscoConfig.getCaCrtPath()).getFile().getPath());
-            cryptoMaterial.put("sslKey",
-                    resolver.getResource("classpath:" + fiscoConfig.getSdkKeyPath()).getFile().getPath());
-            cryptoMaterial.put("sslCert",
-                    resolver.getResource("classpath:" + fiscoConfig.getSdkCrtPath()).getFile().getPath());
-
-            if (fiscoConfig.getWeb3sdkEncryptType().equals("SM2_TYPE")) {
-                log.info("SM2_TYPE");
-                cryptoMaterial.put("enSslKey",
-                        resolver.getResource("classpath:" + fiscoConfig.getSdkGmKeyPath()).getFile().getPath());
-                cryptoMaterial.put("enSslCert",
-                        resolver.getResource("classpath:" + fiscoConfig.getSdkCrtPath()).getFile().getPath());
-            }
-            Map<String, Object> network = new HashMap<>();
-            network.put("peers", Arrays.asList(fiscoConfig.getNodes().split(";")));
-
-            Map<String, Object> account = new HashMap<>();
-            if (fiscoConfig.getWeb3sdkEncryptType().equals("SM2_TYPE")) {
-                account.put("accountAddress",
-                        resolver.getResource("classpath:" + fiscoConfig.getPemKeyPath()).getFile().getPath());
-            }
-            Map<String, Object> threadPool = new HashMap<>();
-            threadPool.put("maxBlockingQueueSize", String.valueOf(fiscoConfig.getMaxBlockingQueueSize()));
-
-            ConfigProperty configProperty = new ConfigProperty();
-            configProperty.setAccount(account);
-            configProperty.setCryptoMaterial(cryptoMaterial);
-            configProperty.setNetwork(network);
-            configProperty.setThreadPool(threadPool);
-
-            if (fiscoConfig.getWeb3sdkEncryptType().equals("ECDSA_TYPE")) {
-                configOption = new ConfigOption(configProperty, CryptoType.ECDSA_TYPE);
-            } else if (fiscoConfig.getWeb3sdkEncryptType().equals("SM2_TYPE")) {
-                configOption = new ConfigOption(configProperty, CryptoType.SM_TYPE);
-            } else {
-                log.error("unknown encrypt type:{}, support ECDSA_TYPE or SM2_TYPE", fiscoConfig.getWeb3sdkEncryptType());
-                throw new BrokerException(ErrorCode.BCOS_SDK_BUILD_ERROR);
-            }
-        } catch (ConfigException | IOException e) {
+            configOption = new ConfigOption(fiscoConfig.getConfigProperty(), CryptoType.ECDSA_TYPE);
+        } catch (ConfigException e) {
             log.error("build BcosSDK, load configOption fail", e);
             throw new BrokerException(ErrorCode.BCOS_SDK_BUILD_ERROR);
         }
-
         return new BcosSDK(configOption);
     }
 
@@ -119,10 +80,6 @@ public class Web3SDKConnector {
             StopWatch sw = StopWatch.createStarted();
 
             Client client = sdk.getClient(groupId);
-            if (fiscoConfig.getWeb3sdkEncryptType().equals("ECDSA_TYPE")) {
-                CryptoKeyPair keyPair = client.getCryptoSuite().getKeyPairFactory().createKeyPair(fiscoConfig.getAccount());
-                client.getCryptoSuite().setCryptoKeyPair(keyPair);
-            }
 
             // check connect with getNodeVersion command
             org.fisco.bcos.sdk.model.NodeVersion version = client.getNodeVersion();
