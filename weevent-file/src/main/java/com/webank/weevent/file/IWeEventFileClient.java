@@ -73,14 +73,6 @@ public interface IWeEventFileClient {
      * @throws BrokerException broker exception
      */
     void openTransport4Receiver(String topic, FileListener fileListener) throws BrokerException;
-    
-    /**
-     * get Subscribers
-     * @param topic topic name
-     * @return String Set
-     * @throws BrokerException broker exception
-     */
-    Set<String> getSubscribers(String topic) throws BrokerException;
 
     /**
      * open transport for authentication receiver.
@@ -191,4 +183,12 @@ public interface IWeEventFileClient {
      * @return node list
      */
     List<String> getNodeList();
+
+    /**
+     * get Subscribers
+     * @param topic topic name
+     * @return String Set
+     * @throws BrokerException broker exception
+     */
+    Set<String> getSubscribers(String topic) throws BrokerException;
 }

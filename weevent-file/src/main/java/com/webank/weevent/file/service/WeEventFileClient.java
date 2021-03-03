@@ -221,11 +221,6 @@ public class WeEventFileClient implements IWeEventFileClient {
 
         amopChannel.subTopic(topic, fileEventListener);
     }
-    
-    public Set<String> getSubscribers(String topic) throws BrokerException {
-        AMOPChannel amopChannel = this.fileTransportService.getChannel();
-        return amopChannel.getSubscribers(topic);
-    }
 
     public void openTransport4Receiver(String topic, FileListener fileListener, InputStream privatePem) throws BrokerException {
         // get AMOPChannel, fileTransportService and amopChannel is One-to-one correspondence
@@ -342,6 +337,25 @@ public class WeEventFileClient implements IWeEventFileClient {
         return this.fileTransportService.getDiskFiles();
     }
 
+    @Override
+    public List<String> getNodeList() {
+        return this.config.getFiscoNodes();
+    }
+
+    public Set<String> getSubscribers(String topic) throws BrokerException {
+        AMOPChannel amopChannel = this.fileTransportService.getChannel();
+        return amopChannel.getSubscribers(topic);
+    }
+
+    private static void validateLocalFile(String filePath) throws BrokerException {
+        if (StringUtils.isBlank(filePath)) {
+            throw new BrokerException(ErrorCode.LOCAL_FILE_IS_EMPTY);
+        }
+        if (!(new File(filePath)).exists()) {
+            throw new BrokerException(ErrorCode.LOCAL_FILE_NOT_EXIST);
+        }
+    }
+
     public static String genPemFile(String encryptType) throws BrokerException {
         try {
             CryptoKeyPair cryptoKeyPair ;
@@ -380,10 +394,6 @@ public class WeEventFileClient implements IWeEventFileClient {
         }
     }
 
-    @Override
-    public List<String> getNodeList() {
-        return this.config.getFiscoNodes();
-    }
 
     private static void zipFiles(File[] srcFiles, File zipFile) throws IOException {
         byte[] buf = new byte[1024];
@@ -408,15 +418,6 @@ public class WeEventFileClient implements IWeEventFileClient {
         return this.fileTransportService.getFileExistence(fileName, topic, groupId);
     }
 
-
-    private static void validateLocalFile(String filePath) throws BrokerException {
-        if (StringUtils.isBlank(filePath)) {
-            throw new BrokerException(ErrorCode.LOCAL_FILE_IS_EMPTY);
-        }
-        if (!(new File(filePath)).exists()) {
-            throw new BrokerException(ErrorCode.LOCAL_FILE_NOT_EXIST);
-        }
-    }
 
     /**
      * Interface for event notify callback
