@@ -4,7 +4,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -56,18 +55,18 @@ public class GovernanceConfig {
     @Value("${acount.name}")
     private String acountName;
 
-    @Value("${acount.passwrod}")
-    private String acountPasswrod;
+    @Value("${acount.password}")
+    private String acountPassword;
 
     private List<String> nodeAddressList;
 
     public static String acount_name;
-    public static String acount_passwrod;
+    public static String acount_password;
 
     @PostConstruct
     private void init() {
         acount_name = acountName;
-        acount_passwrod = acountPasswrod;
+        acount_password = acountPassword;
     }
 
 }
