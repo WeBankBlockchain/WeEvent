@@ -160,6 +160,6 @@ CREATE TABLE t_timer_scheduler (
 alter table t_broker add CONSTRAINT brokerUrlDeleteAt UNIQUE (broker_url, delete_at) ;
 alter table t_rule_engine add CONSTRAINT ruleNameDeleteAt UNIQUE (rule_name, delete_at);
 alter table t_topic add CONSTRAINT topicNameBrokerGroupDelete UNIQUE (topic_name,broker_id,group_id,delete_at);
-alter table t_file_transport_channel add CONSTRAINT topicBrokerGroupDelete UNIQUE (topic_name,broker_id,group_id);
+alter table t_file_transport_channel add CONSTRAINT topicBrokerGroupDelete UNIQUE (topic_name,broker_id,group_id,node_address,role);
 alter table t_topic_historical add CONSTRAINT brokerIdGroupIdEventId UNIQUE (brokerId, groupId, eventId);
 alter table t_file_transport_status add CONSTRAINT topicBrokerGroupFileName UNIQUE (broker_id,group_id,topic_name,file_name);
