@@ -13,7 +13,7 @@ consumerHistoryMergeBlock: 8
 consumerIdleTime: 1000
 
 
-################ fisco bcos sdk cofnig config ################
+################ fisco bcos sdk config ################
 # https://fisco-bcos-documentation.readthedocs.io/zh_CN/latest/docs/sdk/java_sdk/configuration.html
 
 #cryptoMaterial:
