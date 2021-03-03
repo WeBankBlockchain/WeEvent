@@ -4,6 +4,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import com.webank.weevent.broker.config.WeEventConfig;
+import com.webank.weevent.broker.utils.SSL;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
@@ -17,6 +18,7 @@ import io.netty.handler.codec.mqtt.MqttDecoder;
 import io.netty.handler.codec.mqtt.MqttEncoder;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import io.netty.handler.ssl.SslContext;
 import io.netty.handler.timeout.IdleStateHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,15 +34,23 @@ import org.springframework.stereotype.Component;
 public class TcpBroker {
     private WeEventConfig weEventConfig;
 
+    private SslContext sslContext;
+
     private EventLoopGroup bossGroup;
     private EventLoopGroup workerGroup;
     private Channel tcpChannel;
 
     private ProtocolProcess protocolProcess;
 
+
     @Autowired
     public void setWeEventConfig(WeEventConfig weEventConfig) {
         this.weEventConfig = weEventConfig;
+    }
+
+    @Autowired(required=false)
+    public void setSslContext(SslContext sslContext) {
+        this.sslContext = sslContext;
     }
 
     @Autowired
@@ -90,7 +100,10 @@ public class TcpBroker {
                                 0,
                                 weEventConfig.getKeepAlive()));
 
-                        //channelPipeline.addLast("ssl", getSslHandler(sslContext, socketChannel.alloc()));
+                        if (weEventConfig.getSsl() && sslContext!=null ){
+                            channelPipeline.addLast(sslContext.newHandler(socketChannel.alloc()));
+                        }
+//                        channelPipeline.addLast("ssl", getSslHandler(sslContext, socketChannel.alloc()));
                         channelPipeline.addLast("decoder", new MqttDecoder());
                         channelPipeline.addLast("encoder", MqttEncoder.INSTANCE);
                         channelPipeline.addLast("broker", new TcpHandler(protocolProcess));
