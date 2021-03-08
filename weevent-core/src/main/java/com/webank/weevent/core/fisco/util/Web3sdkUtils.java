@@ -61,7 +61,7 @@ public class Web3sdkUtils {
             taskExecutor.initialize();
 
             if (StringUtils.isBlank(fiscoConfig.getWeEventCoreConfig().getVersion())) {
-                log.error("empty FISCO-BCOS version in fisco.properties");
+                log.error("empty FISCO-BCOS version in fisco.yml");
                 systemExit(1);
             }
 

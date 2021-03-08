@@ -3,6 +3,7 @@ package com.webank.weevent.file;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import com.webank.weevent.client.BrokerException;
 import com.webank.weevent.client.SendResult;
@@ -355,7 +356,6 @@ public class WeEventFileClientTest {
 
     @Test
     public void testGetPemFile() throws BrokerException {
-//        WeEventFileClient.genPemFile(fiscoConfig.getWeEventCoreConfig().getWeb3sdkEncryptType());
         WeEventFileClient.genPemFile("SM_TYPE");
         Assert.assertTrue(true);
     }
@@ -368,4 +368,13 @@ public class WeEventFileClientTest {
         boolean ret = weEventFileClient.isFileExist("conf/ca.crt", this.topicName, this.groupId);
         Assert.assertTrue(ret);
     }
+
+    @Test
+    public void testGetSubscribers() throws BrokerException {
+        WeEventFileClient weEventFileClient = new WeEventFileClient(this.groupId, this.localReceivePath, this.fileChunkSize, this.fiscoConfig);
+        Set<String> subscribers = weEventFileClient.getSubscribers(this.topicName);
+        System.out.println("subscribers:" + subscribers);
+        Assert.assertTrue(true);
+    }
+
 }
