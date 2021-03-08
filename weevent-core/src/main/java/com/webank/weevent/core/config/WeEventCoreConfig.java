@@ -27,8 +27,6 @@ public class WeEventCoreConfig {
 
     private Integer keepAliveSeconds;
 
-    private String web3sdkEncryptType;
-
     private Integer consumerIdleTime;
 
     private Integer consumerHistoryMergeBlock;

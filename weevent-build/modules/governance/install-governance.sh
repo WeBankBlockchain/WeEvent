@@ -8,9 +8,9 @@ function governance_setup() {
     cp -r ./* ${out_path}/
 
     install_top_path=$(dirname ${out_path})
-    cp ${install_top_path}/broker/conf/ca.crt ${out_path}/conf/
-    cp ${install_top_path}/broker/conf/sdk.* ${out_path}/conf/
-    cp ${install_top_path}/broker/conf/fisco.properties ${out_path}/conf/
+    rm -rf ${out_path}/conf/conf
+    cp -rf ${install_top_path}/broker/conf/conf ${out_path}/conf
+    cp -rf ${install_top_path}/broker/conf/fisco.yml ${out_path}/conf/
 
     rm -f ${out_path}/install-governance.sh
 
