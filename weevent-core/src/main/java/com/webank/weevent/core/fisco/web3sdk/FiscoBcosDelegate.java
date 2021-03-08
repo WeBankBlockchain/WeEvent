@@ -32,7 +32,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /**
- * Detect FISCO-BCOS version from configuration 'fisco.properties' and then proxy all the invoke to the target.
+ * Detect FISCO-BCOS version from configuration 'fisco.yml' and then proxy all the invoke to the target.
  * Parameter groupId in all interface:
  * default 1L in 2.x, meanings first group
  * There is 2 different caches for block data. One is local memory, another is redis.
@@ -76,11 +76,11 @@ public class FiscoBcosDelegate {
                 config.getWeEventCoreConfig().getKeepAliveSeconds());
 
         if (StringUtils.isBlank(config.getWeEventCoreConfig().getVersion())) {
-            log.error("the fisco version in fisco.properties is empty");
+            log.error("the fisco version in fisco.yml is empty");
             throw new BrokerException(ErrorCode.WEB3SDK_INIT_ERROR);
         }
         if (0 == config.getConfigProperty().getNetwork().size()) {
-            log.error("the fisco nodes in fisco.properties is null");
+            log.error("the fisco nodes in fisco.yml is null");
             throw new BrokerException(ErrorCode.WEB3SDK_INIT_ERROR);
         }
 
