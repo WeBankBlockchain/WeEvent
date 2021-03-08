@@ -30,6 +30,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.fisco.bcos.sdk.model.CryptoType.ECDSA_TYPE;
+
 /**
  * FiscoBcosTopicAdmin Tester.
  *
@@ -49,6 +51,8 @@ public class FiscoTopicAdminTest extends JUnitTestBase {
     private IProducer iProducer;
     private final long transactionTimeout = 10;
     private FiscoConfig fiscoConfig;
+
+    private int cryptoType = ECDSA_TYPE;
 
     @Before
     public void before() throws Exception {
@@ -1103,7 +1107,7 @@ public class FiscoTopicAdminTest extends JUnitTestBase {
     }
 
     private CryptoKeyPair getExternalAccountCryptoKeyPair() {
-        if (fiscoConfig.getWeEventCoreConfig().getWeb3sdkEncryptType().equals("ECDSA_TYPE")) {
+        if ( cryptoType == ECDSA_TYPE) {
             return (new ECDSAKeyPair()).generateKeyPair();
         } else {
             return (new SM2KeyPair()).generateKeyPair();

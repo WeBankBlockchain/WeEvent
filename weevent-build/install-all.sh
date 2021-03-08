@@ -13,7 +13,6 @@ governance_port=7009
 processor_port=7008
 zookeeper_connect_string=
 block_chain_version=
-block_chain_channel=
 block_chain_node_path=
 database_type=
 mysql_ip=
@@ -22,6 +21,8 @@ mysql_user=
 mysql_password=
 
 current_path=$PWD
+
+fisco_config_file=$PWD/fisco.yml
 
 function yellow_echo (){
     local what=$*
@@ -49,7 +50,6 @@ function properties_get(){
 function set_global_param(){
     java_home_path=$(properties_get "JAVA_HOME")
     block_chain_version=$(properties_get "fisco-bcos.version")
-    block_chain_channel=$(properties_get "fisco-bcos.channel")
     block_chain_node_path=$(properties_get  "fisco-bcos.node_path")
     if [[ "${block_chain_node_path:0:1}" == "~" ]];then
         block_chain_node_path=$(realpath -m ${HOME}/${block_chain_node_path:1})
@@ -126,7 +126,6 @@ function check_param(){
         check_port $(echo ${zookeeper_connect_string} | cut -d ":" -f2)
     fi
     if [[ -d ${block_chain_node_path} ]]; then
-        check_telnet ${block_chain_channel}
         echo "param ok"
     else
         echo "path not exist, ${block_chain_node_path}"
@@ -160,7 +159,7 @@ function install_module(){
 
     yellow_echo "install module broker"
     cd ${current_path}/modules/broker
-    ./install-broker.sh --out_path ${out_path}/broker --listen_port ${broker_port} --block_chain_node_path ${block_chain_node_path} --channel_info ${block_chain_channel} --version ${block_chain_version} --zookeeper_connect_string ${zookeeper_connect_string}
+    ./install-broker.sh --out_path ${out_path}/broker --listen_port ${broker_port} --block_chain_node_path ${block_chain_node_path}  --version ${block_chain_version} --zookeeper_connect_string ${zookeeper_connect_string}  --fisco_config_file ${fisco_config_file}
     check_result "install broker"
 
     if [[ ${governance_enable} = "true" ]];then

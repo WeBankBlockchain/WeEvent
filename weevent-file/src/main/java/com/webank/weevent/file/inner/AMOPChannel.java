@@ -35,6 +35,7 @@ import org.fisco.bcos.sdk.amop.AmopMsgOut;
 import org.fisco.bcos.sdk.amop.AmopResponse;
 import org.fisco.bcos.sdk.amop.topic.AmopMsgIn;
 import org.fisco.bcos.sdk.amop.topic.TopicType;
+import org.fisco.bcos.sdk.client.protocol.response.NodeInfo;
 import org.fisco.bcos.sdk.client.protocol.response.Peers;
 import org.fisco.bcos.sdk.client.protocol.response.Peers.PeerInfo;
 import org.fisco.bcos.sdk.crypto.keystore.KeyTool;
@@ -115,15 +116,43 @@ public class AMOPChannel extends AmopCallback {
 
     public Set<String> getSubscribers(String topic) {
     	Integer groupId = Integer.parseInt(WeEvent.DEFAULT_GROUP_ID);
-        Set<String> subscribers = new HashSet<>();
-        Peers peers = this.bcosSDK.getClient(groupId).getPeers();
-        log.info("peers:{}", peers.getPeers());
-        for (Peers.PeerInfo peer : peers.getPeers()){
-            if(peer.getTopic().contains(topic)){
-                subscribers.add(peer.getIpAndPort());
+        Set<String> subscriberIPs = new HashSet<>();
+        Set<String> subscriberNodeIds = new HashSet<>();
+
+        try {
+            List<PeerInfo> peers = this.bcosSDK.getClient(groupId).getPeers().getPeers();
+            log.info("getSubscribers: peers {}, {}", topic, peers);
+            for (Peers.PeerInfo peer : peers){
+                if(peer.getTopic().contains(topic)){
+                    subscriberIPs.add(peer.getIpAndPort());
+                    subscriberNodeIds.add(peer.getNodeID());
+                    log.info("subscribers peer {}, {}", topic, peer.getNodeID(), peer.getIpAndPort());
+                }
+            }
+        } catch (Exception e) {
+            log.error("getPeers error:{} {}", topic, e.toString());
+        }
+
+
+        List<String> connectedNodes = this.bcosSDK.getConfig().getNetworkConfig().getPeers();
+        log.info("getSubscribers: nodes {}", connectedNodes);
+        for (String nodeIp : connectedNodes){
+            NodeInfo.NodeInformation nodeInfo = null;
+            try {
+                nodeInfo = this.bcosSDK.getClient(groupId).getNodeInfo(nodeIp).getNodeInfo();
+            } catch (Exception e) {
+                log.error("getNodeInfo error:{} {} {}", topic, nodeIp, e.toString());
+                continue;
+            }
+            log.info("getSubscribers: node {}, {}, {}", topic, nodeIp, nodeInfo);
+            if(nodeInfo.getTopic().contains(topic)){
+                subscriberIPs.add(nodeInfo.getIpAndPort());
+                subscriberNodeIds.add(nodeInfo.getNodeID());
+                log.info("subscribers node {}, {}", topic, nodeInfo.getNodeID(), nodeInfo.getIpAndPort());
             }
         }
-        return subscribers;
+        log.info("getSubscribers:{} {}", subscriberIPs, subscriberNodeIds);
+        return subscriberNodeIds;
     }
 
     // Receiver call subscribe topic
