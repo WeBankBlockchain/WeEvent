@@ -225,7 +225,7 @@ public class FileService {
                             chunkParam.getFileChunksMeta().getFileName());
                     transportStatusRepository.updateTransportStatus(ConstantProperties.SUCCESS, status.getId().longValue());
                 } catch (BrokerException | IOException e) {
-                    log.error("publish file error, fileName:{}.", chunkParam.getFileChunksMeta().getFileName(), e);
+                    log.error("publish file error, fileName:{}, {}.", chunkParam.getFileChunksMeta().getFileName(), e);
                     transportStatusRepository.updateTransportStatus(ConstantProperties.FAILED, status.getId().longValue());
                 } finally {
                     // remove local file after publish
