@@ -171,11 +171,12 @@ public class WeEventFileClient implements IWeEventFileClient {
         }
 
         String newTopic = this.fileTransportService.getChannel().switchTopic(topic);
-        boolean resOpen = iProducer.open(newTopic, this.groupId);
-        if (!resOpen) {
-            log.error("create topic: {} failed.", newTopic);
-            throw new BrokerException(ErrorCode.TOPIC_CREATE_FAILED);
-        }
+// unnecessary
+//       boolean resOpen = iProducer.open(newTopic, this.groupId);
+//        if (!resOpen) {
+//            log.error("create topic: {} failed.", newTopic);
+//            throw new BrokerException(ErrorCode.TOPIC_CREATE_FAILED);
+//        }
 
         AMOPChannel amopChannel = this.fileTransportService.getChannel();
         if (amopChannel.senderTopics.contains(topic)) {
@@ -358,13 +359,13 @@ public class WeEventFileClient implements IWeEventFileClient {
 
     public static String genPemFile(String encryptType) throws BrokerException {
         try {
-            CryptoKeyPair cryptoKeyPair ;
+            CryptoKeyPair cryptoKeyPair;
             if (encryptType.equals("SM_TYPE")) {
                 cryptoKeyPair = (new SM2KeyPair()).generateKeyPair();
-                cryptoKeyPair= cryptoKeyPair.createKeyPair(cryptoKeyPair.getHexPrivateKey());
+                cryptoKeyPair = cryptoKeyPair.createKeyPair(cryptoKeyPair.getHexPrivateKey());
             } else {
                 cryptoKeyPair = (new ECDSAKeyPair()).generateKeyPair();
-                cryptoKeyPair= cryptoKeyPair.createKeyPair(cryptoKeyPair.getHexPrivateKey());
+                cryptoKeyPair = cryptoKeyPair.createKeyPair(cryptoKeyPair.getHexPrivateKey());
             }
 
             KeyPair pair = cryptoKeyPair.getKeyPair();
@@ -434,7 +435,7 @@ public class WeEventFileClient implements IWeEventFileClient {
         /**
          * Called while new event arrived.
          *
-         * @param topic topic name
+         * @param topic    topic name
          * @param fileName file name
          */
         void onEvent(String topic, String fileName);
