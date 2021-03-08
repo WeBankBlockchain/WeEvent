@@ -148,10 +148,11 @@ public class FileTransportService {
     }
 
     public FileChunksMeta openChannel(FileChunksMeta fileChunksMeta) throws BrokerException {
-        if (!this.producer.exist(fileChunksMeta.getTopic(), fileChunksMeta.getGroupId())) {
-            log.error("topic:{} not exist, fileId: {}", fileChunksMeta.getTopic(), fileChunksMeta.getFileId());
-            throw new BrokerException(ErrorCode.TOPIC_NOT_EXIST);
-        }
+// unnecessary
+//        if (!this.producer.exist(fileChunksMeta.getTopic(), fileChunksMeta.getGroupId())) {
+//            log.error("topic:{} not exist, fileId: {}", fileChunksMeta.getTopic(), fileChunksMeta.getFileId());
+//            throw new BrokerException(ErrorCode.TOPIC_NOT_EXIST);
+//        }
         if (this.fileTransportContexts.containsKey(fileChunksMeta.getFileId())) {
             log.error("already exist file context, fileId: {}", fileChunksMeta.getFileId());
             throw new BrokerException(ErrorCode.FILE_EXIST_CONTEXT);
