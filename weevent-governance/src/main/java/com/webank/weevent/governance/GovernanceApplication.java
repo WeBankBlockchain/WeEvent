@@ -5,6 +5,7 @@ import java.net.UnknownHostException;
 
 import javax.net.ssl.SSLException;
 
+import com.webank.weevent.core.config.FiscoConfig;
 import com.webank.weevent.governance.common.GovernanceConfig;
 
 import lombok.extern.slf4j.Slf4j;
@@ -62,6 +63,13 @@ public class GovernanceApplication {
     @Autowired
     public void setGovernanceConfig(GovernanceConfig config) {
         governanceConfig = config;
+    }
+
+    @Bean
+    public FiscoConfig fiscoConfig(){
+        FiscoConfig fiscoConfig = new FiscoConfig();
+        fiscoConfig.load("");
+        return fiscoConfig;
     }
 
     @Bean

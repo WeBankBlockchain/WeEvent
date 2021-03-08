@@ -7,8 +7,6 @@ timeout: 10000
 poolSize: 10
 maxPoolSize: 200
 keepAliveSeconds: 10
-web3sdkEncryptType: ECDSA_TYPE
-#web3sdkEncryptType: SM_TYPE
 
 consumerHistoryMergeBlock: 8
 consumerIdleTime: 1000

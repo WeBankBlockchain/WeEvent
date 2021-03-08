@@ -5,8 +5,10 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -25,6 +27,7 @@ import com.webank.weevent.governance.entity.TopicPage;
 import com.webank.weevent.governance.entity.TopicPageEntity;
 import com.webank.weevent.governance.enums.IsDeleteEnum;
 import com.webank.weevent.governance.repository.TopicRepository;
+import com.webank.weevent.governance.utils.Utils;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
@@ -58,6 +61,9 @@ public class TopicService {
 
     @Autowired
     private CommonService commonService;
+
+    @Autowired
+    private FiscoConfig fiscoConfig;
 
     private final String SPLIT = "-";
 
@@ -97,7 +103,7 @@ public class TopicService {
         TopicPage result = new TopicPage();
         result.setPageIndex(pageIndex);
         result.setPageSize(pageSize);
-        result.setNodeAddress(governanceConfig.getNodeAddressList());
+        result.setNodeAddress(this.getNodeAddressList());
         if (brokerEntity == null) {
             return result;
         }
@@ -116,7 +122,7 @@ public class TopicService {
         TopicPage topicPage = invokeBrokerCGI(request, url, new TypeReference<BaseResponse<TopicPage>>() {
         }).getData();
 
-        topicPage.setNodeAddress(governanceConfig.getNodeAddressList());
+        topicPage.setNodeAddress(this.getNodeAddressList());
         if (topicPage == null || CollectionUtils.isEmpty(topicPage.getTopicInfoList())) {
             return result;
         }
@@ -265,4 +271,13 @@ public class TopicService {
         }
     }
 
+    private List<String> getNodeAddressList() {
+        Set<String> nodeAddressList = new HashSet<>();
+        nodeAddressList.add(Utils.list2String(fiscoConfig.getFiscoNodes()));
+        if (governanceConfig.getNodeAddressList() != null) {
+            nodeAddressList.addAll(governanceConfig.getNodeAddressList());
+        }
+
+        return new ArrayList<>(nodeAddressList);
+    }
 }
