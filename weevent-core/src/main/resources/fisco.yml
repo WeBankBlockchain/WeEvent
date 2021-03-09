@@ -26,10 +26,10 @@ consumerIdleTime: 1000
 account:
 # ECDSA_TYPE
   accountAddress: "0x64fa644d2a694681bd6addd6c5e36cccd8dcdde3"
-# sm_type
+#  SM_TYPE
 #  accountAddress: "0x4278900c23e4b364ba6202a24682d99be9ff8cbc"
 #  accountFileFormat: "pem"
-#  accountFilePath: "conf"
+#  accountFilePath: ""
   keyStoreDir: "account"
 #  password: ""
 
