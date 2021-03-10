@@ -490,11 +490,11 @@ export default {
         if (e.role === '0') {
           vm.downLoadList[name] = setInterval(fun => {
             vm.downStatus(e)
-          }, 1000)
+          }, 2000)
         } else {
           vm.downLoadList[name] = setInterval(fun => {
             vm.upStatus(e)
-          }, 1000)
+          }, 2000)
         }
       }
     },
