@@ -40,29 +40,28 @@ public class InitialDb implements AutoCloseable {
     }
 
     private void createDataBase() throws Exception {
-        try {
-            String goalUrl = properties.getProperty("spring.datasource.url");
-            this.user = properties.getProperty("spring.datasource.username");
-            this.password = properties.getProperty("spring.datasource.password");
-            String driverName = properties.getProperty("spring.datasource.driverClassName");
-            boolean flag = driverName.contains("mariadb");
-            if (flag) {
-                databaseType = "mysql";
-            }
-            int first = goalUrl.lastIndexOf("/") + 1;
-            this.dbName = goalUrl.substring(first);
-            // get mysql default url like jdbc:mysql://127.0.0.1:3306
-            String defaultUrl = flag ? goalUrl.substring(0, first) : goalUrl;
-            Class.forName(driverName);
-
-            List<String> tableSqlList = readCEPSql();
-
-            runScript(defaultUrl, flag, tableSqlList);
-        } catch (Exception e) {
-            log.error("create database error,{}", e.getMessage());
-            throw e;
+        String goalUrl = properties.getProperty("spring.datasource.url");
+        this.user = properties.getProperty("spring.datasource.username");
+        this.password = properties.getProperty("spring.datasource.password");
+        String driverName = properties.getProperty("spring.datasource.driver-class-name");
+        boolean flag = driverName.contains("mariadb");
+        if (flag) {
+            databaseType = "mysql";
         }
+        int first = goalUrl.lastIndexOf("/") + 1;
+        int endTag = goalUrl.indexOf("?");
+        if (endTag == -1) {
+            endTag = goalUrl.length();
+        }
+        this.dbName = goalUrl.substring(first, endTag);
+        // get mysql default url like jdbc:mysql://127.0.0.1:3306
+        String defaultUrl = flag ? goalUrl.substring(0, first) : goalUrl;
+        log.info("dbName:{},defaultUrl:{}, {}", this.dbName, defaultUrl, databaseType);
+        Class.forName(driverName);
 
+        List<String> tableSqlList = readSql();
+
+        runScript(defaultUrl, flag, tableSqlList);
     }
 
     private Properties getProperties() throws Exception {
@@ -74,7 +73,7 @@ public class InitialDb implements AutoCloseable {
     }
 
 
-    private static List<String> readCEPSql() throws IOException {
+    private static List<String> readSql() throws IOException {
         InputStream resourceAsStream = InitialDb.class.getResourceAsStream("/cep_rule_" + databaseType + ".sql");
         StringBuffer sqlBuffer = new StringBuffer();
         List<String> sqlList = new ArrayList<>();
