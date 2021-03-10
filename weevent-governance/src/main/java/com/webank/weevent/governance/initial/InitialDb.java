@@ -47,13 +47,15 @@ public class InitialDb implements AutoCloseable {
         if (flag) {
             databaseType = "mysql";
         }
-        // first use dbself database
-        int first = goalUrl.lastIndexOf("/");
-        int end = goalUrl.lastIndexOf("?");
-        this.dbName = flag ? goalUrl.substring(first + 1, end) : goalUrl.substring(first + 1);
+        int first = goalUrl.lastIndexOf("/") + 1;
+        int endTag = goalUrl.indexOf("?");
+        if (endTag == -1) {
+            endTag = goalUrl.length();
+        }
+        this.dbName = goalUrl.substring(first, endTag);
         // get mysql default url like jdbc:mysql://127.0.0.1:3306
         String defaultUrl = flag ? goalUrl.substring(0, first) : goalUrl;
-
+        log.info("dbName:{},defaultUrl:{}, {}", this.dbName, defaultUrl, databaseType);
         Class.forName(driverName);
 
         List<String> tableSqlList = readSql();
