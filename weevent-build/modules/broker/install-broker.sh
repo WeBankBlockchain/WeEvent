@@ -71,6 +71,46 @@ else
 fi
 echo "set lister_port success"
 
+if [[ ${database_type} != "h2" ]];then
+    switch_database_to_mysql "${application_properties}"
+
+    if [[ -z ${mysql_ip} ]];then
+        echo "mysql_ip is empty."
+        echo "set mysql_ip failed"
+        exit 1
+    else
+       sed -i "s/127.0.0.1:3306/${mysql_ip}:3306/" ${application_properties}
+    fi
+    echo "set mysql_ip success"
+
+    if [[ -z ${mysql_port} ]];then
+        echo "mysql_port is empty."
+        echo "set mysql_port failed"
+        exit 1
+    else
+        sed -i "s/3306/${mysql_port}/" ${application_properties}
+    fi
+    echo "set mysql_port success"
+
+    if [[ -z ${mysql_user} ]];then
+        echo "mysql_user is empty."
+        echo "set mysql_user failed"
+        exit 1
+    else
+        sed -i "s/xxxx/${mysql_user}/" ${application_properties}
+    fi
+    echo "set mysql_user success"
+
+    if [[ -z ${mysql_pwd} ]];then
+        echo "mysql_pwd is empty"
+        echo "set mysql_pwd failed"
+        exit 1
+    else
+        sed -i "s/yyyy/${mysql_pwd}/" ${application_properties}
+    fi
+    echo "set mysql_pwd success"
+fi
+
 if [[ -n ${zookeeper_connect_string} ]];then
   sed -i "/spring.cloud.zookeeper.connect-string=/cspring.cloud.zookeeper.connect-string=${zookeeper_connect_string}" ${out_path}/conf/application-prod.properties
 else
@@ -78,5 +118,23 @@ else
     exit 1
 fi
 echo "set zookeeper_connect_string success"
+
+# init db, create database and tables
+cd ${out_path}
+./init-broker.sh
+if [[ $? -ne 0 ]];then
+
+    echo "Error,init mysql fail"
+    exit 1
+fi
+echo "init db success"
+
+function switch_database_to_mysql() {
+    mysql_config_line=$(cat -n $1|grep 'spring.jpa.database=mysql'|awk '{print $1}'|head -1)
+    sed -i ''$mysql_config_line','$((mysql_config_line+4))'s/^#//' $1
+
+    h2_config_line=$(cat -n $1|grep 'spring.jpa.database=h2'|awk '{print $1}'|head -1)
+    sed -i ''$h2_config_line','$((h2_config_line+4))'s/^/#/' $1
+}
 
 echo "broker module install success"
