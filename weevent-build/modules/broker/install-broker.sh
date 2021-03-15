@@ -1,12 +1,31 @@
 #!/bin/bash
+
+# usage
+if [[ $# -lt 2 ]]; then
+    echo "Usage:"
+    echo "    $0 --out_path /data/app/weevent-install/broker "
+    echo "      --server_port --database_type --mysql_ip --mysql_port  --mysql_user  --mysql_pwd  "
+    exit 1
+fi
+
 #get parameter
 para=""
 current_path=$(pwd)
+database_type=""
+mysql_ip=""
+mysql_port=""
+mysql_user=""
+mysql_pwd=""
 
 while [[ $# -ge 2 ]] ; do
     case "$1" in
     --out_path) para="$1 = $2;";out_path="$2";shift 2;;
     --listen_port) para="$1 = $2;";listen_port="$2";shift 2;;
+    --database_type) para="$1 = $2;";database_type="$2";shift 2;;
+    --mysql_ip) para="$1 = $2;";mysql_ip="$2";shift 2;;
+    --mysql_port) para="$1 = $2;";mysql_port="$2";shift 2;;
+    --mysql_user) para="$1 = $2;";mysql_user="$2";shift 2;;
+    --mysql_pwd) para="$1 = $2;";mysql_pwd="$2";shift 2;;
     --block_chain_node_path) para="$1 = $2;";block_chain_node_path="$2";shift 2;;
     --version) para="$1 = $2;";version="$2";shift 2;;
     --zookeeper_connect_string) para="$1 = $2;";zookeeper_connect_string="$2";shift 2;;
@@ -21,6 +40,11 @@ echo "param version: ${version}"
 echo "param block_chain_node_path: ${block_chain_node_path}"
 echo "param zookeeper_connect_string: ${zookeeper_connect_string}"
 echo "param fisco_config_file: ${fisco_config_file}"
+echo "param database_type: ${database_type}"
+echo "param mysql_ip: ${mysql_ip}"
+echo "param mysql_port: ${mysql_port}"
+echo "param mysql_user: ${mysql_user}"
+echo "param mysql_pwd: ${mysql_pwd}"
 
 
 #copy file
@@ -61,18 +85,30 @@ else
     exit 1
 fi
 
+application_properties=${out_path}/conf/application-prod.properties
+
 cd ${current_path}
 
 if [[ ${listen_port} -gt 0 ]]; then
-    sed -i "/server.port=/cserver.port=${listen_port}" ${out_path}/conf/application-prod.properties
+    sed -i "/server.port=/cserver.port=${listen_port}" ${application_properties}
 else
     echo "listen_port is err"
     exit 1
 fi
 echo "set lister_port success"
 
+function switch_database_to_mysql() {
+    mysql_config_line=$(cat -n $1|grep 'spring.jpa.database=mysql'|awk '{print $1}'|head -1)
+    sed -i ''$mysql_config_line','$((mysql_config_line+4))'s/^#//' $1
+
+    h2_config_line=$(cat -n $1|grep 'spring.jpa.database=h2'|awk '{print $1}'|head -1)
+    sed -i ''$h2_config_line','$((h2_config_line+4))'s/^/#/' $1
+}
+
+
 if [[ ${database_type} != "h2" ]];then
     switch_database_to_mysql "${application_properties}"
+    echo "switch_database_to_mysql ok"
 
     if [[ -z ${mysql_ip} ]];then
         echo "mysql_ip is empty."
@@ -128,13 +164,5 @@ if [[ $? -ne 0 ]];then
     exit 1
 fi
 echo "init db success"
-
-function switch_database_to_mysql() {
-    mysql_config_line=$(cat -n $1|grep 'spring.jpa.database=mysql'|awk '{print $1}'|head -1)
-    sed -i ''$mysql_config_line','$((mysql_config_line+4))'s/^#//' $1
-
-    h2_config_line=$(cat -n $1|grep 'spring.jpa.database=h2'|awk '{print $1}'|head -1)
-    sed -i ''$h2_config_line','$((h2_config_line+4))'s/^/#/' $1
-}
 
 echo "broker module install success"

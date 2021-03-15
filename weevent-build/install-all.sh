@@ -159,7 +159,7 @@ function install_module(){
 
     yellow_echo "install module broker"
     cd ${current_path}/modules/broker
-    ./install-broker.sh --out_path ${out_path}/broker --listen_port ${broker_port} --block_chain_node_path ${block_chain_node_path}  --version ${block_chain_version} --zookeeper_connect_string ${zookeeper_connect_string}  --fisco_config_file ${fisco_config_file}
+    ./install-broker.sh --out_path ${out_path}/broker --listen_port ${broker_port} --block_chain_node_path ${block_chain_node_path}  --version ${block_chain_version} --zookeeper_connect_string ${zookeeper_connect_string}  --fisco_config_file ${fisco_config_file} --database_type ${database_type} --mysql_ip ${mysql_ip} --mysql_port ${mysql_port} --mysql_user ${mysql_user} --mysql_pwd ${mysql_password} 
     check_result "install broker"
 
     if [[ ${governance_enable} = "true" ]];then
@@ -189,6 +189,9 @@ function config_java_home(){
     fi
     if [[ -e ${current_path}/modules/broker/deploy-fabric-topic-control.sh ]];then
         sed -i "/JAVA_HOME=/cJAVA_HOME=${java_home_path}" ${current_path}/modules/broker/deploy-fabric-topic-control.sh
+    fi
+    if [[ -e ${current_path}/modules/broker/init-broker.sh ]];then
+        sed -i "/JAVA_HOME=/cJAVA_HOME=${java_home_path}" ${current_path}/modules/broker/init-broker.sh
     fi
     if [[ -e ${current_path}/modules/governance/governance.sh ]];then
         sed -i "/JAVA_HOME=/cJAVA_HOME=${java_home_path}" ${current_path}/modules/governance/governance.sh
