@@ -34,6 +34,7 @@ import org.fisco.bcos.sdk.amop.AmopCallback;
 import org.fisco.bcos.sdk.amop.AmopMsgOut;
 import org.fisco.bcos.sdk.amop.AmopResponse;
 import org.fisco.bcos.sdk.amop.topic.AmopMsgIn;
+import org.fisco.bcos.sdk.amop.topic.TopicManager;
 import org.fisco.bcos.sdk.amop.topic.TopicType;
 import org.fisco.bcos.sdk.client.protocol.response.NodeInfo;
 import org.fisco.bcos.sdk.client.protocol.response.Peers;
@@ -115,18 +116,21 @@ public class AMOPChannel extends AmopCallback {
     }
 
     public Set<String> getSubscribers(String topic) {
-    	Integer groupId = Integer.parseInt(WeEvent.DEFAULT_GROUP_ID);
+        Integer groupId = Integer.parseInt(WeEvent.DEFAULT_GROUP_ID);
         Set<String> subscriberIPs = new HashSet<>();
         Set<String> subscriberNodeIds = new HashSet<>();
 
         try {
             List<PeerInfo> peers = this.bcosSDK.getClient(groupId).getPeers().getPeers();
             log.info("getSubscribers: peers {}, {}", topic, peers);
-            for (Peers.PeerInfo peer : peers){
-                if(peer.getTopic().contains(topic)){
-                    subscriberIPs.add(peer.getIpAndPort());
-                    subscriberNodeIds.add(peer.getNodeID());
-                    log.info("subscribers peer {}, {}", topic, peer.getNodeID(), peer.getIpAndPort());
+            for (Peers.PeerInfo peer : peers) {
+                for (String subTopic : peer.getTopic()) {
+                    if (matchTopic(subTopic, topic)) {
+                        subscriberIPs.add(peer.getIpAndPort());
+                        subscriberNodeIds.add(peer.getNodeID());
+                        log.info("subscribers peer {}, {}", topic, peer.getNodeID(), peer.getIpAndPort());
+                        break;
+                    }
                 }
             }
         } catch (Exception e) {
@@ -136,7 +140,7 @@ public class AMOPChannel extends AmopCallback {
 
         List<String> connectedNodes = this.bcosSDK.getConfig().getNetworkConfig().getPeers();
         log.info("getSubscribers: nodes {}", connectedNodes);
-        for (String nodeIp : connectedNodes){
+        for (String nodeIp : connectedNodes) {
             NodeInfo.NodeInformation nodeInfo = null;
             try {
                 nodeInfo = this.bcosSDK.getClient(groupId).getNodeInfo(nodeIp).getNodeInfo();
@@ -145,10 +149,13 @@ public class AMOPChannel extends AmopCallback {
                 continue;
             }
             log.info("getSubscribers: node {}, {}, {}", topic, nodeIp, nodeInfo);
-            if(nodeInfo.getTopic().contains(topic)){
-                subscriberIPs.add(nodeInfo.getIpAndPort());
-                subscriberNodeIds.add(nodeInfo.getNodeID());
-                log.info("subscribers node {}, {}", topic, nodeInfo.getNodeID(), nodeInfo.getIpAndPort());
+            for (String subTopic : nodeInfo.getTopic()) {
+                if (matchTopic(subTopic, topic)) {
+                    subscriberIPs.add(nodeInfo.getIpAndPort());
+                    subscriberNodeIds.add(nodeInfo.getNodeID());
+                    log.info("subscribers node {}, {}", topic, nodeInfo.getNodeID(), nodeInfo.getIpAndPort());
+                }
+                break;
             }
         }
         log.info("getSubscribers:{} {}", subscriberIPs, subscriberNodeIds);
@@ -404,7 +411,7 @@ public class AMOPChannel extends AmopCallback {
     public FileChunksMeta getNewFileChunksMeta(FileChunksMeta fileChunksMeta) throws BrokerException {
         // get old topic from new topic
         String topic = null;
-        for(Map.Entry<String, String> entry : this.old2NewTopic.entrySet()) {
+        for (Map.Entry<String, String> entry : this.old2NewTopic.entrySet()) {
             if (entry.getValue().equals(fileChunksMeta.getTopic())) {
                 topic = entry.getKey();
             }
@@ -461,7 +468,7 @@ public class AMOPChannel extends AmopCallback {
                 break;
             }
             Thread.sleep(1000);
-            log.warn("send amop message failed, retry count: {}.", i+1);
+            log.warn("send amop message failed, retry count: {}.", i + 1);
         }
 
         sw.stop();
@@ -617,5 +624,17 @@ public class AMOPChannel extends AmopCallback {
                 log.error("unknown file event type on channel");
                 return DataTypeUtils.toChannelResponse(ErrorCode.UNKNOWN_ERROR);
         }
+    }
+
+    public static boolean matchTopic(String pattenTopic, String topic) {
+        if (pattenTopic == topic) {
+            return true;
+        }
+        //verity topic
+        String verifyTopicPre = TopicManager.verifyChannelPrefix + TopicManager.topicNeedVerifyPrefix + topic;
+        if (pattenTopic.startsWith(verifyTopicPre)) {
+            return true;
+        }
+        return false;
     }
 }
