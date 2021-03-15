@@ -175,8 +175,7 @@ public class ProtocolProcess {
         MqttConnAckMessage rsp = (MqttConnAckMessage) this.connect.processConnect(msg, sessionData);
         // if accept
         if (rsp.variableHeader().connectReturnCode() == MqttConnectReturnCode.CONNECTION_ACCEPTED) {
-            AuthorSessions sessionsParam = AuthorSessions.builder().clientId(sessionData.getClientId())
-                    .userName("user").build();
+            AuthorSessions sessionsParam = AuthorSessions.builder().clientId(sessionData.getClientId()).userName(msg.payload().userName()).build();
             this.authorSessions.put(sessionData.getSessionId(), sessionsParam);
         }
         return rsp;
@@ -213,6 +212,7 @@ public class ProtocolProcess {
             boolean isAuth = false;
             String topicName = ((MqttPublishVariableHeader) req.variableHeader()).topicName();
             String userName = this.authorSessions.get(sessionId).getUserName();
+
             List<AccountTopicAuthEntity> entities = accountTopicAuthRepository.findAllByUserName(userName);
             for (AccountTopicAuthEntity entity : entities) {
                 if (entity.getTopicName().equals(topicName) && (entity.getPermission() == SUB_PUB || entity.getPermission() == SUB)) {
