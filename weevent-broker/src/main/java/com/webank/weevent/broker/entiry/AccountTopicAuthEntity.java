@@ -23,10 +23,10 @@ import lombok.EqualsAndHashCode;
 public class AccountTopicAuthEntity extends BaseEntity {
 
     @NotBlank
-    @Column(name = "user_name")
+    @Column(name = "user_name", columnDefinition = "varchar(200)")
     private String userName;
 
-    @Column(name = "topic_name")
+    @Column(name = "topic_name", columnDefinition = "varchar(128)")
     private String topicName;
     
     @Column(name = "permission")
