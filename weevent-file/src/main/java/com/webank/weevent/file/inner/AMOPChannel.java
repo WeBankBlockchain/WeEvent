@@ -154,8 +154,8 @@ public class AMOPChannel extends AmopCallback {
                     subscriberIPs.add(nodeInfo.getIpAndPort());
                     subscriberNodeIds.add(nodeInfo.getNodeID());
                     log.info("subscribers node {}, {}", topic, nodeInfo.getNodeID(), nodeInfo.getIpAndPort());
+                    break;
                 }
-                break;
             }
         }
         log.info("getSubscribers:{} {}", subscriberIPs, subscriberNodeIds);
@@ -627,7 +627,7 @@ public class AMOPChannel extends AmopCallback {
     }
 
     public static boolean matchTopic(String pattenTopic, String topic) {
-        if (pattenTopic == topic) {
+        if (pattenTopic.equals(topic)) {
             return true;
         }
         //verity topic
