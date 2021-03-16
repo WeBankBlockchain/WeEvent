@@ -16,6 +16,7 @@ create TABLE t_account_topic_auth(
 	user_name VARCHAR (200),
 	topic_name VARCHAR (128),
 	permission INTEGER,
+	delete_at BIGINT,
 	create_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	last_update TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	PRIMARY KEY (id)
