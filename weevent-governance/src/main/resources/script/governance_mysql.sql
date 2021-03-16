@@ -1,3 +1,15 @@
+drop table IF EXISTS t_account;
+drop table IF EXISTS t_broker;
+drop table IF EXISTS t_permission;
+drop table IF EXISTS t_rule_database;
+drop table IF EXISTS t_rule_engine;
+drop table IF EXISTS t_rule_engine_condition;
+drop table IF EXISTS t_topic;
+drop table IF EXISTS t_file_transport_channel;
+drop table IF EXISTS t_file_transport_status;
+drop table IF EXISTS t_topic_historical;
+drop table IF EXISTS t_timer_scheduler;
+
 CREATE TABLE t_account(
   `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `username` VARCHAR(64) NOT NULL COMMENT '用户名',
