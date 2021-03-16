@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.webank.weevent.broker.config.WeEventConfig;
 import com.webank.weevent.broker.entiry.AccountTopicAuthEntity;
 import com.webank.weevent.broker.entiry.AuthorSessions;
+import com.webank.weevent.broker.enums.IsDeleteEnum;
 import com.webank.weevent.broker.protocol.mqtt.command.Connect;
 import com.webank.weevent.broker.protocol.mqtt.command.DisConnect;
 import com.webank.weevent.broker.protocol.mqtt.command.PingReq;
@@ -213,7 +214,7 @@ public class ProtocolProcess {
             String topicName = ((MqttPublishVariableHeader) req.variableHeader()).topicName();
             String userName = this.authorSessions.get(sessionId).getUserName();
 
-            List<AccountTopicAuthEntity> entities = accountTopicAuthRepository.findAllByUserName(userName);
+            List<AccountTopicAuthEntity> entities = accountTopicAuthRepository.findAllByUserNameAndDeleteAt(userName, IsDeleteEnum.NOT_DELETED.getCode());
             for (AccountTopicAuthEntity entity : entities) {
                 if (entity.getTopicName().equals(topicName) && (entity.getPermission() == SUB_PUB || entity.getPermission() == SUB)) {
                     isAuth = true;
@@ -230,7 +231,7 @@ public class ProtocolProcess {
             for (MqttTopicSubscription topicSubscription : topicSubscriptions) {
                 String topicName = topicSubscription.topicName();
                 String userName = this.authorSessions.get(sessionId).getUserName();
-                AccountTopicAuthEntity entity = accountTopicAuthRepository.findAllByUserNameAndTopicName(userName, topicName);
+                AccountTopicAuthEntity entity = accountTopicAuthRepository.findAllByUserNameAndTopicNameAndDeleteAt(userName, topicName, IsDeleteEnum.NOT_DELETED.getCode());
                 if (null != entity && (entity.getPermission() == SUB_PUB || entity.getPermission() == PUB)) {
                     return this.subscribe.process(req, clientId, remoteIp);
                 }
