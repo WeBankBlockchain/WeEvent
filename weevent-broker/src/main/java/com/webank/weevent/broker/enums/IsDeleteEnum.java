@@ -5,7 +5,8 @@ import lombok.Getter;
 @Getter
 public enum IsDeleteEnum {
 
-    NOT_DELETED(0L, "not deleted");
+    NOT_DELETED(0L, "not deleted"),
+    DELETED(1L, "delete");
 
     private Long code;
     private String value;
