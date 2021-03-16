@@ -631,7 +631,9 @@ public class AMOPChannel extends AmopCallback {
             return true;
         }
         //verity topic
-        String verifyTopicPre = TopicManager.verifyChannelPrefix + TopicManager.topicNeedVerifyPrefix + topic;
+        StringBuilder sb = new StringBuilder();
+        sb.append(TopicManager.verifyChannelPrefix).append(TopicManager.topicNeedVerifyPrefix).append(topic).append('_');
+        String verifyTopicPre = sb.toString();
         if (pattenTopic.startsWith(verifyTopicPre)) {
             return true;
         }
