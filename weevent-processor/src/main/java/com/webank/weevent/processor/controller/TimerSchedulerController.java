@@ -14,6 +14,7 @@ import org.quartz.CronExpression;
 import org.quartz.JobDataMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -72,7 +73,7 @@ public class TimerSchedulerController {
         return resEntity;
     }
 
-    @PostMapping("/checkCorn")
+    @GetMapping("/checkCorn")
     public BaseRspEntity checkCorn(@RequestParam("corn") String corn) {
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
         boolean validExpression = CronExpression.isValidExpression(corn);
