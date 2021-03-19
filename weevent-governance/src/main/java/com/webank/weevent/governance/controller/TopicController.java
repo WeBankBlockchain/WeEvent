@@ -32,7 +32,7 @@ public class TopicController {
     @Autowired
     private TopicService topicService;
 
-    @GetMapping(value = "/close")
+    @RequestMapping(value = "/close")
     public GovernanceResult<Boolean> close(@RequestParam("brokerId") Integer brokerId, @RequestParam String topic,
                                            @RequestParam(required = false) String groupId, HttpServletRequest request, HttpServletResponse response)
             throws GovernanceException {
@@ -40,14 +40,14 @@ public class TopicController {
         return new GovernanceResult<>(topicService.close(brokerId, topic, groupId, request, response));
     }
 
-    @PostMapping(value = "/list")
+    @RequestMapping(value = "/list")
     public GovernanceResult<TopicPage> getTopics(@Validated @RequestBody TopicPageEntity topicPageEntity,
                                                  HttpServletRequest request, HttpServletResponse response) throws GovernanceException {
         log.info("get topic list,topicPageEntity:{}", topicPageEntity);
         return new GovernanceResult<>(topicService.getTopics(topicPageEntity, request, response));
     }
 
-    @PostMapping(value = "/openTopic")
+    @RequestMapping(value = "/openTopic")
     public GovernanceResult<Object> open(@RequestBody TopicCreateEntity topicCreateEntity, HttpServletRequest request,
                                          HttpServletResponse response) throws GovernanceException {
         log.info("open topic creator:{} ,topic:{}", topicCreateEntity.getCreater(), topicCreateEntity.getTopic());
@@ -55,7 +55,7 @@ public class TopicController {
                 topicCreateEntity.getCreater(), topicCreateEntity.getGroupId(), request, response);
     }
 
-    @GetMapping(value = "/topicInfo")
+    @RequestMapping(value = "/topicInfo")
     public GovernanceResult<TopicEntity> getTopicInfo(@RequestParam(name = "brokerId") Integer brokerId,
                                                       @RequestParam(name = "topic") String topic,
                                                       @RequestParam(name = "groupId", required = false) String groupId, HttpServletRequest request)

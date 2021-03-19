@@ -42,7 +42,7 @@ public class BrokerRest {
         this.producer = producer;
     }
 
-    @GetMapping(path = "/publish")
+    @RequestMapping(path = "/publish")
     public CompletableFuture<SendResult> publish(@RequestParam Map<String, String> eventData) throws BrokerException {
         if (!eventData.containsKey(WeEventConstants.EVENT_TOPIC)
                 || !eventData.containsKey(WeEventConstants.EVENT_CONTENT)) {
@@ -66,7 +66,7 @@ public class BrokerRest {
         return this.producer.publish(event, groupId);
     }
 
-    @GetMapping(path = "/getEvent")
+    @RequestMapping(path = "/getEvent")
     public BaseResponse<WeEvent> getEvent(@RequestParam(name = "eventId") String eventId,
                                           @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
         log.info("eventId:{} groupId:{}", eventId, groupId);
@@ -74,7 +74,7 @@ public class BrokerRest {
         return BaseResponse.buildSuccess(this.producer.getEvent(eventId, groupId));
     }
 
-    @GetMapping(path = "/open")
+    @RequestMapping(path = "/open")
     public BaseResponse<Boolean> open(@RequestParam(name = "topic") String topic,
                                       @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
         log.info("topic:{} groupId:{}", topic, groupId);
@@ -82,7 +82,7 @@ public class BrokerRest {
         return BaseResponse.buildSuccess(this.producer.open(topic, groupId));
     }
 
-    @GetMapping(path = "/close")
+    @RequestMapping(path = "/close")
     public BaseResponse<Boolean> close(@RequestParam(name = "topic") String topic,
                                        @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
         log.info("topic:{} groupId:{}", topic, groupId);
@@ -90,7 +90,7 @@ public class BrokerRest {
         return BaseResponse.buildSuccess(this.producer.close(topic, groupId));
     }
 
-    @GetMapping(path = "/exist")
+    @RequestMapping(path = "/exist")
     public BaseResponse<Boolean> exist(@RequestParam(name = "topic") String topic,
                                        @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
         log.info("topic:{} groupId:{}", topic, groupId);
@@ -98,7 +98,7 @@ public class BrokerRest {
         return BaseResponse.buildSuccess(this.producer.exist(topic, groupId));
     }
 
-    @GetMapping(path = "/list")
+    @RequestMapping(path = "/list")
     public BaseResponse<TopicPage> list(@RequestParam(name = "pageIndex") Integer pageIndex,
                                         @RequestParam(name = "pageSize") Integer pageSize,
                                         @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
@@ -107,7 +107,7 @@ public class BrokerRest {
         return BaseResponse.buildSuccess(this.producer.list(pageIndex, pageSize, groupId));
     }
 
-    @GetMapping(path = "/state")
+    @RequestMapping(path = "/state")
     public BaseResponse<TopicInfo> state(@RequestParam(name = "topic") String topic,
                                          @RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
         log.info("topic:{} groupId:{}", topic, groupId);
