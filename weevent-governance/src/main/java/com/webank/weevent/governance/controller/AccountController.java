@@ -33,12 +33,12 @@ public class AccountController {
     @Autowired
     private AccountService accountService;
 
-    @GetMapping("/check/{param}/{type}")
+    @RequestMapping("/check/{param}/{type}")
     public GovernanceResult<Object> checkData(@PathVariable String param, @PathVariable Integer type) {
         return accountService.checkData(param, type);
     }
 
-    @PostMapping(value = "/register")
+    @RequestMapping("/register")
     public GovernanceResult<Object> register(@Valid @RequestBody AccountEntity user, BindingResult result) throws GovernanceException {
         return accountService.register(user);
     }
@@ -58,7 +58,7 @@ public class AccountController {
         return accountService.getUserId(username);
     }
 
-    @GetMapping("/require")
+    @RequestMapping("/require")
     public BaseResponse authRequire() {
         return new BaseResponse(ConstantCode.USER_NOT_LOGGED_IN);
     }
@@ -66,7 +66,7 @@ public class AccountController {
     /**
      * Query all account except themselves
      */
-    @GetMapping("/accountList")
+    @RequestMapping("/accountList")
     public GovernanceResult<List<AccountEntity>> accountEntityList(AccountEntity accountEntity, HttpServletRequest request,
                                                                    HttpServletResponse response) throws GovernanceException {
         List<AccountEntity> accountEntities = accountService.accountEntityList(request, accountEntity, JwtUtils.getAccountId(request));
@@ -76,7 +76,7 @@ public class AccountController {
     /**
      * delete user by id
      */
-    @PostMapping("/delete")
+    @RequestMapping("/delete")
     public GovernanceResult<Boolean> deleteUser(@RequestBody AccountEntity accountEntity, HttpServletRequest request,
                                                 HttpServletResponse response) throws GovernanceException {
         accountService.deleteUser(request, accountEntity);
