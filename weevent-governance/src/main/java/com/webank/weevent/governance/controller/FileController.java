@@ -91,7 +91,7 @@ public class FileController {
         return this.fileService.prepareUploadFile(fileId, filename, topicName, groupId, totalSize, chunkSize);
     }
 
-    @GetMapping(path = "/download")
+    @RequestMapping(path = "/download")
     public void download(@RequestParam(name = "groupId") String groupId,
                          @RequestParam(name = "topic") String topic,
                          @RequestParam(name = "fileName") String fileName,
@@ -129,7 +129,7 @@ public class FileController {
         }
     }
 
-    @GetMapping(path = "/listFile")
+    @RequestMapping(path = "/listFile")
     @ResponseBody
     public GovernanceResult<List<FileChunksMeta>> listFile(@RequestParam(name = "groupId") String groupId,
                                                            @RequestParam(name = "brokerId") Integer brokerId,
@@ -140,7 +140,7 @@ public class FileController {
         return this.fileService.listFile(groupId, brokerId, topicName, nodeAddress);
     }
 
-    @GetMapping(path = "/downLoadStatus")
+    @RequestMapping(path = "/downLoadStatus")
     @ResponseBody
     public GovernanceResult<List<FileChunksMetaEntity>> downLoadStatus(@RequestParam(name = "groupId") String groupId,
                                                                        @RequestParam(name = "brokerId") Integer brokerId,
@@ -151,7 +151,7 @@ public class FileController {
         return this.fileService.downLoadStatus(groupId, brokerId, topicName, nodeAddress);
     }
 
-    @GetMapping(path = "/uploadStatus")
+    @RequestMapping(path = "/uploadStatus")
     @ResponseBody
     public GovernanceResult<List<FileTransportStatusEntity>> uploadStatus(@RequestParam(name = "groupId") String groupId,
                                                                           @RequestParam(name = "brokerId") Integer brokerId,
@@ -161,7 +161,7 @@ public class FileController {
         return this.fileService.uploadStatus(groupId, brokerId, topicName, nodeAddress);
     }
 
-    @GetMapping(path = "/listTransport")
+    @RequestMapping(path = "/listTransport")
     @ResponseBody
     public GovernanceResult<List<FileTransportChannelEntity>> listTransport(@RequestParam(name = "groupId") String groupId,
                                                                             @RequestParam(name = "brokerId") Integer brokerId) {
@@ -177,7 +177,7 @@ public class FileController {
         return fileService.closeTransport(fileTransport);
     }
 
-    @GetMapping(path = "/genPemFile")
+    @RequestMapping(path = "/genPemFile")
     public void genPemFile(@RequestParam(name = "groupId") String groupId,
                            @RequestParam(name = "brokerId") Integer brokerId,
                            @RequestParam(name = "encryptType") String encryptType,
@@ -222,7 +222,7 @@ public class FileController {
         }
     }
 
-    @GetMapping(path = "/checkUploaded")
+    @RequestMapping(path = "/checkUploaded")
     @ResponseBody
     public GovernanceResult<Object> checkFileIsUploaded(@RequestParam(name = "groupId") String groupId,
                                                         @RequestParam(name = "brokerId") Integer brokerId,

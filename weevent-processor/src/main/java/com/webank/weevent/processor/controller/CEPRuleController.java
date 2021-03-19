@@ -124,7 +124,7 @@ public class CEPRuleController {
         return resEntity;
     }
 
-    @GetMapping(value = "/checkWhereCondition")
+    @RequestMapping(value = "/checkWhereCondition")
     public BaseRspEntity checkWhereCondition(@RequestParam(name = "payload") String payload, @RequestParam(name = "condition") String condition) {
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
         RetCode ret = CEPRuleMQ.checkCondition(payload, condition);
@@ -137,7 +137,7 @@ public class CEPRuleController {
         return resEntity;
     }
 
-    @GetMapping(value = "/getJobDetail")
+    @RequestMapping(value = "/getJobDetail")
     public BaseRspEntity getJobDetail(@RequestParam(name = "id") String id) {
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
         try {
