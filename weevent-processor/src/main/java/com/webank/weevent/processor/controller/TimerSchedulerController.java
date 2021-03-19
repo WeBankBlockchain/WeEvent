@@ -33,7 +33,7 @@ public class TimerSchedulerController {
         this.timerSchedulerService = timerSchedulerService;
     }
 
-    @PostMapping("/insert")
+    @RequestMapping("/insert")
     public BaseRspEntity insertTimerScheduler(@Validated @RequestBody TimerScheduler timerScheduler) throws BrokerException {
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
         JobDataMap timerSchedulerMap = new JobDataMap();
@@ -50,7 +50,7 @@ public class TimerSchedulerController {
         return resEntity;
     }
 
-    @PostMapping("/update")
+    @RequestMapping("/update")
     public BaseRspEntity updateTimerScheduler(@Validated @RequestBody TimerScheduler timerScheduler) throws BrokerException {
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
         JobDataMap timerSchedulerMap = new JobDataMap();
@@ -66,14 +66,14 @@ public class TimerSchedulerController {
         return resEntity;
     }
 
-    @PostMapping("/delete")
+    @RequestMapping("/delete")
     public BaseRspEntity deleteTimerScheduler(@RequestBody TimerScheduler timerScheduler) throws BrokerException {
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
         this.timerSchedulerService.deleteTimerScheduler(timerScheduler);
         return resEntity;
     }
 
-    @GetMapping("/checkCorn")
+    @RequestMapping("/checkCorn")
     public BaseRspEntity checkCorn(@RequestParam("corn") String corn) {
         BaseRspEntity resEntity = new BaseRspEntity(ConstantsHelper.RET_SUCCESS);
         boolean validExpression = CronExpression.isValidExpression(corn);
