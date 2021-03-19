@@ -74,12 +74,12 @@ public class AdminRest {
         this.discoveryClient = discoveryClient;
     }
 
-    @GetMapping(path = "/listGroup")
+    @RequestMapping(path = "/listGroup")
     public BaseResponse<List<String>> listGroup() throws BrokerException {
         return BaseResponse.buildSuccess(this.consumer.listGroupId());
     }
 
-    @GetMapping(path = "/listNodes")
+    @RequestMapping(path = "/listNodes")
     public BaseResponse<List<String>> listNodes() {
         log.info("query node list");
 
@@ -92,7 +92,7 @@ public class AdminRest {
         return BaseResponse.buildSuccess(nodesInfo);
     }
 
-    @GetMapping(path = "/listSubscription")
+    @RequestMapping(path = "/listSubscription")
     public BaseResponse<Map<String, List<SubscriptionInfo>>> listSubscription(@RequestParam(name = "nodeInstances") String nodeInstances,
                                                                               @RequestParam(name = "groupId", required = false) String groupId) {
         log.info("groupId:{}, nodeInstances:{}", groupId, nodeInstances);
@@ -133,14 +133,14 @@ public class AdminRest {
         return BaseResponse.buildSuccess(subscriptions);
     }
 
-    @GetMapping(path = "/innerListSubscription")
+    @RequestMapping(path = "/innerListSubscription")
     public BaseResponse<Map<String, SubscriptionInfo>> innerListSubscription(@RequestParam(name = "groupId", required = false) String groupId) throws BrokerException {
         log.info("groupId: {}", groupId);
 
         return BaseResponse.buildSuccess(this.consumer.listSubscription(groupId));
     }
 
-    @GetMapping(path = "/getVersion")
+    @RequestMapping(path = "/getVersion")
     public BaseResponse<BuildInfo> getVersion() {
         return BaseResponse.buildSuccess(this.buildInfo);
     }
@@ -148,7 +148,7 @@ public class AdminRest {
     /**
      * get general
      */
-    @GetMapping(path = "/group/general")
+    @RequestMapping(path = "/group/general")
     public BaseResponse<GroupGeneral> getGroupGeneral(@RequestParam(value = "groupId", required = false) String groupId) throws BrokerException {
         log.info("groupId: {}", groupId);
 
@@ -161,7 +161,7 @@ public class AdminRest {
     /**
      * query transaction list.
      */
-    @GetMapping(path = "/transaction/transList")
+    @RequestMapping(path = "/transaction/transList")
     public BaseResponse<ListPage<TbTransHash>> queryTransList(@RequestParam(value = "groupId", required = false) String groupId,
                                                               @RequestParam("pageNumber") Integer pageNumber,
                                                               @RequestParam("pageSize") Integer pageSize,
@@ -179,7 +179,7 @@ public class AdminRest {
     /**
      * query block list.
      */
-    @GetMapping(path = "/block/blockList")
+    @RequestMapping(path = "/block/blockList")
     public BaseResponse<ListPage<TbBlock>> queryBlockList(@RequestParam(value = "groupId", required = false) String groupId,
                                                           @RequestParam("pageNumber") Integer pageNumber,
                                                           @RequestParam("pageSize") Integer pageSize,
@@ -196,7 +196,7 @@ public class AdminRest {
     /**
      * query node info list.
      */
-    @GetMapping(path = "/node/nodeList")
+    @RequestMapping(path = "/node/nodeList")
     public BaseResponse<ListPage<TbNode>> queryNodeList(@RequestParam(value = "groupId", required = false) String groupId,
                                                         @RequestParam("pageNumber") Integer pageNumber,
                                                         @RequestParam("pageSize") Integer pageSize,
@@ -215,7 +215,7 @@ public class AdminRest {
     /**
      * query ContractContext.
      */
-    @GetMapping(path = "/getContractContext")
+    @RequestMapping(path = "/getContractContext")
     public BaseResponse<ContractContext> getContractContext(@RequestParam(value = "groupId", required = false) String groupId) throws BrokerException {
         log.info("groupId: {} ", groupId);
 
@@ -225,7 +225,7 @@ public class AdminRest {
     /**
      * validateGroupId.
      */
-    @GetMapping(path = "/validateGroupId")
+    @RequestMapping(path = "/validateGroupId")
     public BaseResponse<ErrorCode> validateGroupId(@RequestParam(value = "groupId") String groupId) throws BrokerException {
         log.info("groupId: {} ", groupId);
         this.consumer.validateGroupId(groupId);

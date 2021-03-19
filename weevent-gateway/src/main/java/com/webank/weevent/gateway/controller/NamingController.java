@@ -36,7 +36,7 @@ public class NamingController {
     }
 
     // get all services in register
-    @GetMapping("/list")
+    @RequestMapping("/list")
     public Mono<Map<String, List<NamingService>>> list() {
         Map<String, List<NamingService>> output = new HashMap<>();
         List<String> services = this.discoveryClient.getServices();
