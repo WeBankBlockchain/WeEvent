@@ -147,7 +147,7 @@
       <el-button @click="dialogFormVisible = false">{{$t('common.cancel')}}</el-button>
     </div>
   </el-dialog>
-  
+
   <el-dialog :title="$t('file.secretKey')" :visible.sync="dialogSecretKeyVisible" center width='450px' :close-on-click-modal='false'>
     <el-form :model="form" ref='form' label-position="top">
       <el-form-item>
@@ -576,8 +576,7 @@ export default {
           role: e.role,
           topicName: e.topicName,
           brokerId: localStorage.getItem('brokerId'),
-          groupId: localStorage.getItem('groupId'),
-          nodeAddress: e.nodeAddress
+          groupId: localStorage.getItem('groupId')
         })
       } else {
         // download file
