@@ -30,7 +30,7 @@ public class AuthService {
         if (null == accountEntity) {
             return false;
         }
-        log.info("accountEntity:{}", accountEntity.toString());
+        log.info("accountEntity:{}", accountEntity.getUserName());
         return password.equals(accountEntity.getPassword());
     }
 }
