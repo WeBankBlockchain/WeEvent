@@ -227,15 +227,20 @@ public class ProtocolProcess {
         }
 
         if (auth && req.fixedHeader().messageType().equals(MqttMessageType.SUBSCRIBE)) {
+            boolean isAuth = true;
             List<MqttTopicSubscription> topicSubscriptions = ((MqttSubscribePayload) req.payload()).topicSubscriptions();
             for (MqttTopicSubscription topicSubscription : topicSubscriptions) {
                 String topicName = topicSubscription.topicName();
                 String userName = this.authorSessions.get(sessionId).getUserName();
                 AccountTopicAuthEntity entity = accountTopicAuthRepository.findAllByUserNameAndTopicNameAndDeleteAt(userName, topicName, IsDeleteEnum.NOT_DELETED.getCode());
                 if (null != entity && (entity.getPermission() == SUB_PUB || entity.getPermission() == PUB)) {
-                    return this.subscribe.process(req, clientId, remoteIp);
+                    continue;
                 }
                 log.error("userName:{},topicName:{}, no subscribe permission", userName, topicName);
+                isAuth = false;
+                break;
+            }
+            if (!isAuth) {
                 throw new BrokerException(ErrorCode.MQTT_NO_SUB_PERMISSION);
             }
         }
