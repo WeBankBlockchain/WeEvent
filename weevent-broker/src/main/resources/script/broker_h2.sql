@@ -20,7 +20,7 @@ create TABLE t_account_topic_auth(
 	create_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	last_update TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	PRIMARY KEY (id)
-)
+);
 
 alter table t_account add CONSTRAINT userName UNIQUE (user_name);
 alter table t_account_topic_auth add CONSTRAINT userNameTopicName UNIQUE (user_name, topic_name);
