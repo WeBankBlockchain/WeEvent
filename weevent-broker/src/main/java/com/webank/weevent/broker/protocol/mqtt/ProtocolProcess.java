@@ -221,8 +221,8 @@ public class ProtocolProcess {
                 }
             }
             if (!isAuth) {
-                log.error("userName:{},topicName:{}, not publish permission", userName, topicName);
-                throw new BrokerException(ErrorCode.MQTT_NOT_PERMISSION);
+                log.error("userName:{},topicName:{}, no publish permission", userName, topicName);
+                throw new BrokerException(ErrorCode.MQTT_NO_PUB_PERMISSION);
             }
         }
 
@@ -235,8 +235,8 @@ public class ProtocolProcess {
                 if (null != entity && (entity.getPermission() == SUB_PUB || entity.getPermission() == PUB)) {
                     return this.subscribe.process(req, clientId, remoteIp);
                 }
-                log.error("userName:{},topicName:{}, not subscribe permission", userName, topicName);
-                throw new BrokerException(ErrorCode.MQTT_NOT_PERMISSION);
+                log.error("userName:{},topicName:{}, no subscribe permission", userName, topicName);
+                throw new BrokerException(ErrorCode.MQTT_NO_SUB_PERMISSION);
             }
         }
 
