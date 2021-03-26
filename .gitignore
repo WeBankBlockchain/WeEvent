@@ -1,6 +1,5 @@
 ### gradle
 .gradle
-gradle.properties
 !gradle/wrapper/gradle-wrapper.jar
 
 ### java project
