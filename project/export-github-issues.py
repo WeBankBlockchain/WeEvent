@@ -17,7 +17,7 @@ def load_all_issues(milestone):
     '''
 
     # page is 1-based, 30 items by default
-    url = "https://api.github.com/repos/WeBankFinTech/WeEvent/issues?state=all&milestone=%s&per_page=100" % milestone
+    url = "https://api.github.com/repos/WeBankBlockchain/WeEvent/issues?state=all&milestone=%s&per_page=100" % milestone
     page = 1
     origin_data = []
     while True:
