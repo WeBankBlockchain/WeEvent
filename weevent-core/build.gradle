@@ -81,11 +81,11 @@ artifacts {
                 name project.name
                 packaging 'jar'
                 description 'The Java core sdk for WeEvent.'
-                url 'https://github.com/WeBankFinTech/WeEvent'
+                url 'https://github.com/WeBankBlockchain/WeEvent'
                 scm {
-                    url 'scm:git@github.com:WeBankFinTech/WeEvent.git'
-                    connection 'scm:git@github.com:WeBankFinTech/WeEvent.git'
-                    developerConnection 'git@github.com:WeBankFinTech/WeEvent.git'
+                    url 'scm:git@github.com:WeBankBlockchain/WeEvent.git'
+                    connection 'scm:git@github.com:WeBankBlockchain/WeEvent.git'
+                    developerConnection 'git@github.com:WeBankBlockchain/WeEvent.git'
                 }
                 licenses {
                     license {
