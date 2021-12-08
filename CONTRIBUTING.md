@@ -20,13 +20,13 @@
 
 #### 编写文档
 
-我们的文档工程位于[WeEvent-docs](https://github.com/WeBankFinTech/WeEvent-docs)。会自动生成最新文档到[readthedocs](https://weeventdoc.readthedocs.io/zh_CN/latest/)。你看到一个错字或其他方法来改善它吗？欢迎提交PR。
+我们的文档工程位于[WeEvent-docs](https://github.com/WeBankBlockchain/WeEvent-docs)。会自动生成最新文档到[readthedocs](https://weeventdoc.readthedocs.io/zh_CN/latest/)。你看到一个错字或其他方法来改善它吗？欢迎提交PR。
 
 #### 提供帮助
 
 可以做的最简单的事情，就是帮助我们推动发展，并对我们的进展产生影响，帮助、支持在WeEvent中遇到困难的人。
 
-你可以在这里回复 [issues on Github](https://github.com/WeBankFinTech/WeEvent/issues)
+你可以在这里回复 [issues on Github](https://github.com/WeBankBlockchain/WeEvent/issues)
 
 #### 测试
 
